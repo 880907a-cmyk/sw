@@ -1208,12 +1208,19 @@ function onUpload(e){
 
 function parseSheet(rows){
   if(!rows?.length)return null;
+  // 헤더 행 탐색 ('계정' 포함 행)
   let hi=0;
-  for(let i=0;i<5&&i<rows.length;i++){if(rows[i]?.[0]&&String(rows[i][0]).includes('계정')){hi=i;break;}}
+  for(let i=0;i<5&&i<rows.length;i++){
+    if(rows[i]?.[0]&&String(rows[i][0]).includes('계정')){hi=i;break;}
+  }
   const hdr=rows[hi];
+  console.log('[parseSheet] 헤더행:', hi, '/ 컬럼수:', hdr?.length, '/ hdr[0]:', hdr?.[0]);
   const depts=[];
   for(let i=2;i<hdr.length;i++){if(hdr[i])depts.push(String(hdr[i]).replace(/\(\d+\)/g,'').trim());}
-  if(!depts.length)return null;
+  if(!depts.length){
+    console.warn('[parseSheet] depts 없음 — hdr전체:', hdr);
+    return null;
+  }
   const KM={
     'Ⅰ. 매출액':'revenue','Ⅱ. 매출원가':'cogs','Ⅲ. 매출총이익':'gross',
     'Ⅳ. 판매비와 관리비':'sga','Ⅴ. 영업손실':'op_raw','Ⅴ. 영업이익':'op_raw',
@@ -1225,11 +1232,15 @@ function parseSheet(rows){
     const k=KM[String(row[0]).trim()];
     if(k)res[k]=Array.from({length:depts.length},(_,j)=>Number(row[2+j])||0);
   }
-  if(!res.revenue.length)return null;
+  if(!res.revenue.length){
+    // 매출액 행을 못 찾은 경우 — 실제 row[0] 값들 출력
+    const rowKeys=rows.slice(0,15).map(r=>r?.[0]).filter(Boolean);
+    console.warn('[parseSheet] revenue 없음 — 행 키값들:', rowKeys);
+    return null;
+  }
   ['cogs','gross','sga','other_income','other_expense','net_income'].forEach(k=>{
     if(!res[k].length)res[k]=new Array(RAW_DEPTS.length).fill(0);
   });
-  // 영업손익 = 총이익 - 판관비
   res.op_income=res.gross.map((g,i)=>g-(res.sga[i]||0));
   return res;
 }
@@ -1239,30 +1250,18 @@ function parseSheet(rows){
 // ════════════════════════════════════════════
 const SHEET_PUB_BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOZiCbraP0YGEYPL1FGLwSPEDNdsydkJVjOA4fKa_4DqBeJHpRwFqoETv4rFfO2y_GPHU7LHjuhT3_/pub';
 
-// index 시트에서 시트 목록 + 업데이트 일시 가져오기
-// index 시트 구조: A열=시트명(202501...), B1=업데이트일시(예: 2025-09-30 14:23:05)
+// index 시트에서 시트 목록 가져오기 (A열 YYYYMM만)
 async function fetchSheetNames(){
   try{
     const url=`${SHEET_PUB_BASE}?output=csv&sheet=index`;
-    const controller=new AbortController();
-    setTimeout(()=>controller.abort(),8000);
-    const res=await fetch(url,{cache:'reload',signal:controller.signal});
+    const res=await fetch(url,{cache:'no-store'});
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const text=await res.text();
-    if(text.trim().startsWith('<')) throw new Error('HTML 응답 — index 시트 없음');
-    const lines=text.trim().split(/\r?\n/);
-    // B1셀 = 업데이트 일시
-    const firstRow=lines[0].split(',');
-    const updatedAt=(firstRow[1]||'').replace(/"/g,'').trim();
-    if(updatedAt){
-      const el=document.getElementById('last-updated');
-      if(el) el.textContent=updatedAt;
-    }
-    // A열 YYYYMM 형식만 추출
-    const names=lines
-      .map(line=>line.split(',')[0].replace(/"/g,'').trim())
+    if(text.trim().startsWith('<')) throw new Error('index 시트 없음');
+    const names=text.trim().split(/\r?\n/)
+      .map(line=>line.replace(/"/g,'').trim().split(/[,;]/)[0].trim())
       .filter(n=>/^\d{6}$/.test(n));
-    console.log('[fetchSheetNames] 탭:', names, '/ 업데이트:', updatedAt);
+    console.log('[fetchSheetNames] 탭:', names);
     return names;
   }catch(e){
     console.error('[fetchSheetNames] 실패:', e.message);
@@ -1270,7 +1269,26 @@ async function fetchSheetNames(){
   }
 }
 
-// CSV 텍스트 → 2D 배열 (숫자 내 쉼표, 따옴표 처리)
+// day 시트에서 업데이트 일시 가져오기 (A1셀)
+async function fetchLastUpdated(){
+  try{
+    const url=`${SHEET_PUB_BASE}?output=csv&sheet=day`;
+    const res=await fetch(url,{cache:'no-store'});
+    if(!res.ok) return;
+    const text=await res.text();
+    if(text.trim().startsWith('<')) return;
+    const val=text.trim().split(/\r?\n/)[0].replace(/"/g,'').trim().split(/[,;]/)[0].trim();
+    if(val){
+      const el=document.getElementById('last-updated');
+      if(el) el.textContent=val;
+      console.log('[fetchLastUpdated] 업데이트:', val);
+    }
+  }catch(e){
+    console.warn('[fetchLastUpdated] 실패:', e.message);
+  }
+}
+
+// CSV 텍스트 → 2D 배열 (쉼표/세미콜론 모두 처리, 숫자 천단위 구분자 제거)
 function csvToRows(text){
   const lines=text.trim().split(/\r?\n/);
   return lines.map(line=>{
@@ -1280,14 +1298,15 @@ function csvToRows(text){
       if(ch==='"'){
         if(inQ&&line[i+1]==='"'){cur+='"';i++;}
         else inQ=!inQ;
-      } else if(ch===','&&!inQ){
-        const v=cur.trim().replace(/,(?=\d)/g,'');
-        row.push(v===''?null:v);
+      } else if((ch===','||ch===';')&&!inQ){
+        // 숫자 천단위 쉼표 제거 후 저장
+        row.push(cur.trim().replace(/(\d),(\d)/g,'$1$2')||null);
         cur='';
-      } else cur+=ch;
+      } else {
+        cur+=ch;
+      }
     }
-    const v=cur.trim().replace(/,(?=\d)/g,'');
-    row.push(v===''?null:v);
+    row.push(cur.trim().replace(/(\d),(\d)/g,'$1$2')||null);
     return row;
   });
 }
@@ -1296,10 +1315,7 @@ function csvToRows(text){
 async function fetchSheet(sheetName){
   const url=`${SHEET_PUB_BASE}?output=csv&sheet=${encodeURIComponent(sheetName)}`;
   try{
-    const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),8000);
-    const res=await fetch(url,{cache:'reload',signal:controller.signal});
-    clearTimeout(timer);
+    const res=await fetch(url,{cache:'no-store'});
     if(!res.ok){ console.warn(`[Sheet ${sheetName}] HTTP ${res.status}`); return null; }
     const text=await res.text();
     if(text.trim().startsWith('<')){ console.warn(`[Sheet ${sheetName}] HTML 응답 — 시트 없음`); return null; }
@@ -1320,8 +1336,9 @@ async function autoLoad(){
   metaTxt.textContent='구글 스프레드시트 로딩 중…';
   console.log('[autoLoad] 시작');
 
-  // ① 실제 시트 탭 목록 가져오기
+  // ① 시트 목록 + 업데이트 일시 병렬 가져오기
   let sheetNames=await fetchSheetNames();
+  fetchLastUpdated(); // 별도 병렬 실행 (결과 기다리지 않음)
 
   if(sheetNames){
     // YYYYMM 형식만 필터
