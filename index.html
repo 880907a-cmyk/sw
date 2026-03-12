@@ -329,7 +329,10 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
       <div class="hdr-sub"><span class="pulse"></span><span id="meta-txt">로딩 중…</span></div>
     </div>
   </div>
-  <label class="upload-btn">＋ xlsx 추가<input type="file" accept=".xlsx,.xls" multiple onchange="onUpload(event)"></label>
+  <div style="font-size:10px;color:#8a98aa;text-align:right;line-height:1.6;">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.5px;color:#b0bcc8;">최근 업데이트</div>
+    <div id="last-updated" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4a5a6a;">—</div>
+  </div>
 </div>
 
 <!-- ─── 슬라이서 ─── -->
@@ -1212,7 +1215,8 @@ function parseSheet(rows){
 // ════════════════════════════════════════════
 const SHEET_PUB_BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOZiCbraP0YGEYPL1FGLwSPEDNdsydkJVjOA4fKa_4DqBeJHpRwFqoETv4rFfO2y_GPHU7LHjuhT3_/pub';
 
-// index 시트에서 실제 시트 목록 가져오기
+// index 시트에서 시트 목록 + 업데이트 일시 가져오기
+// index 시트 구조: A열=시트명(202501...), B1=업데이트일시(예: 2025-09-30 14:23:05)
 async function fetchSheetNames(){
   try{
     const url=`${SHEET_PUB_BASE}?output=csv&sheet=index`;
@@ -1222,11 +1226,19 @@ async function fetchSheetNames(){
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const text=await res.text();
     if(text.trim().startsWith('<')) throw new Error('HTML 응답 — index 시트 없음');
-    // A열 값만 추출, YYYYMM 형식 필터
-    const names=text.trim().split(/\r?\n/)
+    const lines=text.trim().split(/\r?\n/);
+    // B1셀 = 업데이트 일시
+    const firstRow=lines[0].split(',');
+    const updatedAt=(firstRow[1]||'').replace(/"/g,'').trim();
+    if(updatedAt){
+      const el=document.getElementById('last-updated');
+      if(el) el.textContent=updatedAt;
+    }
+    // A열 YYYYMM 형식만 추출
+    const names=lines
       .map(line=>line.split(',')[0].replace(/"/g,'').trim())
       .filter(n=>/^\d{6}$/.test(n));
-    console.log('[fetchSheetNames] index 시트에서 읽은 탭:', names);
+    console.log('[fetchSheetNames] 탭:', names, '/ 업데이트:', updatedAt);
     return names;
   }catch(e){
     console.error('[fetchSheetNames] 실패:', e.message);
@@ -1319,7 +1331,8 @@ async function autoLoad(){
     console.error('[autoLoad] 데이터 없음 — 스프레드시트 웹게시 및 탭명 확인');
   } else {
     const keys=Object.keys(DATA).sort();
-    metaTxt.textContent=`${loaded}개월 로드됨 · ${keys[keys.length-1].slice(0,4)}년 ${parseInt(keys[keys.length-1].slice(4))}월 최신`;
+    const lastYM=keys[keys.length-1];
+    metaTxt.textContent=`${loaded}개월 로드됨 · ${lastYM.slice(0,4)}년 ${parseInt(lastYM.slice(4))}월 최신`;
   }
   buildSlicers();
   render();
@@ -1360,26 +1373,65 @@ window.addEventListener('resize',()=>{
   resizeTimer=setTimeout(()=>{updateSlicerTop();render();},200);
 });
 
-// ════ 잠금 화면 ════
+// ════ 잠금 화면 (PBKDF2 + 브루트포스 방지) ════
 (function(){
-  const HASH='03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'; // sha256('1234')
-  async function sha256(str){
-    const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  // PBKDF2-HMAC-SHA256, 310000회 반복, salt: SWH_DASHBOARD_2025
+  // password: 3907
+  const STORED_HASH='39a17d1a5da78fd2dc4df7b6ccbc03b3a0f3cb47825e7c2c1f7ab66225e325b9';
+  const SALT='SWH_DASHBOARD_2025';
+  const ITERATIONS=310000;
+  let failCount=0, lockUntil=0;
+
+  async function pbkdf2Hash(pw){
+    const enc=new TextEncoder();
+    const key=await crypto.subtle.importKey('raw',enc.encode(pw),{name:'PBKDF2'},false,['deriveBits']);
+    const bits=await crypto.subtle.deriveBits(
+      {name:'PBKDF2',salt:enc.encode(SALT),iterations:ITERATIONS,hash:'SHA-256'},
+      key, 256
+    );
+    return Array.from(new Uint8Array(bits)).map(b=>b.toString(16).padStart(2,'0')).join('');
   }
+
   window.tryUnlock=async function(){
-    const pw=document.getElementById('lock-pw').value;
+    const now=Date.now();
     const err=document.getElementById('lock-err');
+    // 잠금 시간 체크
+    if(now<lockUntil){
+      const sec=Math.ceil((lockUntil-now)/1000);
+      err.textContent=`${sec}초 후 다시 시도하세요.`;
+      return;
+    }
+    const pw=document.getElementById('lock-pw').value;
     if(!pw){err.textContent='비밀번호를 입력해주세요.';return;}
-    const h=await sha256(pw);
-    if(h===HASH){
-      document.getElementById('lock-screen').classList.add('hidden');
-      if(typeof init==='function')init();
-    } else {
-      err.textContent='비밀번호가 올바르지 않습니다.';
-      const inp=document.getElementById('lock-pw');
-      inp.value='';inp.focus();
-      setTimeout(()=>{err.textContent='';},3000);
+    // 로딩 표시
+    const btn=document.querySelector('.lock-btn');
+    btn.textContent='확인 중…';btn.disabled=true;
+    try{
+      const h=await pbkdf2Hash(pw);
+      if(h===STORED_HASH){
+        failCount=0;
+        document.getElementById('lock-screen').classList.add('hidden');
+        if(typeof init==='function')init();
+      } else {
+        failCount++;
+        const inp=document.getElementById('lock-pw');
+        inp.value='';inp.focus();
+        if(failCount>=5){
+          lockUntil=Date.now()+30000; // 30초 잠금
+          err.textContent='5회 실패 — 30초 후 다시 시도하세요.';
+          failCount=0;
+          let t=setInterval(()=>{
+            const s=Math.ceil((lockUntil-Date.now())/1000);
+            if(s<=0){clearInterval(t);err.textContent='';}
+            else err.textContent=`${s}초 후 다시 시도하세요.`;
+          },1000);
+        } else {
+          err.textContent=`비밀번호가 올바르지 않습니다. (${failCount}/5)`;
+          setTimeout(()=>{if(failCount<5)err.textContent='';},3000);
+        }
+      }
+    }finally{
+      btn.textContent='확인';btn.disabled=false;
     }
   };
   window.togglePw=function(){
@@ -1388,7 +1440,6 @@ window.addEventListener('resize',()=>{
     if(inp.type==='password'){inp.type='text';eye.textContent='🙈';}
     else{inp.type='password';eye.textContent='👁';}
   };
-  // 자동 init 방지: onload를 잠금 해제 후로 이동
   window.onload=null;
   document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('lock-pw').focus();
