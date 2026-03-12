@@ -1254,7 +1254,7 @@ const SHEET_PUB_BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOZiCbr
 async function fetchSheetNames(){
   try{
     const url=`${SHEET_PUB_BASE}?output=csv&sheet=index`;
-    const res=await fetch(url,{cache:'no-store'});
+    const res=await fetch(url);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const text=await res.text();
     if(text.trim().startsWith('<')) throw new Error('index 시트 없음');
@@ -1273,7 +1273,7 @@ async function fetchSheetNames(){
 async function fetchLastUpdated(){
   try{
     const url=`${SHEET_PUB_BASE}?output=csv&sheet=day`;
-    const res=await fetch(url,{cache:'no-store'});
+    const res=await fetch(url);
     if(!res.ok) return;
     const text=await res.text();
     if(text.trim().startsWith('<')) return;
@@ -1315,11 +1315,12 @@ function csvToRows(text){
 async function fetchSheet(sheetName){
   const url=`${SHEET_PUB_BASE}?output=csv&sheet=${encodeURIComponent(sheetName)}`;
   try{
-    const res=await fetch(url,{cache:'no-store'});
+    const res=await fetch(url);
     if(!res.ok){ console.warn(`[Sheet ${sheetName}] HTTP ${res.status}`); return null; }
     const text=await res.text();
     if(text.trim().startsWith('<')){ console.warn(`[Sheet ${sheetName}] HTML 응답 — 시트 없음`); return null; }
     const rows=csvToRows(text);
+    console.log(`[Sheet ${sheetName}] raw 앞100자:`, text.slice(0,100).replace(/\n/g,'↵'));
     const parsed=parseSheet(rows);
     if(parsed) console.log(`[Sheet ${sheetName}] ✓ revenue[0]=${rows.length}행, 파싱성공`);
     else console.warn(`[Sheet ${sheetName}] 파싱실패 — 1행:`, rows[0]);
