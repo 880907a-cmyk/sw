@@ -591,6 +591,12 @@ function fmt(n,unit='억'){
   }
   return s+a.toLocaleString();
 }
+// KPI 카드 전용: 항상 억 단위 소수점 2자리
+function fmtKPI(n){
+  if(n===null||n===undefined||n===0)return'—';
+  const s=n<0?'-':'';
+  return s+(Math.abs(n)/1e8).toFixed(2)+'억';
+}
 function pct(a,b){if(!b||b===0)return'—';return(a/b*100).toFixed(1)+'%';}
 function vc(v){return v>0?'cp':v<0?'cn':'cz';}
 function bc(v){const f=parseFloat(v);return f>=15?'bg':f>=0?'by':'br';}
@@ -746,7 +752,7 @@ function renderKPI(cms){
   // 월 레이블
   const mLabels=cms.map(m=>parseInt(m.slice(4))+'월');
   items.forEach(([i,v,sub,col,key])=>{
-    document.getElementById('kv'+i).textContent=v?fmt(v):'—';
+    document.getElementById('kv'+i).textContent=v?fmtKPI(v):'—';
     document.getElementById('ks'+i).textContent=sub;
     spkLine('sp'+i,cms.map(m=>trendVal(m,key)),col,mLabels);
   });
@@ -1274,24 +1280,37 @@ function parseSheet(rows){
   const KM={
     'Ⅰ. 매출액':'revenue','Ⅱ. 매출원가':'cogs','Ⅲ. 매출총이익':'gross',
     'Ⅳ. 판매비와 관리비':'sga','Ⅴ. 영업손실':'op_raw','Ⅴ. 영업이익':'op_raw',
-    'Ⅵ. 영업외수익':'other_income','Ⅶ. 영업외비용':'other_expense','손익':'net_income'
+    'Ⅵ. 영업외수익':'other_income','Ⅶ. 영업외비용':'other_expense',
+    'Ⅷ. 당기순손익':'net_income','Ⅷ. 당기순이익':'net_income','Ⅷ. 당기순손실':'net_income',
+    '당기순손익':'net_income','당기순이익':'net_income','당기순손실':'net_income','손익':'net_income'
   };
   const res={revenue:[],cogs:[],gross:[],sga:[],op_raw:[],other_income:[],other_expense:[],net_income:[]};
   for(const row of rows){
     if(!row?.[0])continue;
-    const k=KM[String(row[0]).trim()];
-    if(k)res[k]=Array.from({length:depts.length},(_,j)=>Number(row[2+j])||0);
+    const rawKey=String(row[0]).trim();
+    // 완전일치 우선, 없으면 부분포함 매칭
+    let k=KM[rawKey];
+    if(!k){
+      const found=Object.keys(KM).find(km=>rawKey.includes(km)||km.includes(rawKey));
+      if(found)k=KM[found];
+    }
+    if(k && !res[k].length) res[k]=Array.from({length:depts.length},(_,j)=>Number(row[2+j])||0);
   }
   if(!res.revenue.length){
-    // 매출액 행을 못 찾은 경우 — 실제 row[0] 값들 출력
     const rowKeys=rows.slice(0,15).map(r=>r?.[0]).filter(Boolean);
     console.warn('[parseSheet] revenue 없음 — 행 키값들:', rowKeys);
     return null;
   }
   ['cogs','gross','sga','other_income','other_expense','net_income'].forEach(k=>{
-    if(!res[k].length)res[k]=new Array(RAW_DEPTS.length).fill(0);
+    if(!res[k].length)res[k]=new Array(depts.length).fill(0);
   });
   res.op_income=res.gross.map((g,i)=>g-(res.sga[i]||0));
+  // net_income: 시트값 우효성 검증 — 전부 0이면 공식으로 계산
+  const niAllZero=res.net_income.every(v=>v===0);
+  if(niAllZero){
+    console.warn('[parseSheet] net_income 전부 0 → 공식으로 계산');
+    res.net_income=res.op_income.map((o,i)=>(o||0)+(res.other_income[i]||0)-(res.other_expense[i]||0));
+  }
   return res;
 }
 
