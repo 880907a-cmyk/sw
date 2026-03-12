@@ -371,7 +371,7 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
 
 <!-- ─── KPI 카드 6개: 슬라이서 바로 아래 최상단 ─── -->
 <div class="kpi-full-wrap">
-  <div class="kpi-row-label" id="kpi-grid-title">— 손익현황</div>
+  <div class="sec-label" id="kpi-grid-title">— 손익현황</div>
   <div class="kpi-row6">
     <div class="kpi-card kc1">
       <div class="kc-lbl">당기 누적 매출</div>
@@ -412,51 +412,8 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
   </div>
 </div>
 
-<!-- ─── 상단: 추이차트 + 이슈분석 (2열) ─── -->
-<div class="sec-label" id="trend-label">직전 12개월 월별 손익 추이</div>
-<div class="main-top-layout">
-
-  <!-- ① 추이차트 -->
-  <div class="main-top-left">
-    <div class="panel" id="trend-panel" style="display:flex;flex-direction:column;">
-      <div class="ph">
-        <div><div class="pt" id="trend-title">직전 12개월 월별 손익 추이</div><div class="ps" id="trend-sub"></div></div>
-        <span class="pill">TREND</span>
-      </div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:2px;">
-        <button class="mchip on" data-key="revenue" style="--mc:#1d6fe8">매출액</button>
-        <button class="mchip"    data-key="cogs"    style="--mc:#e03030">매출원가</button>
-        <button class="mchip"    data-key="gross"   style="--mc:#0a9e6e">매출총손익</button>
-        <button class="mchip"    data-key="sga"     style="--mc:#cc8800">판관비</button>
-        <button class="mchip"    data-key="op"      style="--mc:#6d3fd6">영업손익</button>
-        <button class="mchip"    data-key="ni"      style="--mc:#0891b2">당기순손익</button>
-      </div>
-      <div class="chart-box" style="flex:1;height:auto;min-height:220px;"><canvas id="lineChart"></canvas></div>
-    </div>
-  </div>
-
-  <!-- ② 이슈분석 -->
-  <div class="main-top-right">
-    <div class="panel" style="flex:1;display:flex;flex-direction:column;">
-      <div class="ph">
-        <div><div class="pt">주요이슈 분석</div><div class="ps" id="issue-sub">—</div></div>
-        <span class="pill">ISSUE</span>
-      </div>
-      <!-- 좌: 그래프 | 우: 카드 -->
-      <div class="issue-inner-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;min-height:0;">
-        <div style="display:flex;flex-direction:column;">
-          <div style="font-size:9px;font-weight:700;color:#5a6a7a;margin-bottom:4px;" id="issue-bar-title">주요지표 전월 비교</div>
-          <div style="position:relative;flex:1;min-height:120px;"><canvas id="issue-bar"></canvas></div>
-        </div>
-        <div id="issue-grid" style="display:flex;flex-direction:column;gap:6px;overflow-y:auto;"></div>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /main-top-layout -->
-
-<!-- ─── 사업부별 손익 ─── -->
-<div class="sec-label">사업부별 손익</div>
+<!-- ─── 요약손익계산서 ─── -->
+<div class="sec-label">요약손익계산서</div>
 <div class="two-col-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px 12px;">
 
   <!-- 좌: 당월 -->
@@ -488,6 +445,48 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
   </div>
 
 </div>
+
+<!-- ─── 직전 12개월 추이 (좌) + 주요이슈분석 (우) ─── -->
+<div class="sec-label" id="trend-label2">직전 12개월 월별 손익 추이</div>
+<div class="main-top-layout">
+
+  <!-- 추이차트 -->
+  <div class="main-top-left">
+    <div class="panel" id="trend-panel" style="display:flex;flex-direction:column;">
+      <div class="ph">
+        <div><div class="pt" id="trend-title">직전 12개월 월별 손익 추이</div><div class="ps" id="trend-sub"></div></div>
+        <span class="pill">TREND</span>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:2px;">
+        <button class="mchip on" data-key="revenue" style="--mc:#1d6fe8">매출액</button>
+        <button class="mchip"    data-key="cogs"    style="--mc:#e03030">매출원가</button>
+        <button class="mchip"    data-key="gross"   style="--mc:#0a9e6e">매출총손익</button>
+        <button class="mchip"    data-key="sga"     style="--mc:#cc8800">판관비</button>
+        <button class="mchip"    data-key="op"      style="--mc:#6d3fd6">영업손익</button>
+        <button class="mchip"    data-key="ni"      style="--mc:#0891b2">당기순손익</button>
+      </div>
+      <div class="chart-box" style="flex:1;height:auto;min-height:220px;"><canvas id="lineChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- 이슈분석 -->
+  <div class="main-top-right">
+    <div class="panel" style="flex:1;display:flex;flex-direction:column;">
+      <div class="ph">
+        <div><div class="pt">주요이슈 분석</div><div class="ps" id="issue-sub">—</div></div>
+        <span class="pill">ISSUE</span>
+      </div>
+      <div class="issue-inner-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;min-height:0;">
+        <div style="display:flex;flex-direction:column;">
+          <div style="font-size:9px;font-weight:700;color:#5a6a7a;margin-bottom:4px;" id="issue-bar-title">주요지표 전월 비교</div>
+          <div style="position:relative;flex:1;min-height:120px;"><canvas id="issue-bar"></canvas></div>
+        </div>
+        <div id="issue-grid" style="display:flex;flex-direction:column;gap:6px;overflow-y:auto;"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-top-layout -->
 
 <!-- ─── 전월대비 증감 ─── -->
 <div class="sec-label">전월 대비 증감</div>
@@ -695,7 +694,7 @@ function render(){
   const tStart=parseInt(tms[0].slice(4)),tEnd=parseInt(tms[tms.length-1].slice(4));
   const tStartY=tms[0].slice(0,4),tEndY=tms[tms.length-1].slice(0,4);
   const tLabel=tStartY===tEndY?`${tStartY}년 ${tStart}월~${tEnd}월`:`${tStartY}년 ${tStart}월~${tEndY}년 ${tEnd}월`;
-  document.getElementById('trend-label').textContent=`직전 12개월 월별 손익 추이 (${tLabel})`;
+  document.getElementById('trend-label2').textContent=`직전 12개월 월별 손익 추이 (${tLabel})`;
   document.getElementById('trend-title').textContent=`직전 12개월 월별 손익 추이`;
   document.getElementById('trend-sub').textContent=`${tLabel} · ${dName} · 단위: 억원`;
 
@@ -943,7 +942,8 @@ function renderMoM(cms){
   ];
 
   const depts=activeDepts();
-  const allCols=['__total__',...depts];
+  const showTotal=selDepts.has('all'); // 전사일 때만 합계 표시
+  const allCols=showTotal?['__total__',...depts]:[...depts];
 
   // 모든 값 미리 계산
   const vals={};
@@ -1321,11 +1321,36 @@ async function fetchLastUpdated(){
     const val=text.trim().split(/\r?\n/)[0].replace(/"/g,'').trim().split(/[,;]/)[0].trim();
     if(val){
       const el=document.getElementById('last-updated');
-      if(el) el.textContent=val;
+      if(el) el.textContent=formatUpdatedAt(val);
       console.log('[fetchLastUpdated] 업데이트:', val);
     }
   }catch(e){
     console.warn('[fetchLastUpdated] 실패:', e.message);
+  }
+}
+
+function formatUpdatedAt(val){
+  const DAYS=['일','월','화','수','목','금','토'];
+  try{
+    // 구글 시트에서 올 수 있는 다양한 형식 파싱
+    // ex) "2026-03-12 14:23:05" / "2026. 3. 12 오전 11:26:46" / "2026/3/12 14:23"
+    let d=new Date(val);
+    // 한국어 오전/오후 형식 처리
+    if(isNaN(d)){
+      const m=val.match(/(\d{4})[.\-\/]\s*(\d{1,2})[.\-\/]\s*(\d{1,2})\s*(오전|오후)?\s*(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+      if(m){
+        let h=parseInt(m[5]);
+        if(m[4]==='오후'&&h<12)h+=12;
+        if(m[4]==='오전'&&h===12)h=0;
+        d=new Date(parseInt(m[1]),parseInt(m[2])-1,parseInt(m[3]),h,parseInt(m[6]),parseInt(m[7]||0));
+      }
+    }
+    if(isNaN(d)) return val; // 파싱 실패 시 원본 그대로
+    const day=DAYS[d.getDay()];
+    const pad=n=>String(n).padStart(2,'0');
+    return `${d.getFullYear()}년 ${pad(d.getMonth()+1)}월 ${pad(d.getDate())}일 (${day}) ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }catch(e){
+    return val;
   }
 }
 
