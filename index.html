@@ -48,8 +48,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fn);font-size:11px
 .slicer-bar::-webkit-scrollbar{height:2px;}
 .slicer-inner{display:flex;align-items:stretch;overflow-x:auto;min-width:max-content;}
 .sg{display:flex;align-items:center;padding:5px 14px;gap:8px;border-right:1px solid #e8ecf0;}
-.sg:last-child{border-right:none;}
-.slbl{font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+.sg:last-child{border-right:none;}.slbl{font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
   color:#8a98aa;white-space:nowrap;min-width:32px;}
 .chips{display:flex;gap:3px;flex-wrap:nowrap;}
 .chip{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;
@@ -199,8 +198,8 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
   .co-name{font-size:11px;}
   .hdr-sub{font-size:8px;}
   .upload-btn{padding:4px 8px;font-size:9px;}
-  /* 슬라이서: 각 카테고리 행으로 분리 */
-  .slicer-bar{top:52px;overflow-x:visible;}
+  /* 슬라이서: 각 카테고리 행으로 분리, top은 JS로 동적 설정 */
+  .slicer-bar{overflow-x:visible;}
   .slicer-inner{flex-direction:column;min-width:0;overflow-x:visible;}
   .sg{border-right:none;border-bottom:1px solid #e8ecf0;padding:5px 12px;flex-wrap:wrap;}
   .sg:last-child{border-bottom:none;}
@@ -222,7 +221,10 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
   .pt{font-size:10px;}
   .ps{font-size:8px;}
   .tbl-section{padding:0 12px 6px;}
+  /* 테이블 overflow: 패널은 고정, 내부 tw만 스크롤 */
   .two-col-grid{grid-template-columns:1fr !important;}
+  .panel{overflow:hidden;}
+  .tw{overflow-x:auto;max-width:100%;}
   table{font-size:9px;}
   thead th{font-size:8px;padding:4px 5px;}
   tbody td{font-size:9px;padding:4px 5px;}
@@ -352,11 +354,11 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
       </div>
       <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:2px;">
         <button class="mchip on" data-key="revenue" style="--mc:#1d6fe8">매출액</button>
-        <button class="mchip on" data-key="cogs"    style="--mc:#e03030">매출원가</button>
-        <button class="mchip on" data-key="gross"   style="--mc:#0a9e6e">매출총손익</button>
-        <button class="mchip on" data-key="sga"     style="--mc:#cc8800">판관비</button>
-        <button class="mchip on" data-key="op"      style="--mc:#6d3fd6">영업손익</button>
-        <button class="mchip on" data-key="ni"      style="--mc:#0891b2">당기순손익</button>
+        <button class="mchip"    data-key="cogs"    style="--mc:#e03030">매출원가</button>
+        <button class="mchip"    data-key="gross"   style="--mc:#0a9e6e">매출총손익</button>
+        <button class="mchip"    data-key="sga"     style="--mc:#cc8800">판관비</button>
+        <button class="mchip"    data-key="op"      style="--mc:#6d3fd6">영업손익</button>
+        <button class="mchip"    data-key="ni"      style="--mc:#0891b2">당기순손익</button>
       </div>
       <div class="chart-box" style="flex:1;height:auto;min-height:220px;"><canvas id="lineChart"></canvas></div>
     </div>
@@ -531,7 +533,7 @@ let DATA={
 
 // 상태
 let selYear='2025',selMonth='11',selDepts=new Set(['all']);
-let selMetrics=new Set(['revenue','cogs','gross','sga','op','ni']);
+let selMetrics=new Set(['revenue']); // 기본값: 매출액만
 let charts={};
 
 // ════════════════════════════════════════════
@@ -634,22 +636,16 @@ function setMonth(m,el){
   el.classList.add('on');render();
 }
 function setDept(d,el){
-  if(d==='all'){
-    // 전사 클릭 → 무조건 전사만
+  // 단일 선택: 클릭한 것만 선택, 같은 것 재클릭하면 전사로
+  if(d==='all' || (selDepts.size===1 && selDepts.has(d))){
     selDepts=new Set(['all']);
   } else {
-    selDepts.delete('all');
-    if(selDepts.has(d)){
-      selDepts.delete(d);
-      if(selDepts.size===0) selDepts.add('all'); // 모두 해제되면 전사로
-    } else {
-      selDepts.add(d);
-    }
+    selDepts=new Set([d]);
   }
   // 버튼 UI 갱신
   document.querySelectorAll('#s-dept .chip').forEach(c=>{
     const key=c.getAttribute('onclick').match(/'([^']+)'/)[1];
-    const isOn= key==='all' ? selDepts.has('all') : (selDepts.has(key)&&!selDepts.has('all'));
+    const isOn= key==='all' ? selDepts.has('all') : selDepts.has(key);
     c.classList.toggle('on',isOn);
     c.style.cssText='';
     if(isOn&&key!=='all'){const col=DEPT_COLORS[key];c.style.borderColor=col;c.style.color=col;c.style.borderWidth='2px';}
@@ -1215,17 +1211,22 @@ function parseSheet(rows){
 // 구글 스프레드시트 자동 fetch
 // ════════════════════════════════════════════
 const SHEET_PUB_BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOZiCbraP0YGEYPL1FGLwSPEDNdsydkJVjOA4fKa_4DqBeJHpRwFqoETv4rFfO2y_GPHU7LHjuhT3_/pub';
-const SHEET_ID = '18jMpXGbKKRrFUUXB1HaG8sV26n3tIwgMbBV9cJAkqnc';
 
-// 실제 존재하는 시트 탭 목록 가져오기 (Google Sheets JSON feed)
+// index 시트에서 실제 시트 목록 가져오기
 async function fetchSheetNames(){
   try{
-    const url=`https://spreadsheets.google.com/feeds/worksheets/${SHEET_ID}/public/basic?alt=json`;
-    const res=await fetch(url,{cache:'no-cache'});
+    const url=`${SHEET_PUB_BASE}?output=csv&sheet=index`;
+    const controller=new AbortController();
+    setTimeout(()=>controller.abort(),8000);
+    const res=await fetch(url,{cache:'no-cache',signal:controller.signal});
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json=await res.json();
-    const names=json.feed.entry.map(e=>e.title.$t);
-    console.log('[fetchSheetNames] 실제 시트 탭:', names);
+    const text=await res.text();
+    if(text.trim().startsWith('<')) throw new Error('HTML 응답 — index 시트 없음');
+    // A열 값만 추출, YYYYMM 형식 필터
+    const names=text.trim().split(/\r?\n/)
+      .map(line=>line.split(',')[0].replace(/"/g,'').trim())
+      .filter(n=>/^\d{6}$/.test(n));
+    console.log('[fetchSheetNames] index 시트에서 읽은 탭:', names);
     return names;
   }catch(e){
     console.error('[fetchSheetNames] 실패:', e.message);
@@ -1343,12 +1344,20 @@ function init(){
     });
   });
   autoLoad();
+  updateSlicerTop();
+}
+
+// 슬라이서 sticky top을 헤더 실제 높이에 맞게 동적 설정
+function updateSlicerTop(){
+  const hdr=document.querySelector('.hdr');
+  const slicer=document.querySelector('.slicer-bar');
+  if(hdr&&slicer) slicer.style.top=hdr.offsetHeight+'px';
 }
 
 let resizeTimer;
 window.addEventListener('resize',()=>{
   clearTimeout(resizeTimer);
-  resizeTimer=setTimeout(()=>{render();},200);
+  resizeTimer=setTimeout(()=>{updateSlicerTop();render();},200);
 });
 
 // ════ 잠금 화면 ════
