@@ -17,7 +17,10 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{overflow-y:scroll;}
-body{background:var(--bg);color:var(--text);font-family:var(--fn);font-size:11px;}
+body{background:var(--bg);color:var(--text);font-family:var(--fn);font-size:11px;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:#e8ecf0;}
 ::-webkit-scrollbar-thumb{background:#b0bcc8;border-radius:3px;}
@@ -506,6 +509,10 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
 </div>
 
 </div><!-- /app -->
+
+<div style="text-align:center;padding:18px;font-size:10px;color:#b0bcc8;font-family:'JetBrains Mono',monospace;letter-spacing:.3px;border-top:1px solid #e8ecf0;margin-top:8px;">
+  © SW Healthcare Co., Ltd. | Prepared by Finance Team
+</div>
 <script>
 // ════════════════════════════════════════════
 // 상수
@@ -535,6 +542,7 @@ Chart.defaults.color='#5a6a7a';
 Chart.defaults.borderColor='rgba(0,0,0,0.07)';
 Chart.defaults.font.family="'Noto Sans KR',sans-serif";
 Chart.defaults.font.size=9;
+Chart.defaults.devicePixelRatio=window.devicePixelRatio||2;
 
 // 판관비 세부 계정 (top5 by 연간합계)
 const SGA_DETAIL={"202501": {"직원급여": 494061920, "판매촉진비": 115237275, "보험료": 49732098, "결제대행수수료": 51751369, "감가상각비": 49568387}, "202502": {"직원급여": 488906070, "판매촉진비": 147327389, "보험료": 49171141, "결제대행수수료": 52332033, "감가상각비": 49568386}, "202503": {"직원급여": 400668370, "판매촉진비": 96274208, "보험료": 39817259, "결제대행수수료": 47281276, "감가상각비": 50524698}, "202504": {"직원급여": 411340850, "판매촉진비": 131505935, "보험료": 48916607, "결제대행수수료": 43891754, "감가상각비": 48225502}, "202505": {"직원급여": 416102410, "판매촉진비": 128406808, "보험료": 40051791, "결제대행수수료": 48885291, "감가상각비": 48268726}, "202506": {"직원급여": 420018530, "판매촉진비": 134199288, "보험료": 40531721, "결제대행수수료": 47060405, "감가상각비": 44794342}, "202507": {"직원급여": 325671250, "판매촉진비": 83740983, "보험료": 37407610, "결제대행수수료": 46812208, "감가상각비": 45835107}, "202508": {"직원급여": 318009500, "판매촉진비": 122461078, "보험료": 33002786, "결제대행수수료": 47344403, "감가상각비": 45835004}, "202509": {"직원급여": 361730240, "판매촉진비": 119509909, "보험료": 37116441, "결제대행수수료": 52765645, "감가상각비": 45469899}, "202510": {"직원급여": 360591292, "판매촉진비": 105827216, "보험료": 36357600, "결제대행수수료": 58764101, "감가상각비": 45833295}, "202511": {"직원급여": 365839967, "판매촉진비": 146145794, "보험료": 136283945, "결제대행수수료": 59892290, "감가상각비": 45494797}, "202512": {"직원급여": 369998848, "판매촉진비": 218966491, "보험료": 166906889, "결제대행수수료": 68749051, "감가상각비": 45204595}};
@@ -1153,12 +1161,13 @@ function renderDeptTable(tbodyId,monthKey,isCum,cms){
     ?sum(cms.map(m=>deptVal(m,k,d)))
     :deptVal(monthKey,k,d);
 
-  // 헤더: 계정과목 | 합계 | 사업부1 | 사업부2 ...
+  // 헤더: 계정과목 | (합계) | 사업부1 | 사업부2 ...
+  const showTotal=selDepts.has('all');
   const headId=tbodyId==='t1-body'?'t1-head':'t2-head';
   const headEl=document.getElementById(headId);
   if(headEl){
     headEl.innerHTML=`<th class="L" style="min-width:90px">계정과목</th>`
-      +`<th style="min-width:72px;border-right:2px solid #d0d8e4">합 계</th>`
+      +(showTotal?`<th style="min-width:72px;border-right:2px solid #d0d8e4">합 계</th>`:'')
       +depts.map(d=>`<th style="min-width:72px"><span class="d8" style="background:${DEPT_COLORS[d]}"></span>${d}</th>`).join('');
   }
 
@@ -1191,7 +1200,7 @@ function renderDeptTable(tbodyId,monthKey,isCum,cms){
     vals['__total__'][k]=depts.reduce((s,d)=>s+vals[d][k],0);
   });
 
-  const allCols=['__total__',...depts];
+  const allCols=showTotal?['__total__',...depts]:[...depts];
 
   const rows=METRICS.map((m,mi)=>{
     const isRate=m.rate;
