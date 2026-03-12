@@ -70,7 +70,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fn);font-size:11px
 .main-top-right .panel{flex:1;}
 
 /* KPI 카드 풀폭 6열 */
-.kpi-full-wrap{padding:0 18px 8px;}
+.kpi-full-wrap{padding:8px 18px 4px;}
 .kpi-row-label{font-size:10px;font-weight:700;color:#1a2333;padding:0 2px 5px;letter-spacing:0;}
 .kpi-row6{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
 
@@ -369,6 +369,49 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
   </div>
 </div>
 
+<!-- ─── KPI 카드 6개: 슬라이서 바로 아래 최상단 ─── -->
+<div class="kpi-full-wrap">
+  <div class="kpi-row-label" id="kpi-grid-title">— 손익현황</div>
+  <div class="kpi-row6">
+    <div class="kpi-card kc1">
+      <div class="kc-lbl">당기 누적 매출</div>
+      <div class="kc-val" id="kv1">—</div>
+      <div class="kc-sub" id="ks1"></div>
+      <div class="kc-sparkwrap"><canvas id="sp1"></canvas></div>
+    </div>
+    <div class="kpi-card kc2">
+      <div class="kc-lbl">당기 누적 매출원가</div>
+      <div class="kc-val" id="kv2">—</div>
+      <div class="kc-sub" id="ks2"></div>
+      <div class="kc-sparkwrap"><canvas id="sp2"></canvas></div>
+    </div>
+    <div class="kpi-card kc3">
+      <div class="kc-lbl">당기 누적 매출총손익</div>
+      <div class="kc-val" id="kv3">—</div>
+      <div class="kc-sub" id="ks3"></div>
+      <div class="kc-sparkwrap"><canvas id="sp3"></canvas></div>
+    </div>
+    <div class="kpi-card kc4">
+      <div class="kc-lbl">당기 누적 판관비</div>
+      <div class="kc-val" id="kv4">—</div>
+      <div class="kc-sub" id="ks4"></div>
+      <div class="kc-sparkwrap"><canvas id="sp4"></canvas></div>
+    </div>
+    <div class="kpi-card kc5">
+      <div class="kc-lbl">당기 누적 영업손익</div>
+      <div class="kc-val" id="kv5">—</div>
+      <div class="kc-sub" id="ks5"></div>
+      <div class="kc-sparkwrap"><canvas id="sp5"></canvas></div>
+    </div>
+    <div class="kpi-card kc6">
+      <div class="kc-lbl">당기 누적 순손익</div>
+      <div class="kc-val" id="kv6">—</div>
+      <div class="kc-sub" id="ks6"></div>
+      <div class="kc-sparkwrap"><canvas id="sp6"></canvas></div>
+    </div>
+  </div>
+</div>
+
 <!-- ─── 상단: 추이차트 + 이슈분석 (2열) ─── -->
 <div class="sec-label" id="trend-label">직전 12개월 월별 손익 추이</div>
 <div class="main-top-layout">
@@ -411,49 +454,6 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
   </div>
 
 </div><!-- /main-top-layout -->
-
-<!-- ─── KPI 카드 6개: 추이+이슈 아래 풀폭 ─── -->
-<div class="kpi-full-wrap">
-  <div class="kpi-row-label" id="kpi-grid-title">— 손익현황</div>
-  <div class="kpi-row6">
-    <div class="kpi-card kc1">
-      <div class="kc-lbl">당기 누적 매출</div>
-      <div class="kc-val" id="kv1">—</div>
-      <div class="kc-sub" id="ks1"></div>
-      <div class="kc-sparkwrap"><canvas id="sp1"></canvas></div>
-    </div>
-    <div class="kpi-card kc2">
-      <div class="kc-lbl">당기 누적 매출원가</div>
-      <div class="kc-val" id="kv2">—</div>
-      <div class="kc-sub" id="ks2"></div>
-      <div class="kc-sparkwrap"><canvas id="sp2"></canvas></div>
-    </div>
-    <div class="kpi-card kc3">
-      <div class="kc-lbl">당기 누적 매출총손익</div>
-      <div class="kc-val" id="kv3">—</div>
-      <div class="kc-sub" id="ks3"></div>
-      <div class="kc-sparkwrap"><canvas id="sp3"></canvas></div>
-    </div>
-    <div class="kpi-card kc4">
-      <div class="kc-lbl">당기 누적 판관비</div>
-      <div class="kc-val" id="kv4">—</div>
-      <div class="kc-sub" id="ks4"></div>
-      <div class="kc-sparkwrap"><canvas id="sp4"></canvas></div>
-    </div>
-    <div class="kpi-card kc5">
-      <div class="kc-lbl">당기 누적 영업손익</div>
-      <div class="kc-val" id="kv5">—</div>
-      <div class="kc-sub" id="ks5"></div>
-      <div class="kc-sparkwrap"><canvas id="sp5"></canvas></div>
-    </div>
-    <div class="kpi-card kc6">
-      <div class="kc-lbl">당기 누적 순손익</div>
-      <div class="kc-val" id="kv6">—</div>
-      <div class="kc-sub" id="ks6"></div>
-      <div class="kc-sparkwrap"><canvas id="sp6"></canvas></div>
-    </div>
-  </div>
-</div>
 
 <!-- ─── 사업부별 손익 ─── -->
 <div class="sec-label">사업부별 손익</div>
