@@ -247,7 +247,25 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
   thead th{font-size:7px;padding:3px 4px;}
   tbody td{font-size:8px;padding:3px 4px;}
 }
-/* ════ 잠금 화면 ════ */
+/* ════ 모바일 슬라이서 드롭다운 ════ */
+.slicer-toggle{display:none;}
+@media(max-width:768px){
+  .slicer-toggle{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 14px;cursor:pointer;user-select:none;
+    font-size:11px;font-weight:700;color:#1a2333;
+    background:#fff;
+  }
+  .slicer-toggle-label{display:flex;align-items:center;gap:6px;}
+  .slicer-toggle-arrow{font-size:10px;transition:transform .2s;color:#8a98aa;}
+  .slicer-toggle-summary{font-size:10px;color:var(--blue);font-weight:600;margin-left:4px;}
+  .slicer-inner{
+    display:none;flex-direction:column;min-width:0;overflow-x:visible;
+    border-top:1px solid #e8ecf0;
+  }
+  .slicer-inner.open{display:flex;}
+  .slicer-bar.open .slicer-toggle-arrow{transform:rotate(180deg);}
+}
 #lock-screen{
   position:fixed;inset:0;z-index:9999;
   background:linear-gradient(135deg,#0f1e3d 0%,#1d3a6e 60%,#1a2f5a 100%);
@@ -336,8 +354,15 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
 </div>
 
 <!-- ─── 슬라이서 ─── -->
-<div class="slicer-bar">
-  <div class="slicer-inner">
+<div class="slicer-bar" id="slicer-bar">
+  <div class="slicer-toggle" onclick="toggleSlicer()">
+    <div class="slicer-toggle-label">
+      <span>🗂</span><span>필터</span>
+      <span class="slicer-toggle-summary" id="slicer-summary"></span>
+    </div>
+    <span class="slicer-toggle-arrow">▼</span>
+  </div>
+  <div class="slicer-inner" id="slicer-inner">
     <div class="sg"><span class="slbl">기준연도</span><div class="chips" id="s-year"></div></div>
     <div class="sg"><span class="slbl">기준월</span><div class="chips" id="s-month"></div></div>
     <div class="sg"><span class="slbl">사업부</span><div class="chips" id="s-dept"></div></div>
@@ -494,6 +519,7 @@ const DEPT_COLORS={
   '기타':'#7090aa'
 };
 const DEPT_ORDER=['의약품사업부','건기식사업부','정보사업부','해외사업부','기타'];
+const DEPT_LABELS={'의약품사업부':'의약품','건기식사업부':'건기식','정보사업부':'정보','해외사업부':'해외','기타':'기타'};
 
 // 원본 인덱스 → 통합 사업부 매핑
 // 0:경영지원실 1:해외사업본부 2:사업총괄 3:연구생산 4:의약품 5:건기식 6:의료기기안양 7:정보
@@ -693,6 +719,7 @@ function render(){
   renderIssues(issueMs);
   renderDeptTable('t1-body',mkKey(selYear,selMonth),false);
   renderDeptTable('t2-body',null,true,cms);
+  updateSlicerSummary();
 }
 
 // ════════════════════════════════════════════
@@ -749,7 +776,7 @@ function spk(id,data,color,monthLabels){
         },
         y:{display:false}
       },
-      responsive:true,maintainAspectRatio:false
+      responsive:true,maintainAspectRatio:false,animation:false
     }
   });
 }
@@ -776,7 +803,7 @@ function spkLine(id,data,color,monthLabels){
         x:{display:false},
         y:{display:false}
       },
-      responsive:true,maintainAspectRatio:false
+      responsive:true,maintainAspectRatio:false,animation:false
     }
   });
 }
@@ -845,7 +872,7 @@ function renderTrendChart(tms){
     plugins:[datalabelPlugin],
     data:{labels,datasets},
     options:{
-      responsive:true,maintainAspectRatio:false,
+      responsive:true,maintainAspectRatio:false,animation:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
         legend:{
@@ -1016,7 +1043,7 @@ function renderIssues(cms){
       ]
     },
     options:{
-      responsive:true,maintainAspectRatio:false,
+      responsive:true,maintainAspectRatio:false,animation:false,
       layout:{padding:{top:18}},
       plugins:{
         legend:{position:'top',labels:{font:{size:9,weight:'600'},color:'#2a3a4a',padding:8}},
@@ -1408,6 +1435,21 @@ function init(){
   });
   updateSlicerTop();
   autoLoad(); // buildSlicers/render는 autoLoad 완료 후 내부에서 호출
+}
+
+function toggleSlicer(){
+  const bar=document.getElementById('slicer-bar');
+  const inner=document.getElementById('slicer-inner');
+  const isOpen=inner.classList.toggle('open');
+  bar.classList.toggle('open',isOpen);
+}
+
+function updateSlicerSummary(){
+  const el=document.getElementById('slicer-summary');
+  if(!el)return;
+  const dept=[...selDepts][0];
+  const deptName=dept==='all'?'전사':DEPT_LABELS[dept]||dept;
+  el.textContent=`${selYear}년 ${parseInt(selMonth)}월 · ${deptName}`;
 }
 
 // 슬라이서 sticky top을 헤더 실제 높이에 맞게 동적 설정
