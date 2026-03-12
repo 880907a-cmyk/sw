@@ -684,7 +684,13 @@ function render(){
   renderKPI(cms);
   renderTrendChart(tms);
   renderMoM(cms);
-  renderIssues(cms);
+
+  // 이슈분석용: 전월이 연도 경계여도 포함
+  const curKey=mkKey(selYear,selMonth);
+  const allKeys=Object.keys(DATA).sort();
+  const curIdx=allKeys.indexOf(curKey);
+  const issueMs= curIdx>0 ? [allKeys[curIdx-1], curKey] : cms.slice(-2);
+  renderIssues(issueMs);
   renderDeptTable('t1-body',mkKey(selYear,selMonth),false);
   renderDeptTable('t2-body',null,true,cms);
 }
@@ -976,9 +982,13 @@ function renderMoM(cms){
 function renderIssues(cms){
   if(cms.length<2){document.getElementById('issue-grid').innerHTML='<div class="issue-empty">전월 데이터 없음</div>';return;}
   const cur=cms[cms.length-1],prev=cms[cms.length-2];
+  const cy=cur.slice(0,4),py=prev.slice(0,4);
   const cm=parseInt(cur.slice(4)),pm=parseInt(prev.slice(4));
-  document.getElementById('issue-sub').textContent=`${selYear}년 ${pm}월 → ${cm}월`;
-  document.getElementById('issue-bar-title').textContent=`전월(${pm}월) vs 당월(${cm}월) 합계 주요지표`;
+  const crossYear=cy!==py;
+  const prevLabel=crossYear?`${py}년 ${pm}월`:`${pm}월`;
+  const curLabel=crossYear?`${cy}년 ${cm}월`:`${cm}월`;
+  document.getElementById('issue-sub').textContent=`${prevLabel} → ${curLabel}`;
+  document.getElementById('issue-bar-title').textContent=`전월(${prevLabel}) vs 당월(${curLabel}) 합계 주요지표`;
   const depts=activeDepts();
   const ALLD=DEPT_ORDER; // 사업부 전체 (차트는 항상 전사 기준)
 
@@ -1001,8 +1011,8 @@ function renderIssues(cms){
     data:{
       labels:BAR_METRICS.map(m=>m.l),
       datasets:[
-        {label:`${pm}월`,data:totPrev,backgroundColor:'#93c5fd',borderColor:'#3b82f6',borderWidth:1.5,borderRadius:3},
-        {label:`${cm}월`,data:totCur, backgroundColor:'#1d6fe8',borderColor:'#1d4fad',borderWidth:1.5,borderRadius:3},
+        {label:`${prevLabel}`,data:totPrev,backgroundColor:'#93c5fd',borderColor:'#3b82f6',borderWidth:1.5,borderRadius:3},
+        {label:`${curLabel}`, data:totCur, backgroundColor:'#1d6fe8',borderColor:'#1d4fad',borderWidth:1.5,borderRadius:3},
       ]
     },
     options:{
@@ -1248,12 +1258,12 @@ function parseSheet(rows){
 // ════════════════════════════════════════════
 // 구글 스프레드시트 자동 fetch
 // ════════════════════════════════════════════
-const SHEET_PUB_BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOZiCbraP0YGEYPL1FGLwSPEDNdsydkJVjOA4fKa_4DqBeJHpRwFqoETv4rFfO2y_GPHU7LHjuhT3_/pub';
+const SHEET_PUB_BASE = 'https://script.google.com/macros/s/AKfycbz7oOdMAD8TwdvcaZVtrnyiEzj4NTG-RNJibwrLQD1X82FUw9y8auzZ27QGfRJcD9ZJ/exec';
 
 // index 시트에서 시트 목록 가져오기 (A열 YYYYMM만)
 async function fetchSheetNames(){
   try{
-    const url=`${SHEET_PUB_BASE}?output=csv&sheet=index`;
+    const url=`${SHEET_PUB_BASE}?sheet=index`;
     const res=await fetch(url);
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const text=await res.text();
@@ -1272,7 +1282,7 @@ async function fetchSheetNames(){
 // day 시트에서 업데이트 일시 가져오기 (A1셀)
 async function fetchLastUpdated(){
   try{
-    const url=`${SHEET_PUB_BASE}?output=csv&sheet=day`;
+    const url=`${SHEET_PUB_BASE}?sheet=day`;
     const res=await fetch(url);
     if(!res.ok) return;
     const text=await res.text();
@@ -1313,7 +1323,7 @@ function csvToRows(text){
 
 // 시트명(yyyymm)으로 CSV fetch
 async function fetchSheet(sheetName){
-  const url=`${SHEET_PUB_BASE}?output=csv&sheet=${encodeURIComponent(sheetName)}`;
+  const url=`${SHEET_PUB_BASE}?sheet=${encodeURIComponent(sheetName)}`;
   try{
     const res=await fetch(url);
     if(!res.ok){ console.warn(`[Sheet ${sheetName}] HTTP ${res.status}`); return null; }
