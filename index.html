@@ -535,7 +535,7 @@ let DATA={
 };
 
 // 상태
-let selYear='2025',selMonth='12',selDepts=new Set(['all']);
+let selYear='',selMonth='',selDepts=new Set(['all']);
 let selMetrics=new Set(['revenue']); // 기본값: 매출액만
 let charts={};
 
@@ -1243,11 +1243,10 @@ const SHEET_PUB_BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOZiCbr
 // index 시트 구조: A열=시트명(202501...), B1=업데이트일시(예: 2025-09-30 14:23:05)
 async function fetchSheetNames(){
   try{
-    const ts=Date.now();
-    const url=`${SHEET_PUB_BASE}?output=csv&sheet=index&t=${ts}`;
+    const url=`${SHEET_PUB_BASE}?output=csv&sheet=index`;
     const controller=new AbortController();
     setTimeout(()=>controller.abort(),8000);
-    const res=await fetch(url,{cache:'no-store',signal:controller.signal});
+    const res=await fetch(url,{cache:'reload',signal:controller.signal});
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const text=await res.text();
     if(text.trim().startsWith('<')) throw new Error('HTML 응답 — index 시트 없음');
@@ -1295,23 +1294,22 @@ function csvToRows(text){
 
 // 시트명(yyyymm)으로 CSV fetch
 async function fetchSheet(sheetName){
-  const ts=Date.now();
-  const url=`${SHEET_PUB_BASE}?output=csv&sheet=${encodeURIComponent(sheetName)}&t=${ts}`;
+  const url=`${SHEET_PUB_BASE}?output=csv&sheet=${encodeURIComponent(sheetName)}`;
   try{
     const controller=new AbortController();
     const timer=setTimeout(()=>controller.abort(),8000);
-    const res=await fetch(url,{cache:'no-cache',signal:controller.signal});
+    const res=await fetch(url,{cache:'reload',signal:controller.signal});
     clearTimeout(timer);
-    if(!res.ok){ console.log(`[Sheet ${sheetName}] HTTP ${res.status}`); return null; }
+    if(!res.ok){ console.warn(`[Sheet ${sheetName}] HTTP ${res.status}`); return null; }
     const text=await res.text();
-    if(text.trim().startsWith('<')){ console.log(`[Sheet ${sheetName}] HTML 응답`); return null; }
+    if(text.trim().startsWith('<')){ console.warn(`[Sheet ${sheetName}] HTML 응답 — 시트 없음`); return null; }
     const rows=csvToRows(text);
     const parsed=parseSheet(rows);
-    if(parsed) console.log(`[Sheet ${sheetName}] ✓ 로드 성공`);
-    else console.warn(`[Sheet ${sheetName}] 파싱 실패`);
+    if(parsed) console.log(`[Sheet ${sheetName}] ✓ revenue[0]=${rows.length}행, 파싱성공`);
+    else console.warn(`[Sheet ${sheetName}] 파싱실패 — 1행:`, rows[0]);
     return parsed;
   }catch(e){
-    if(e.name==='AbortError') console.log(`[Sheet ${sheetName}] 타임아웃`);
+    if(e.name==='AbortError') console.warn(`[Sheet ${sheetName}] 타임아웃`);
     else console.error(`[Sheet ${sheetName}] 오류:`, e.message);
     return null;
   }
@@ -1368,11 +1366,6 @@ async function autoLoad(){
 }
 
 function init(){
-  // other_income / other_expense 없는 기존 DATA에 기본값 추가
-  Object.keys(DATA).forEach(k=>{
-    if(!DATA[k].other_income)DATA[k].other_income=new Array(RAW_DEPTS.length).fill(0);
-    if(!DATA[k].other_expense)DATA[k].other_expense=new Array(RAW_DEPTS.length).fill(0);
-  });
   // 지표 칩 클릭
   document.querySelectorAll('.mchip').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -1385,8 +1378,8 @@ function init(){
       renderTrendChart(trendMonths());
     });
   });
-  autoLoad();
   updateSlicerTop();
+  autoLoad(); // buildSlicers/render는 autoLoad 완료 후 내부에서 호출
 }
 
 // 슬라이서 sticky top을 헤더 실제 높이에 맞게 동적 설정
