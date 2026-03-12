@@ -535,7 +535,7 @@ let DATA={
 };
 
 // 상태
-let selYear='2025',selMonth='11',selDepts=new Set(['all']);
+let selYear='2025',selMonth='12',selDepts=new Set(['all']);
 let selMetrics=new Set(['revenue']); // 기본값: 매출액만
 let charts={};
 
@@ -1007,6 +1007,7 @@ function renderIssues(cms){
     },
     options:{
       responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:18}},
       plugins:{
         legend:{position:'top',labels:{font:{size:9,weight:'600'},color:'#2a3a4a',padding:8}},
         tooltip:{backgroundColor:'rgba(255,255,255,0.97)',borderColor:'#d0d8e4',borderWidth:1,
@@ -1018,7 +1019,30 @@ function renderIssues(cms){
         x:{grid:{display:false},ticks:{font:{size:8,weight:'600'},color:'#1a2333'},maxRotation:0},
         y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:v=>v+'억',font:{size:8},color:'#5a6a7a'},border:{display:false}}
       }
-    }
+    },
+    plugins:[{
+      id:'barTopLabels',
+      afterDraw(chart){
+        const ctx=chart.ctx;
+        ctx.save();
+        chart.data.datasets.forEach((ds,di)=>{
+          const meta=chart.getDatasetMeta(di);
+          meta.data.forEach((bar,i)=>{
+            const val=ds.data[i];
+            if(val===null||val===undefined)return;
+            const absV=Math.abs(val);
+            const label=(absV>=10?absV.toFixed(0):(absV>=1?absV.toFixed(1):absV.toFixed(2)))+'억';
+            ctx.font='600 8px "Noto Sans KR",sans-serif';
+            ctx.fillStyle=val<0?'#e03030':'#1a2333';
+            ctx.textAlign='center';
+            ctx.textBaseline='bottom';
+            const y=bar.y-(val<0?-6:4);
+            ctx.fillText(label,bar.x,y);
+          });
+        });
+        ctx.restore();
+      }
+    }]
   });
 
   // ── ② 이슈 카드 ──
@@ -1219,10 +1243,11 @@ const SHEET_PUB_BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOZiCbr
 // index 시트 구조: A열=시트명(202501...), B1=업데이트일시(예: 2025-09-30 14:23:05)
 async function fetchSheetNames(){
   try{
-    const url=`${SHEET_PUB_BASE}?output=csv&sheet=index`;
+    const ts=Date.now();
+    const url=`${SHEET_PUB_BASE}?output=csv&sheet=index&t=${ts}`;
     const controller=new AbortController();
     setTimeout(()=>controller.abort(),8000);
-    const res=await fetch(url,{cache:'no-cache',signal:controller.signal});
+    const res=await fetch(url,{cache:'no-store',signal:controller.signal});
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const text=await res.text();
     if(text.trim().startsWith('<')) throw new Error('HTML 응답 — index 시트 없음');
@@ -1270,7 +1295,8 @@ function csvToRows(text){
 
 // 시트명(yyyymm)으로 CSV fetch
 async function fetchSheet(sheetName){
-  const url=`${SHEET_PUB_BASE}?output=csv&sheet=${encodeURIComponent(sheetName)}`;
+  const ts=Date.now();
+  const url=`${SHEET_PUB_BASE}?output=csv&sheet=${encodeURIComponent(sheetName)}&t=${ts}`;
   try{
     const controller=new AbortController();
     const timer=setTimeout(()=>controller.abort(),8000);
@@ -1332,7 +1358,10 @@ async function autoLoad(){
   } else {
     const keys=Object.keys(DATA).sort();
     const lastYM=keys[keys.length-1];
-    metaTxt.textContent=`${loaded}개월 로드됨 · ${lastYM.slice(0,4)}년 ${parseInt(lastYM.slice(4))}월 최신`;
+    // 최신 연도/월로 자동 설정
+    selYear=lastYM.slice(0,4);
+    selMonth=lastYM.slice(4);
+    metaTxt.textContent=`${loaded}개월 로드됨 · ${selYear}년 ${parseInt(selMonth)}월 최신`;
   }
   buildSlicers();
   render();
