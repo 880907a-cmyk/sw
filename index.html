@@ -45,12 +45,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--fn);font-size:11px
 .slicer-bar{background:#fff;border-bottom:1px solid var(--bd);
   position:sticky;top:45px;z-index:299;
   box-shadow:0 1px 3px rgba(0,0,0,0.05);}
-.slicer-bar::-webkit-scrollbar{height:2px;}
-.slicer-inner{display:flex;align-items:stretch;overflow-x:auto;min-width:max-content;}
-.sg{display:flex;align-items:center;padding:5px 14px;gap:8px;border-right:1px solid #e8ecf0;}
-.sg:last-child{border-right:none;}.slbl{font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+.slicer-inner{display:flex;align-items:stretch;flex-wrap:wrap;width:100%;}
+.sg{display:flex;align-items:center;padding:5px 14px;gap:8px;border-right:1px solid #e8ecf0;flex-shrink:0;}
+.sg:last-child{border-right:none;}
+.slbl{font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
   color:#8a98aa;white-space:nowrap;min-width:32px;}
-.chips{display:flex;gap:3px;flex-wrap:nowrap;}
+.chips{display:flex;gap:3px;flex-wrap:wrap;}
 .chip{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;
   cursor:pointer;border:1px solid #d0d8e4;background:#fff;
   color:#5a6a7a;font-family:var(--fn);transition:all .12s;white-space:nowrap;}
@@ -198,10 +198,10 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
   .co-name{font-size:11px;}
   .hdr-sub{font-size:8px;}
   .upload-btn{padding:4px 8px;font-size:9px;}
-  /* 슬라이서: 각 카테고리 행으로 분리, top은 JS로 동적 설정 */
+  /* 슬라이서: 모바일에서도 flex-wrap 유지 */
   .slicer-bar{overflow-x:visible;}
-  .slicer-inner{flex-direction:column;min-width:0;overflow-x:visible;}
-  .sg{border-right:none;border-bottom:1px solid #e8ecf0;padding:5px 12px;flex-wrap:wrap;}
+  .slicer-inner{flex-direction:row;flex-wrap:wrap;min-width:0;}
+  .sg{border-right:none;border-bottom:1px solid #e8ecf0;padding:5px 12px;flex-wrap:wrap;width:100%;}
   .sg:last-child{border-bottom:none;}
   .chips{flex-wrap:wrap;}
   .chip{font-size:9px;padding:2px 7px;}
@@ -709,14 +709,14 @@ function render(){
 
   renderKPI(cms);
   renderTrendChart(tms);
-  renderMoM(cms);
 
-  // 이슈분석용: 전월이 연도 경계여도 포함
+  // 전월대비/이슈분석: 연도 경계여도 전월 포함
   const curKey=mkKey(selYear,selMonth);
   const allKeys=Object.keys(DATA).sort();
   const curIdx=allKeys.indexOf(curKey);
-  const issueMs= curIdx>0 ? [allKeys[curIdx-1], curKey] : cms.slice(-2);
-  renderIssues(issueMs);
+  const momMs= curIdx>0 ? [allKeys[curIdx-1], curKey] : cms.slice(-2);
+  renderMoM(momMs);
+  renderIssues(momMs);
   renderDeptTable('t1-body',mkKey(selYear,selMonth),false);
   renderDeptTable('t2-body',null,true,cms);
   updateSlicerSummary();
@@ -922,8 +922,12 @@ function renderMoM(cms){
     return;
   }
   const cur=cms[cms.length-1],prev=cms[cms.length-2];
+  const cy=cur.slice(0,4),py=prev.slice(0,4);
   const cm=parseInt(cur.slice(4)),pm=parseInt(prev.slice(4));
-  document.getElementById('t-mom-sub').textContent=`${selYear}년 ${pm}월 → ${cm}월`;
+  const crossYear=cy!==py;
+  const prevLabel=crossYear?`${py}년 ${pm}월`:`${pm}월`;
+  const curLabel=crossYear?`${cy}년 ${cm}월`:`${cm}월`;
+  document.getElementById('t-mom-sub').textContent=`${prevLabel} → ${curLabel}`;
 
   // 기존 서브헤더 행 제거
   const oldSub=document.getElementById('mom-head')?.nextElementSibling;
@@ -973,7 +977,7 @@ function renderMoM(cms){
   subRow.innerHTML=`<th style="background:#f4f6f9"></th>`+
     allCols.map((d)=>{
       const isTotal=d==='__total__';
-      return [`${pm}월`,`${cm}월`,'증감','증감률'].map((lbl,i)=>{
+      return [prevLabel,curLabel,'증감','증감률'].map((lbl,i)=>{
         let st=`background:${isTotal?'#eef2f7':'#f4f6f9'};`;
         if(i===0) st+=isTotal?'border-left:2px solid #b0bcc8':'border-left:1px solid #d0d8e4';
         if(i===3&&isTotal) st+=';border-right:2px solid #b0bcc8';
