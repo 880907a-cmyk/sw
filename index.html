@@ -394,18 +394,30 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
 .rpt-panel-sub{font-size:9px;color:#8a98aa;margin-top:2px;}
 .rpt-chart-box{position:relative;width:100%;}
 .rpt-chart-box canvas{position:absolute;inset:0;width:100%!important;height:100%!important;}
-.rpt-tbl-wrap{overflow-x:auto;margin-top:4px;}
-.rpt-tbl-wrap::-webkit-scrollbar{height:3px;}
+.rpt-tbl-wrap{overflow-x:auto;margin-top:4px;-webkit-overflow-scrolling:touch;}
+.rpt-tbl-wrap::-webkit-scrollbar{height:4px;}
 .rpt-tbl-wrap::-webkit-scrollbar-thumb{background:#c0ccd8;border-radius:2px;}
-.rpt-tbl-wrap table{border-collapse:collapse;width:100%;white-space:nowrap;table-layout:fixed;}
+.rpt-tbl-wrap table{border-collapse:collapse;min-width:540px;width:100%;white-space:nowrap;table-layout:auto;border:1px solid #cdd6e8;border-radius:6px;overflow:hidden;}
+.tbl-th-acc{min-width:72px;}
+.tbl-th-grp,.tbl-th-sub{min-width:54px;}
+.tbl-cell-acc{min-width:72px;}
+.tbl-cell{min-width:54px;}
 
 /* ── 헤더 공통 ── */
 .rpt-tbl-wrap thead th{position:sticky;top:0;z-index:2;}
 /* ── 상세 비교표 컬럼 색상 체계 ── */
 /* 컬럼 배경: 헤더+서브헤더+본문 모두 동일 */
-.col-prev                { background:#f6f8fb !important; }
-.col-cur                 { background:#eef4ff !important; }
-.col-diff                { background:#f3f0ff !important; }
+.col-prev                { background:transparent !important; }
+.col-cur                 { background:transparent !important; }
+.col-diff                { background:transparent !important; }
+/* 소계행만 연한 음영 */
+tr.sec .col-prev         { background:rgba(180,200,228,0.18) !important; }
+tr.sec .col-cur          { background:rgba(180,200,228,0.18) !important; }
+tr.sec .col-diff         { background:rgba(180,200,228,0.18) !important; }
+/* 헤더행 배경 */
+thead .col-prev          { background:rgba(180,200,228,0.22) !important; }
+thead .col-cur           { background:rgba(180,200,228,0.22) !important; }
+thead .col-diff          { background:rgba(180,200,228,0.22) !important; }
 
 /* 그룹 헤더 컬럼 색상 */
 .tbl-th-grp.col-prev     { color:#3a4a5a; }
@@ -420,38 +432,39 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
 /* 계정과목 헤더 (rowspan=2, 좌측정렬) */
 .tbl-th-acc{
   padding:8px 12px;text-align:left;vertical-align:middle;
-  background:#f4f6f9;color:#1a2333;font-size:10px;font-weight:800;
-  border-bottom:2px solid #d0d8e4;min-width:100px;
+  background:rgba(180,200,228,0.22);color:#1a2333;font-size:10px;font-weight:800;
+  border-bottom:2px solid #bfcfe8;min-width:100px;
+  border-right:1px solid #cdd6e8;
 }
 /* 그룹 헤더 (colspan, 가운데정렬) */
 .tbl-th-grp{
   padding:7px 10px;text-align:center;vertical-align:middle;
   font-size:10px;font-weight:800;letter-spacing:-.2px;
-  border-bottom:1px solid #dde4ee;
 }
-.tbl-th-grp.col-prev{ border-bottom-color:#d0d8e8; }
-.tbl-th-grp.col-cur { border-bottom-color:#aac4f0; }
-.tbl-th-grp.col-diff{ border-bottom-color:#c4b4f0; }
+.tbl-th-grp.col-prev{ border-bottom:2px solid #c8d6e8; border-top:2px solid #c8d6e8; }
+.tbl-th-grp.col-cur { border-bottom:2px solid #c8d6e8; border-top:2px solid #c8d6e8; }
+.tbl-th-grp.col-diff{ border-bottom:2px solid #c8d6e8; border-top:2px solid #c8d6e8; }
 /* 서브 헤더 (금액/이익률/증감/증감률) */
 .tbl-th-sub{
   padding:5px 10px;text-align:center;vertical-align:middle;
   font-size:10px;font-weight:700;letter-spacing:.2px;
   border-bottom:2px solid #d0d8e4;
 }
-.tbl-th-sub.col-prev{ border-bottom-color:#c4ceda; }
-.tbl-th-sub.col-cur { border-bottom-color:#88b4f0; }
-.tbl-th-sub.col-diff{ border-bottom-color:#b8aaee; }
+.tbl-th-sub.col-prev{ border-bottom:2px solid #c8d6e8; }
+.tbl-th-sub.col-cur { border-bottom:2px solid #c8d6e8; }
+.tbl-th-sub.col-diff{ border-bottom:2px solid #c8d6e8; }
 
 /* ── 본문 공통 ── */
 .tbl-cell{
   padding:6px 10px;text-align:right;
-  border-bottom:1px solid #eaecf2;
+  border-bottom:1px solid #dce3ee;
 }
 .tbl-cell-acc{
   padding:6px 12px;text-align:left;
   font-size:11px;font-weight:600;color:#1a2333;
-  border-bottom:1px solid #eaecf2;
-  background:#fff !important;
+  border-bottom:1px solid #dce3ee;
+  background:transparent !important;
+  border-right:1px solid #dce3ee;
 }
 
 /* 금액/증감 숫자 */
@@ -475,22 +488,23 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
 .rpt-tbl-wrap tbody tr.sec td,
 .rpt-tbl-wrap tbody tr.sec .tbl-cell,
 .rpt-tbl-wrap tbody tr.sec .tbl-cell-acc{
-  border-top:2px solid #d8e2f0;
+  border-top:1px solid #c8d6e8;
+  border-bottom:1px solid #c8d6e8;
   font-weight:800;
 }
+
 .rpt-tbl-wrap tbody tr.sec .tbl-cell-acc{
   color:#1a2333;
+  background:rgba(180,200,228,0.18) !important;
 }
 .rpt-tbl-wrap tbody tr.sec .tbl-num{
   font-weight:800;
 }
 
 /* hover */
-.rpt-tbl-wrap tbody tr:hover .tbl-cell{
-  filter:brightness(0.96);
-}
+.rpt-tbl-wrap tbody tr:hover .tbl-cell,
 .rpt-tbl-wrap tbody tr:hover .tbl-cell-acc{
-  background:#f0f4ff !important;
+  background:rgba(180,200,228,0.13) !important;
 }
 
 /* 하위 호환 (기존 .L .mn .grp .gsub 유지) */
@@ -500,8 +514,48 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
 .rpt-tbl-wrap tbody td{padding:6px 10px;text-align:right;border-bottom:1px solid #eef1f6;color:#1a2333;}
 .rpt-tbl-wrap tbody tr.sec td{border-top:2px solid #d8e2f0;font-weight:800;}
 .rpt-tbl-wrap tbody tr:hover td{background:#f5f8ff!important;}
-@media(max-width:768px){.rpt-slicer{flex-direction:column;}.rpt-slicer .sg{border-right:none;border-bottom:1px solid #e8ecf0;width:100%;}.rpt-kpi-row{grid-template-columns:repeat(4,1fr);}.report-wrap{padding:8px 12px 16px;}}
-@media(max-width:480px){.rpt-kpi-row{grid-template-columns:repeat(2,1fr);}.rpt-view-btn{padding:5px 10px;font-size:10px;}}
+@media(max-width:768px){
+  .rpt-slicer{flex-direction:column;}
+  .rpt-slicer .sg{border-right:none;border-bottom:1px solid #e8ecf0;width:100%;}
+  .rpt-kpi-row{grid-template-columns:repeat(4,1fr);}
+  .report-wrap{padding:8px 12px 16px;}
+  /* 테이블 폰트·패딩 축소 */
+  .rpt-tbl-wrap table{min-width:480px;}
+  .tbl-th-acc,.tbl-th-grp,.tbl-th-sub{font-size:9px;padding:5px 6px;}
+  .tbl-cell-acc{font-size:9px;padding:5px 6px;}
+  .tbl-cell{font-size:9px;padding:5px 6px;}
+  .tbl-num{font-size:9px;}
+  .tbl-badge{font-size:8px;padding:1px 4px;}
+}
+@media(max-width:480px){
+  .rpt-kpi-row{grid-template-columns:repeat(2,1fr);}
+  .rpt-view-btn{padding:5px 10px;font-size:10px;}
+  .rpt-tbl-wrap table{min-width:400px;}
+  .tbl-th-acc,.tbl-cell-acc{min-width:60px;font-size:8px;padding:4px 5px;}
+  .tbl-th-grp,.tbl-th-sub,.tbl-cell{min-width:46px;font-size:8px;padding:4px 5px;}
+  .tbl-num{font-size:8px;}
+  .tbl-badge{font-size:7px;}
+  .rpt-panel{padding:8px;}
+  .rpt-panel-ttl{font-size:10px;}
+}
+
+/* ════ 보고서 슬라이서 드롭다운 ════ */
+.rpt-slicer-toggle{display:none;}
+.rpt-slicer-inner{display:flex;align-items:stretch;flex-wrap:wrap;width:100%;}
+@media(max-width:768px){
+  .rpt-slicer-toggle{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 14px;cursor:pointer;user-select:none;
+    font-size:11px;font-weight:700;color:#1a2333;
+    background:#fff;width:100%;
+  }
+  .rpt-slicer-inner{
+    display:none;flex-direction:column;min-width:0;overflow-x:visible;
+    border-top:1px solid #e8ecf0;width:100%;
+  }
+  .rpt-slicer-inner.open{display:flex;}
+  .rpt-slicer-bar.open .slicer-toggle-arrow{transform:rotate(180deg);}
+}
 /* 구버전 클래스 숨김 */
 .report-panel,.report-toolbar,.report-title,.annual-grid,.monthly-tbl-wrap,.sga-chart-wrap{display:none!important;}
 </style>
@@ -713,10 +767,19 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
 <div class="tab-pane" id="tab-report">
 
 <!-- ── 보고서 슬라이서 (report-wrap 밖, slicer-bar와 동일 레벨) ── -->
-<div class="rpt-slicer">
-  <div class="sg"><span class="slbl">기준연도</span><div class="chips" id="rpt-year-chips"></div></div>
-  <div class="sg"><span class="slbl">기준월</span><div class="chips" id="rpt-month-chips"></div></div>
-  <div class="sg" style="border-right:none"><span class="slbl">사업부</span><div class="chips" id="rpt-dept-chips"></div></div>
+<div class="rpt-slicer" id="rpt-slicer-bar">
+  <div class="rpt-slicer-toggle" onclick="toggleRptSlicer()">
+    <div class="slicer-toggle-label">
+      <span style="font-size:12px">⚙</span> 필터
+      <span class="slicer-toggle-summary" id="rpt-slicer-summary"></span>
+    </div>
+    <span class="slicer-toggle-arrow">▼</span>
+  </div>
+  <div class="rpt-slicer-inner" id="rpt-slicer-inner">
+    <div class="sg"><span class="slbl">기준연도</span><div class="chips" id="rpt-year-chips"></div></div>
+    <div class="sg"><span class="slbl">기준월</span><div class="chips" id="rpt-month-chips"></div></div>
+    <div class="sg" style="border-right:none"><span class="slbl">사업부</span><div class="chips" id="rpt-dept-chips"></div></div>
+  </div>
 </div>
 
 <!-- ── 보고서 뷰 선택 바 ── -->
@@ -1827,6 +1890,20 @@ function toggleSlicer(){
   bar.classList.toggle('open',isOpen);
 }
 
+function toggleRptSlicer(){
+  const bar=document.getElementById('rpt-slicer-bar');
+  const inner=document.getElementById('rpt-slicer-inner');
+  const isOpen=inner.classList.toggle('open');
+  bar.classList.toggle('open',isOpen);
+}
+
+function updateRptSlicerSummary(){
+  const el=document.getElementById('rpt-slicer-summary');
+  if(!el)return;
+  const deptName=rptDept==='all'?'전사':DEPT_LABELS[rptDept]||rptDept;
+  el.textContent=`${rptYear}년 ${parseInt(rptMonth)}월 · ${deptName}`;
+}
+
 function updateSlicerSummary(){
   const el=document.getElementById('slicer-summary');
   if(!el)return;
@@ -2005,6 +2082,7 @@ function initReport(){
   const ms=allMonths(rptYear);
   rptMonth=ms[ms.length-1]?.slice(4)||selMonth;
   _buildRptFilters();
+  updateRptSlicerSummary();
 }
 
 function _buildRptFilters(){
@@ -2033,7 +2111,7 @@ function setRD(d,el){rptDept=d;document.querySelectorAll('#rpt-dept-chips .chip'
     c.classList.toggle('on',isOn);
     c.style.cssText='';
     if(isOn&&k!=='all'){const col=DEPT_COLORS[k];c.style.borderColor=col;c.style.color=col;c.style.borderWidth='2px';}
-  });renderReport();}
+  });renderReport();updateRptSlicerSummary();}
 function setRY(y,el){
   rptYear=y;
   document.querySelectorAll('#rpt-year-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');
@@ -2041,9 +2119,9 @@ function setRY(y,el){
   // 월 칩 재생성
   document.getElementById('rpt-month-chips').innerHTML=
     ms.map(m=>{const mo=m.slice(4);return`<button class="chip ${mo===rptMonth?'on':''}" onclick="setRM('${mo}',this)">${parseInt(mo)}월</button>`;}).join('');
-  renderReport();
+  renderReport();updateRptSlicerSummary();
 }
-function setRM(mo,el){rptMonth=mo;document.querySelectorAll('#rpt-month-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderReport();}
+function setRM(mo,el){rptMonth=mo;document.querySelectorAll('#rpt-month-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderReport();updateRptSlicerSummary();}
 
 function setRptView(v){
   rptView=v;
