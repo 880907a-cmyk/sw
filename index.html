@@ -16,8 +16,9 @@
   --fn:'Noto Sans KR',sans-serif;--mo:'JetBrains Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-html{overflow-y:scroll;}
+html{height:100%;}
 body{background:var(--bg);color:var(--text);font-family:var(--fn);font-size:11px;
+  overflow-y:scroll;scrollbar-gutter:stable;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   text-rendering:optimizeLegibility;}
@@ -30,6 +31,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--fn);font-size:11px
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 18px;
   border-bottom:2px solid var(--bd);background:#fff;position:sticky;top:0;z-index:300;
   box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+/* sticky 레이어 기준값 (JS가 실제 값으로 override) */
+:root{--hdr-h:50px;--nav-h:42px;}
 .hdr-l{display:flex;align-items:center;gap:10px;}
 .icon{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#1d4ed8,#60a5fa);
   display:flex;align-items:center;justify-content:center;font-size:13px;}
@@ -46,7 +49,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--fn);font-size:11px
 
 /* ════ 슬라이서 바 ════ */
 .slicer-bar{background:#fff;border-bottom:1px solid var(--bd);
-  position:sticky;top:45px;z-index:299;
+  position:sticky;top:calc(var(--hdr-h) + var(--nav-h));z-index:298;
   box-shadow:0 1px 3px rgba(0,0,0,0.05);}
 .slicer-inner{display:flex;align-items:stretch;flex-wrap:wrap;width:100%;}
 .sg{display:flex;align-items:center;padding:5px 14px;gap:8px;border-right:1px solid #e8ecf0;flex-shrink:0;}
@@ -319,6 +322,188 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
   min-height:16px;transition:opacity .2s;
 }
 .lock-footer{margin-top:24px;font-size:10px;color:rgba(255,255,255,0.25);}
+
+/* ════ 탭 네비게이션 메뉴바 ════ */
+.nav-bar{
+  display:flex;align-items:center;gap:2px;
+  background:#fff;border-bottom:2px solid #e0e6ee;
+  padding:0 18px;
+  position:sticky;top:var(--hdr-h);z-index:299;
+  box-shadow:0 1px 3px rgba(0,0,0,0.05);
+}
+.nav-tab{
+  display:flex;align-items:center;gap:6px;
+  padding:10px 16px;font-size:11px;font-weight:700;
+  color:#8a98aa;cursor:pointer;border:none;background:none;
+  border-bottom:3px solid transparent;margin-bottom:-2px;
+  font-family:var(--fn);transition:all .15s;white-space:nowrap;
+  letter-spacing:0;
+}
+.nav-tab:hover{color:#1a2333;background:#f4f6f9;border-radius:6px 6px 0 0;}
+.nav-tab.active{color:var(--blue);border-bottom-color:var(--blue);background:transparent;}
+.nav-tab .nav-icon{font-size:13px;}
+.nav-badge{
+  font-size:8px;font-family:var(--mo);font-weight:700;
+  background:#e8f0ff;color:var(--blue);border:1px solid #b8d0ff;
+  padding:1px 5px;border-radius:3px;
+}
+
+/* ════ 탭 콘텐츠 패널 ════ */
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+/* ════ 슬라이서 sticky top 조정 (탭 바 추가로) ════ */
+/* JS의 updateSlicerTop()이 동적으로 계산하므로 CSS override 제거 */
+
+/* ════ 보고서 탭 ════ */
+.report-wrap{padding:10px 18px 20px;}
+/* 보고서 슬라이서 — 경영지표 .slicer-inner와 동일한 구조/스타일 */
+.rpt-slicer{
+  display:flex;align-items:stretch;flex-wrap:wrap;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,0.05);
+  position:sticky;top:calc(var(--hdr-h) + var(--nav-h));z-index:297;
+  border-bottom:1px solid #e4e8ef;
+}
+/* 뷰 선택 바 */
+.rpt-viewbar{
+  display:flex;align-items:center;gap:12px;padding:8px 18px 6px;
+  position:sticky;top:calc(var(--hdr-h) + var(--nav-h) + var(--rpt-slicer-h,46px));z-index:296;
+  background:var(--bg);
+  border-bottom:1px solid #e8ecf0;
+  margin-bottom:0;
+}
+.rpt-view-seg{display:flex;gap:2px;background:#e8ecf0;padding:3px;border-radius:8px;}
+.rpt-view-btn{padding:6px 16px;border-radius:6px;font-size:11px;font-weight:700;border:none;background:transparent;color:#6a7a8a;cursor:pointer;font-family:var(--fn);transition:all .15s;white-space:nowrap;}
+.rpt-view-btn:hover{color:#1a2333;}
+.rpt-view-btn.active{background:#fff;color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,0.12);}
+.rpt-desc{font-size:10px;color:#8a98aa;}
+.rpt-kpi-row{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:10px;}
+.rpt-kpi-card{background:#fff;border:1px solid #e0e6ee;border-radius:8px;padding:10px 12px;position:relative;overflow:hidden;}
+.rpt-kpi-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--kc,#ccc);}
+.rpt-kpi-lbl{font-size:9px;color:#5a6a7a;font-weight:700;margin-bottom:3px;}
+.rpt-kpi-val{font-size:16px;font-weight:900;font-family:var(--mo);color:var(--kc,#1a2333);line-height:1.2;}
+.rpt-kpi-diff{font-size:10px;font-weight:700;margin-top:4px;font-family:var(--mo);}
+.rpt-kpi-prev{font-size:9px;color:#8a98aa;margin-top:5px;border-top:1px solid #eef0f4;padding-top:4px;font-family:var(--fn);}
+.rpt-kpi-prev span{font-family:var(--mo);font-weight:700;color:#5a6a7a;}
+.rpt-view{display:none;}
+.rpt-view.active{display:block;}
+.rpt-panel{background:#fff;border:1px solid #e0e6ee;border-radius:10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.rpt-panel-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.rpt-panel-ttl{font-size:11px;font-weight:800;color:#1a2333;}
+.rpt-panel-sub{font-size:9px;color:#8a98aa;margin-top:2px;}
+.rpt-chart-box{position:relative;width:100%;}
+.rpt-chart-box canvas{position:absolute;inset:0;width:100%!important;height:100%!important;}
+.rpt-tbl-wrap{overflow-x:auto;margin-top:4px;}
+.rpt-tbl-wrap::-webkit-scrollbar{height:3px;}
+.rpt-tbl-wrap::-webkit-scrollbar-thumb{background:#c0ccd8;border-radius:2px;}
+.rpt-tbl-wrap table{border-collapse:collapse;width:100%;white-space:nowrap;table-layout:fixed;}
+
+/* ── 헤더 공통 ── */
+.rpt-tbl-wrap thead th{position:sticky;top:0;z-index:2;}
+/* ── 상세 비교표 컬럼 색상 체계 ── */
+/* 컬럼 배경: 헤더+서브헤더+본문 모두 동일 */
+.col-prev                { background:#f6f8fb !important; }
+.col-cur                 { background:#eef4ff !important; }
+.col-diff                { background:#f3f0ff !important; }
+
+/* 그룹 헤더 컬럼 색상 */
+.tbl-th-grp.col-prev     { color:#3a4a5a; }
+.tbl-th-grp.col-cur      { color:#1d6fe8; }
+.tbl-th-grp.col-diff     { color:#6d3fd6; }
+
+/* 서브 헤더 폰트: 그룹 헤더와 동일 컬럼 색상 상속 */
+.tbl-th-sub.col-prev     { color:#7a90a8; }
+.tbl-th-sub.col-cur      { color:#5a9ae8; }
+.tbl-th-sub.col-diff     { color:#9a7ad6; }
+
+/* 계정과목 헤더 (rowspan=2, 좌측정렬) */
+.tbl-th-acc{
+  padding:8px 12px;text-align:left;vertical-align:middle;
+  background:#f4f6f9;color:#1a2333;font-size:10px;font-weight:800;
+  border-bottom:2px solid #d0d8e4;min-width:100px;
+}
+/* 그룹 헤더 (colspan, 가운데정렬) */
+.tbl-th-grp{
+  padding:7px 10px;text-align:center;vertical-align:middle;
+  font-size:10px;font-weight:800;letter-spacing:-.2px;
+  border-bottom:1px solid #dde4ee;
+}
+.tbl-th-grp.col-prev{ border-bottom-color:#d0d8e8; }
+.tbl-th-grp.col-cur { border-bottom-color:#aac4f0; }
+.tbl-th-grp.col-diff{ border-bottom-color:#c4b4f0; }
+/* 서브 헤더 (금액/이익률/증감/증감률) */
+.tbl-th-sub{
+  padding:5px 10px;text-align:center;vertical-align:middle;
+  font-size:10px;font-weight:700;letter-spacing:.2px;
+  border-bottom:2px solid #d0d8e4;
+}
+.tbl-th-sub.col-prev{ border-bottom-color:#c4ceda; }
+.tbl-th-sub.col-cur { border-bottom-color:#88b4f0; }
+.tbl-th-sub.col-diff{ border-bottom-color:#b8aaee; }
+
+/* ── 본문 공통 ── */
+.tbl-cell{
+  padding:6px 10px;text-align:right;
+  border-bottom:1px solid #eaecf2;
+}
+.tbl-cell-acc{
+  padding:6px 12px;text-align:left;
+  font-size:11px;font-weight:600;color:#1a2333;
+  border-bottom:1px solid #eaecf2;
+  background:#fff !important;
+}
+
+/* 금액/증감 숫자 */
+.tbl-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:600;
+}
+/* — (해당없음) */
+.tbl-nil{color:#b8c4cf;font-size:11px;}
+
+/* 이익률 배지 */
+.tbl-badge{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;font-weight:700;
+  padding:2px 6px;border-radius:3px;
+  line-height:1.4;
+}
+
+/* sec 행 (소계행: 매출액/매출총손익/영업손익/당기순손익) */
+.rpt-tbl-wrap tbody tr.sec td,
+.rpt-tbl-wrap tbody tr.sec .tbl-cell,
+.rpt-tbl-wrap tbody tr.sec .tbl-cell-acc{
+  border-top:2px solid #d8e2f0;
+  font-weight:800;
+}
+.rpt-tbl-wrap tbody tr.sec .tbl-cell-acc{
+  color:#1a2333;
+}
+.rpt-tbl-wrap tbody tr.sec .tbl-num{
+  font-weight:800;
+}
+
+/* hover */
+.rpt-tbl-wrap tbody tr:hover .tbl-cell{
+  filter:brightness(0.96);
+}
+.rpt-tbl-wrap tbody tr:hover .tbl-cell-acc{
+  background:#f0f4ff !important;
+}
+
+/* 하위 호환 (기존 .L .mn .grp .gsub 유지) */
+.rpt-tbl-wrap thead th.L{text-align:left;}
+.rpt-tbl-wrap thead th.grp{text-align:left;font-size:10px;font-weight:800;}
+.rpt-tbl-wrap tbody td.L{text-align:left;}
+.rpt-tbl-wrap tbody td{padding:6px 10px;text-align:right;border-bottom:1px solid #eef1f6;color:#1a2333;}
+.rpt-tbl-wrap tbody tr.sec td{border-top:2px solid #d8e2f0;font-weight:800;}
+.rpt-tbl-wrap tbody tr:hover td{background:#f5f8ff!important;}
+@media(max-width:768px){.rpt-slicer{flex-direction:column;}.rpt-slicer .sg{border-right:none;border-bottom:1px solid #e8ecf0;width:100%;}.rpt-kpi-row{grid-template-columns:repeat(4,1fr);}.report-wrap{padding:8px 12px 16px;}}
+@media(max-width:480px){.rpt-kpi-row{grid-template-columns:repeat(2,1fr);}.rpt-view-btn{padding:5px 10px;font-size:10px;}}
+/* 구버전 클래스 숨김 */
+.report-panel,.report-toolbar,.report-title,.annual-grid,.monthly-tbl-wrap,.sga-chart-wrap{display:none!important;}
 </style>
 </head>
 <body>
@@ -355,6 +540,20 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
     <div id="last-updated" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4a5a6a;">—</div>
   </div>
 </div>
+
+<!-- ─── 탭 네비게이션 메뉴바 ─── -->
+<nav class="nav-bar" id="nav-bar">
+  <button class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard',this)">
+    <span class="nav-icon">📊</span> 경영지표
+  </button>
+  <button class="nav-tab" data-tab="report" onclick="switchTab('report',this)">
+    <span class="nav-icon">📋</span> 보고서
+    <span class="nav-badge">TEST</span>
+  </button>
+</nav>
+
+<!-- ─── [탭1] 경영지표 ─── -->
+<div class="tab-pane active" id="tab-dashboard">
 
 <!-- ─── 슬라이서 ─── -->
 <div class="slicer-bar" id="slicer-bar">
@@ -508,6 +707,89 @@ tr.tot-row td{background:#e8f0ff;font-weight:700;border-top:2px solid #b8d0ff;co
   </div>
 </div>
 
+</div><!-- /tab-dashboard -->
+
+<!-- ─── [탭2] 보고서 ─── -->
+<div class="tab-pane" id="tab-report">
+
+<!-- ── 보고서 슬라이서 (report-wrap 밖, slicer-bar와 동일 레벨) ── -->
+<div class="rpt-slicer">
+  <div class="sg"><span class="slbl">기준연도</span><div class="chips" id="rpt-year-chips"></div></div>
+  <div class="sg"><span class="slbl">기준월</span><div class="chips" id="rpt-month-chips"></div></div>
+  <div class="sg" style="border-right:none"><span class="slbl">사업부</span><div class="chips" id="rpt-dept-chips"></div></div>
+</div>
+
+<!-- ── 보고서 뷰 선택 바 ── -->
+<div class="rpt-viewbar">
+    <div class="rpt-view-seg">
+      <button class="rpt-view-btn active" id="rvb-annual"  onclick="setRptView('annual')">연간 비교</button>
+      <button class="rpt-view-btn"        id="rvb-yoy"     onclick="setRptView('yoy')">전년동월 비교</button>
+      <button class="rpt-view-btn"        id="rvb-mom"     onclick="setRptView('mom')">전월 비교</button>
+    </div>
+    <div class="rpt-desc" id="rpt-desc">기준월까지의 누적 손익을 전년 동기와 비교합니다</div>
+</div><!-- /rpt-viewbar -->
+
+<div class="report-wrap">
+  <!-- ── 요약 KPI 카드 행 ── -->
+  <div class="rpt-kpi-row" id="rpt-kpi-row"></div>
+
+  <!-- ── 차트 + 테이블 영역 ── -->
+  <div class="rpt-body">
+
+    <!-- 연간 비교 뷰 -->
+    <div class="rpt-view active" id="rv-annual">
+      <div class="rpt-panel">
+        <div class="rpt-panel-hd">
+          <div><div class="rpt-panel-ttl" id="ann-chart-ttl">연도별 누적 손익 비교</div><div class="rpt-panel-sub" id="ann-chart-sub">—</div></div>
+          <span class="pill">YoY</span>
+        </div>
+        <div class="rpt-chart-box" style="height:240px;"><canvas id="ann-chart"></canvas></div>
+      </div>
+      <div class="rpt-panel" style="margin-top:10px;">
+        <div class="rpt-panel-hd">
+          <div><div class="rpt-panel-ttl">연간 손익 상세 비교표</div><div class="rpt-panel-sub" id="ann-tbl-sub">—</div></div>
+        </div>
+        <div class="rpt-tbl-wrap"><table><thead><tr id="ann-thead"></tr><tr id="ann-subhead"></tr></thead><tbody id="ann-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- 전년동월 비교 뷰 -->
+    <div class="rpt-view" id="rv-yoy">
+      <div class="rpt-panel">
+        <div class="rpt-panel-hd">
+          <div><div class="rpt-panel-ttl" id="yoy-chart-ttl">전년동월 손익 추이 비교</div><div class="rpt-panel-sub" id="yoy-chart-sub">—</div></div>
+          <span class="pill">YoY MoM</span>
+        </div>
+        <div class="rpt-chart-box" style="height:240px;"><canvas id="yoy-chart"></canvas></div>
+      </div>
+      <div class="rpt-panel" style="margin-top:10px;">
+        <div class="rpt-panel-hd">
+          <div><div class="rpt-panel-ttl" id="yoy-tbl-ttl">전년동월 대비 상세</div><div class="rpt-panel-sub" id="yoy-tbl-sub">—</div></div>
+        </div>
+        <div class="rpt-tbl-wrap"><table><thead><tr id="yoy-thead"></tr><tr id="yoy-subhead"></tr></thead><tbody id="yoy-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- 전월 비교 뷰 -->
+    <div class="rpt-view" id="rv-mom">
+      <div class="rpt-panel">
+        <div class="rpt-panel-hd">
+          <div><div class="rpt-panel-ttl" id="mom-chart-ttl">월별 손익 추이 (전월 비교)</div><div class="rpt-panel-sub" id="mom-chart-sub">—</div></div>
+          <span class="pill">MoM</span>
+        </div>
+        <div class="rpt-chart-box" style="height:240px;"><canvas id="mom-chart"></canvas></div>
+      </div>
+      <div class="rpt-panel" style="margin-top:10px;">
+        <div class="rpt-panel-hd">
+          <div><div class="rpt-panel-ttl" id="mom-tbl-ttl">전월 대비 상세</div><div class="rpt-panel-sub" id="mom-tbl-sub">—</div></div>
+        </div>
+        <div class="rpt-tbl-wrap"><table><thead><tr id="mom-thead"></tr><tr id="mom-subhead"></tr></thead><tbody id="mom-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+  </div><!-- /rpt-body -->
+</div><!-- /report-wrap -->
+</div><!-- /tab-report -->
 </div><!-- /app -->
 
 <div style="text-align:center;padding:18px;font-size:10px;color:#b0bcc8;font-family:'JetBrains Mono',monospace;letter-spacing:.3px;border-top:1px solid #e8ecf0;margin-top:8px;">
@@ -529,13 +811,13 @@ const DEPT_LABELS={'의약품사업부':'의약품','건기식사업부':'건기
 
 // 원본 인덱스 → 통합 사업부 매핑
 // 0:경영지원실 1:해외사업본부 2:사업총괄 3:연구생산 4:의약품 5:건기식 6:의료기기안양 7:정보
-const RAW_DEPTS=["경영지원실","해외사업본부","사업총괄본부","연구생산본부","의약품사업부","건기식사업부","의료기기안양사업부","정보사업부"];
+const RAW_DEPTS=["경영지원실","해외사업부","사업총괄본부","연구생산본부","의약품사업부","건기식사업부","의료기기안양사업부","정보사업부"]; // 통일 8열 구조
 const MERGE_MAP={
-  '의약품사업부':[4],
-  '건기식사업부':[3,5],   // 연구생산 + 건기식
-  '정보사업부':[7],
-  '해외사업부':[1],
-  '기타':[0,2,6]          // 경영지원 + 사업총괄 + 의료기기
+  '의약품사업부':[4],           // 의약품사업부(5000)
+  '건기식사업부':[3,5],         // 연구생산본부(4000) + 건기식사업부(7000)
+  '정보사업부':[7],             // 정보사업부(9000)
+  '해외사업부':[1],             // 해외사업부(2000)
+  '기타':[0,2,6]               // 경영지원실(1000) + 사업총괄본부(3000) + 의료기기안양(8000)
 };
 
 Chart.defaults.color='#5a6a7a';
@@ -553,18 +835,31 @@ const SGA_COLORS={"직원급여":"#f97316","판매촉진비":"#a855f7","보험�
 // 원본 데이터
 // ════════════════════════════════════════════
 let DATA={
-"202501":{revenue:[0,0,0,3162000,4850143165,157264659,1525567321,0],cogs:[0,0,0,0,4022700576,174982278,1420603559,0],gross:[0,0,0,3162000,827442589,-17717619,104963762,0],sga:[93534316,0,93834150,101372337,520866043,184632768,147345098,0],op_income:[-93534316,0,-93834150,-98210337,306576546,-202350387,-42381336,0],other_income:[0,0,0,0,3122066,263645,0,0],other_expense:[96878503,0,0,0,33228,3450,0,0],net_income:[-212750919,0,-93834150,-98210337,309376702,-201618742,-41613177,0]},
-"202502":{revenue:[0,0,0,0,4458399643,61171429,119411426,0],cogs:[0,0,0,0,3855654448,64172443,114066111,0],gross:[0,0,0,0,602745195,-3001014,5345315,0],sga:[64389608,0,48295274,83160194,575643563,280772957,127159170,0],op_income:[-64389608,0,-48295274,-83160194,27101632,-283773971,-121813855,0],other_income:[0,0,0,0,2762420,350000,0,0],other_expense:[128261518,0,0,0,280419,468586,106503,0],net_income:[-192651126,0,-48295274,-83160194,29582429,-280892557,-121920358,0]},
-"202503":{revenue:[16455200,0,0,0,4381712433,64315023,1238235528,0],cogs:[0,0,0,0,3781703978,84808077,1147823174,0],gross:[16455200,0,0,0,600008455,-20493054,90412354,0],sga:[73792944,14620200,49241584,61911142,531695972,271783293,42628749,0],op_income:[-57337744,-14620200,-49241584,-61911142,68312483,-292276347,47783605,0],other_income:[0,0,87872,38694905,6524564,0,0,0],other_expense:[118895101,0,0,0,357282,0,82177396,0],net_income:[-176232845,-14620200,-49153712,-23216237,74568765,-292276347,-34358791,0]},
-"202504":{revenue:[12455200,0,0,43200000,4855230422,49326377,0,0],cogs:[0,0,0,26401870,4083075379,53494357,0,0],gross:[12455200,0,0,16798130,772155043,-4167980,0,0],sga:[71787875,0,52087603,40629881,513727508,295475612,41265489,0],op_income:[-59332675,0,-52087603,-23831751,258427535,-299643592,-41265489,0],other_income:[0,0,27099,0,765094,185684,502299,0],other_expense:[162709202,1004705283,0,0,384350,255368,0,0],net_income:[-222041877,-1004705283,-52060504,-23831751,258808279,-299713276,-40763190,0]},
-"202505":{revenue:[10955200,0,0,8764000,4885949010,45611509,450142375,0],cogs:[0,0,0,0,4154299318,24670655,433424963,0],gross:[10955200,0,0,8764000,731649692,20940854,16717412,0],sga:[60546963,0,38716230,39284413,516306596,268527488,28612298,0],op_income:[-49591763,0,-38716230,-30520413,215343096,-247586634,-11894886,0],other_income:[0,0,160449,0,204668,1041481,0,0],other_expense:[124905842,0,0,0,3322690,241010,4851138,0],net_income:[-174497605,0,-38555781,-30520413,212225074,-247204163,-16746024,0]},
-"202506":{revenue:[10955200,0,0,16528000,4498558711,130638089,0,0],cogs:[0,0,0,6000890,3871418819,61225410,0,0],gross:[10955200,0,0,10527110,627139892,69412679,0,0],sga:[81690591,0,0,0,554186989,412388692,0,0],op_income:[-70735391,0,0,10527110,72952903,-342976013,0,0],other_income:[0,0,0,0,7360,0,0,0],other_expense:[125378062,0,0,0,13390,364936,0,0],net_income:[-196113453,0,0,10527110,72946873,-342344949,1,0]},
-"202507":{revenue:[10955200,0,0,30916545,5507439767,1138812087,5475758,0],cogs:[0,0,0,12489103,4688551853,410348497,13487655,0],gross:[10955200,0,0,18427442,818887914,728463590,-8011897,0],sga:[71865401,0,0,0,513191120,227195091,0,0],op_income:[-60910201,0,0,18427442,305696794,501268499,-8011897,0],other_income:[0,0,0,0,11942441,57066,0,0],other_expense:[120625125,0,0,0,270,56070,0,0],net_income:[-181535126,0,0,18427442,317397497,501325495,-8011897,0]},
-"202508":{revenue:[10955200,0,0,24414546,4879350556,148239576,0,0],cogs:[0,0,0,16354880,4092503179,71089811,0,0],gross:[10955200,0,0,8059666,786847377,77149765,0,0],sga:[54500934,0,0,0,537727076,211593889,0,0],op_income:[-43545734,0,0,8059666,249120301,-134444124,0,0],other_income:[0,0,0,0,28660,0,0,0],other_expense:[117620474,0,0,0,57500,623038,0,0],net_income:[-161137208,0,0,8059666,249091461,-135039162,0,0]},
-"202509":{revenue:[10955200,0,0,28746182,6473939129,287009418,0,0],cogs:[0,0,0,16161980,5539363411,168613789,0,0],gross:[10955200,0,0,12584202,934575718,118395629,0,0],sga:[53476707,0,0,0,581227479,233790554,0,54715364],op_income:[-42521507,0,0,12584202,353348239,-115394925,0,-54715364],other_income:[0,0,0,0,19549777,967,0,0],other_expense:[125835360,0,0,0,241466,1028404,0,0],net_income:[-168356867,0,0,12584202,372930550,-114427412,0,-54715364]},
-"202510":{revenue:[10955200,0,0,26618182,5743973304,176931212,0,0],cogs:[0,0,0,15804080,4943302944,66116439,0,0],gross:[10955200,0,0,10814102,800670360,110814773,0,0],sga:[67304300,0,0,0,519777888,210280747,0,64485367],op_income:[-56349100,0,0,10814102,280892472,-99465974,0,-64485367],other_income:[0,0,0,0,100078,0,0,0],other_expense:[123484777,0,0,0,200156,4084192,0,0],net_income:[-179833877,0,0,10814102,280792394,-95550166,0,-64485367]},
-"202511":{revenue:[6955200,0,0,313000,6322376662,125465352,0,0],cogs:[0,0,0,1164972,5381354892,63562087,0,0],gross:[6955200,0,0,-851972,941021770,61903265,0,0],sga:[74826413,0,0,0,576734759,312922766,0,55195893],op_income:[-67871213,0,0,-851972,364287011,-251019501,0,-55195893],other_income:[0,0,0,0,17146,0,0,0],other_expense:[78142613,0,0,0,26617398,108088,0,0],net_income:[-145996680,0,0,-851972,337754139,-250979589,0,-55195893]},
-"202512":{revenue:[6955200,0,0,13824000,6406160032,2272800682,0,3149998184],cogs:[0,0,0,14413488,4858238637,125389457,0,0],gross:[6955200,0,0,-589488,1547921395,2147411225,0,3149998184],sga:[203083681,0,0,0,715735046,422001894,0,52771726],op_income:[-196128481,0,0,-589488,832186349,1725409331,0,3097226458],other_income:[0,0,0,0,21826884,3375311,0,0],other_expense:[84688606,2770752,0,0,0,32600000,0,0],net_income:[-280817087,-2770752,0,-589488,854013233,1696184642,0,3097226458]}
+"202401":{revenue:[0,8010026,617406252,31488000,3244217663,66115743,178416963,0],cogs:[0,7069268,581352052,11224834,2799420909,40208340,137649081,0],gross:[0,940758,36054200,20263166,444796754,25907403,40767882,0],sga:[76756833,5385635,17229998,185846398,337920742,90306221,109302388,0],op_income:[-76756833,-4444877,18824202,-165583232,106876012,-64398818,-68534506,0],other_income:[54030,0,0,10431,491463,2,30830,0],other_expense:[76019996,0,0,0,14571161,894007,2328646,0],net_income:[-152722799,-4444877,18824202,-165572801,92796314,-65292823,-70832322,0]},
+"202402":{revenue:[0,0,576095096,58752000,2936052122,47441431,109059608,0],cogs:[0,0,535835796,29258434,2454880962,20737704,55220764,0],gross:[0,0,40259300,29493566,481171160,26703727,53838844,0],sga:[76082365,5000000,21489194,167054870,354498804,108949854,116432632,0],op_income:[-76082365,-5000000,18770106,-137561304,126672356,-82246127,-62593788,0],other_income:[66438,0,0,0,1905124,1403755,3012,0],other_expense:[76015656,0,0,0,7573964,0,0,0],net_income:[-152031583,-5000000,18770106,-137561304,121003516,-80842372,-62590776,0]},
+"202403":{revenue:[0,0,421997667,34944000,2971317422,29762019,132888100,0],cogs:[0,0,388169714,19504834,2595870472,17259577,78488639,0],gross:[0,0,33827953,15439166,375446950,12502442,54399461,0],sga:[88116752,7920000,24545446,167454396,417797831,150225797,120385182,0],op_income:[-88116752,-7920000,9282507,-152015230,-42350881,-137723355,-65985721,0],other_income:[16777679,0,14120,0,2494310,6792,5356,0],other_expense:[81772520,0,0,0,2029618,8400000,961384,0],net_income:[-153111593,-7920000,9296627,-152015230,-41886189,-146116563,-66941749,0]},
+"202404":{revenue:[0,0,482936164,240000000,3423763893,37935254,388792715,0],cogs:[0,0,441134906,244434,2970786320,17361304,225633894,0],gross:[0,0,41801258,239755566,452977573,20573950,163158821,0],sga:[108769800,5948300,23108014,128810389,411036995,177989742,115681068,0],op_income:[-108769800,-5948300,18693244,110945177,41940578,-157415792,47477753,0],other_income:[1114,0,0,81352,0,7548,962260,0],other_expense:[91773890,0,0,0,496224,0,54296,0],net_income:[-200542576,-5948300,18693244,111026529,41444354,-157408244,48385717,0]},
+"202405":{revenue:[0,0,959252950,0,3452877250,42879937,252671088,0],cogs:[0,0,892996688,244434,2996700423,22326529,194223911,0],gross:[0,0,66256262,-244434,456176827,20553408,58447177,0],sga:[90829425,5066500,21040571,189635888,399192275,322429001,134116580,0],op_income:[-90829425,-5066500,45215691,-189880322,56984552,-301875593,-75669403,0],other_income:[28957,0,0,5530,1516993,2312855,54330,0],other_expense:[91649473,0,32000,0,492755,12,1849356,0],net_income:[-182449941,-5066500,45183691,-189874792,58008790,-299562750,-77464429,0]},
+"202406":{revenue:[0,0,460481485,28800000,3163334647,18557573,212233873,0],cogs:[0,0,422576995,11224834,2625680881,28883173,139698264,0],gross:[0,0,37904490,17575166,537653766,-10325600,72535609,0],sga:[217877963,5000000,20505378,108500851,441534109,287836104,125515522,0],op_income:[-217877963,-5000000,17399112,-90925685,96119657,-298161704,-52979913,0],other_income:[371801,0,14335,13949,27236444,11973,58615,0],other_expense:[92124305,0,0,0,860951,84000000,1272199,0],net_income:[-309630467,-5000000,17413447,-90911736,122495150,-382149731,-54193497,0]},
+"202407":{revenue:[0,0,0,6912000,4214156956,39943662,1133517014,0],cogs:[0,0,0,11224834,3626309803,20636978,1036763666,0],gross:[0,0,0,-4312834,587847153,19306684,96753348,0],sga:[89891630,5000000,21002619,104928743,463157081,462547013,128293125,0],op_income:[-89891630,-5000000,-21002619,-109241577,124690072,-443240329,-31539777,0],other_income:[11643136,0,0,32404,2616456,182340,1201612,0],other_expense:[91286556,0,0,0,470001,0,2262336,0],net_income:[-169535050,-5000000,-21002619,-109209173,126836527,-443057989,-32600501,0]},
+"202408":{revenue:[0,0,0,-240000000,3779269995,138142035,1449420424,0],cogs:[0,0,0,244434,3356483978,95327065,1340219925,0],gross:[0,0,0,-240244434,422786017,42814970,109200499,0],sga:[64525316,5952388,35731874,164564328,413146384,1041276053,145612722,0],op_income:[-64525316,-5952388,-35731874,-404808762,9639633,-998461083,-36412223,0],other_income:[8096629,0,0,0,2701695,372185,155243,0],other_expense:[94771752,0,0,0,426242,14300,0,0],net_income:[-151200439,-5952388,-35731874,-404808762,11915086,-998103198,-36256980,0]},
+"202409":{revenue:[0,0,0,14400000,4520128182,162546861,1347402039,0],cogs:[0,0,0,12806034,4030594858,124715910,1179968613,0],gross:[0,0,0,1593966,489533324,37830951,167433426,0],sga:[66191259,5000000,47722160,98818088,480413651,878460643,144827501,0],op_income:[-66191259,-5000000,-47722160,-97224122,9119673,-840629692,22605925,0],other_income:[177589,0,0,0,3911889,133779,83890,0],other_expense:[99836751,0,0,0,382342,0,88005,0],net_income:[-165850421,-5000000,-47722160,-97224122,12649220,-840495913,22601810,0]},
+"202410":{revenue:[0,0,0,30381000,4940089497,74627057,1463280806,0],cogs:[0,0,0,17366817,4239469275,25150868,1230949866,0],gross:[0,0,0,13014183,700620222,49476189,232330940,0],sga:[61841780,19403200,47552310,80274513,536133340,560614750,152307646,0],op_income:[-61841780,-19403200,-47552310,-67260330,164486882,-511138561,80023294,0],other_income:[7376298,0,0,0,2769255,259127,24724,0],other_expense:[102788301,0,0,7190,420302,28950310,2505283,0],net_income:[-157253783,-19403200,-47552310,-67267520,166835835,-539829744,77542735,0]},
+"202411":{revenue:[0,0,0,15981000,4485165122,59795278,1466624922,0],cogs:[0,0,0,8377527,3924483614,31611372,1314660186,0],gross:[0,0,0,7603473,560681508,28183906,151964736,0],sga:[64380980,0,80139266,96530598,502746647,494143748,133841208,0],op_income:[-64380980,0,-80139266,-88927125,57934861,-465959842,18123528,0],other_income:[489,0,2003,0,32550520,133363,2520,0],other_expense:[114238717,0,183830,0,404624,12190905,102191738,0],net_income:[-178619208,0,-80321093,-88927125,90080757,-478017384,-84065690,0]},
+"202412":{revenue:[0,0,0,28800000,5225160313,33287565,4001149551,0],cogs:[0,0,0,10980400,4404822892,109576862,3728797577,0],gross:[0,0,0,17819600,820337421,-76289297,272351974,0],sga:[160353901,0,72548284,75855546,523547323,290943737,139093475,0],op_income:[-160353901,0,-72548284,-58035946,296790098,-367233034,133258499,0],other_income:[285596,0,0,0,4093400,2018583,1068375,0],other_expense:[118957562,0,0,0,366313,-98100292,19490652,0],net_income:[-279025867,0,-72548284,-58035946,300517185,-267114159,114836222,0]},
+"202501":{revenue:[0,0,0,3162000,4850143165,157264659,1525567321,0],cogs:[0,0,0,0,4022700576,174982278,1420603559,0],gross:[0,0,0,3162000,827442589,-17717619,104963762,0],sga:[93534316,0,93834150,101372337,520866043,184632768,147345098,0],op_income:[-93534316,0,-93834150,-98210337,306576546,-202350387,-42381336,0],other_income:[757037,0,0,0,3090548,852012,769159,0],other_expense:[119973640,0,0,0,290392,120367,1000,0],net_income:[-212750919,0,-93834150,-98210337,309376702,-201618742,-41613177,0]},
+"202502":{revenue:[0,0,0,0,4458399643,61171429,119411426,0],cogs:[0,0,0,0,3855654448,64172443,114066111,0],gross:[0,0,0,0,602745195,-3001014,5345315,0],sga:[64389608,0,48295274,83160194,575643563,280772957,127159170,0],op_income:[-64389608,0,-48295274,-83160194,27101632,-283773971,-121813855,0],other_income:[67149,0,0,0,2696154,3000005,418939,0],other_expense:[128328667,0,0,0,215357,118591,525442,0],net_income:[-192651126,0,-48295274,-83160194,29582429,-280892557,-121920358,0]},
+"202503":{revenue:[16455200,0,0,0,4381712433,64315023,1238235528,0],cogs:[0,0,0,0,3781703978,84808077,1147823174,0],gross:[16455200,0,0,0,600008455,-20493054,90412354,0],sga:[73792944,14620200,49241584,61911142,531695972,271783293,42628749,0],op_income:[-57337744,-14620200,-49241584,-61911142,68312483,-292276347,47783605,0],other_income:[798471,0,87872,42151083,6516055,0,779328,0],other_expense:[119693572,0,0,3456178,259773,0,82921724,0],net_income:[-176232845,-14620200,-49153712,-23216237,74568765,-292276347,-34358791,0]},
+"202504":{revenue:[12455200,0,0,43200000,4855230422,49326377,0,0],cogs:[0,0,0,26401870,4083075379,53494357,0,0],gross:[12455200,0,0,16798130,772155043,-4167980,0,0],sga:[71787875,0,52087603,40629881,513727508,295475612,41265489,0],op_income:[-59332675,0,-52087603,-23831751,258427535,-299643592,-41265489,0],other_income:[25979,7748000,27099,0,638299,5,2008102,0],other_expense:[162735181,1012453283,0,0,257555,69689,1505803,0],net_income:[-222041877,-1004705283,-52060504,-23831751,258808279,-299713276,-40763190,0]},
+"202505":{revenue:[10955200,0,0,8764000,4885949010,45611509,450142375,0],cogs:[0,0,0,0,4154299318,24670655,433424963,0],gross:[10955200,0,0,8764000,731649692,20940854,16717412,0],sga:[60546963,0,38716230,39284413,516306596,268527488,28612298,0],op_income:[-49591763,0,-38716230,-30520413,215343096,-247586634,-11894886,0],other_income:[803,0,160449,0,2652383,382471,3416123,0],other_expense:[124906645,0,0,0,5770405,0,8267261,0],net_income:[-174497605,0,-38555781,-30520413,212225074,-247204163,-16746024,0]},
+"202506":{revenue:[10955200,0,0,16528000,4498558711,130638089,0,0],cogs:[0,0,0,6000890,3871418819,61225410,0,0],gross:[10955200,0,0,10527110,627139892,69412679,0,0],sga:[81690591,0,0,0,554186989,412388692,0,0],op_income:[-70735391,0,0,10527110,72952903,-342976013,0,0],other_income:[1336762,0,0,0,191212,672264,1,0],other_expense:[126714824,0,0,0,197242,41200,0,0],net_income:[-196113453,0,0,10527110,72946873,-342344949,1,0]},
+"202507":{revenue:[10955200,0,0,30916545,5507439767,1138812087,5475758,0],cogs:[0,0,0,12489103,4688551853,410348497,13487655,0],gross:[10955200,0,0,18427442,818887914,728463590,-8011897,0],sga:[71865401,0,0,0,513191120,227195091,0,0],op_income:[-60910201,0,0,18427442,305696794,501268499,-8011897,0],other_income:[2372917,0,0,0,11862188,56996,0,0],other_expense:[122997842,0,0,0,161485,0,0,0],net_income:[-181535126,0,0,18427442,317397497,501325495,-8011897,0]},
+"202508":{revenue:[10955200,0,0,24414546,4879350556,148239576,0,0],cogs:[0,0,0,16354880,4092503179,71089811,0,0],gross:[10955200,0,0,8059666,786847377,77149765,0,0],sga:[54500934,0,0,0,537727076,211593889,0,0],op_income:[-43545734,0,0,8059666,249120301,-134444124,0,0],other_income:[5366951,0,0,0,107481,6922,0,0],other_expense:[122958425,0,0,0,136321,601960,0,0],net_income:[-161137208,0,0,8059666,249091461,-135039162,0,0]},
+"202509":{revenue:[10955200,0,0,28746182,6473939129,287009418,0,0],cogs:[0,0,0,16161980,5539363411,168613789,0,0],gross:[10955200,0,0,12584202,934575718,118395629,0,0],sga:[53476707,0,0,0,581227479,233790554,0,54715364],op_income:[-42521507,0,0,12584202,353348239,-115394925,0,-54715364],other_income:[524663,0,0,0,19724010,967513,0,0],other_expense:[126360023,0,0,0,141699,0,0,0],net_income:[-168356867,0,0,12584202,372930550,-114427412,0,-54715364]},
+"202510":{revenue:[10955200,0,0,26618182,5743973304,176931212,0,0],cogs:[0,0,0,15804080,4943302944,66116439,0,0],gross:[10955200,0,0,10814102,800670360,110814773,0,0],sga:[67304300,0,0,0,519777888,210280747,0,64485367],op_income:[-56349100,0,0,10814102,280892472,-99465974,0,-64485367],other_income:[750685,0,0,0,0,3915808,0,0],other_expense:[124235462,0,0,0,100078,0,0,0],net_income:[-179833877,0,0,10814102,280792394,-95550166,0,-64485367]},
+"202511":{revenue:[6955200,0,0,313000,6322376662,125465352,0,0],cogs:[0,0,0,1164972,5381354892,63562087,0,0],gross:[6955200,0,0,-851972,941021770,61903265,0,0],sga:[74826413,0,0,0,576734759,312922766,0,55195893],op_income:[-67871213,0,0,-851972,364287011,-251019501,0,-55195893],other_income:[7436735,0,0,0,10300777,39912,0,0],other_expense:[85562202,0,0,0,36833649,0,0,0],net_income:[-145996680,0,0,-851972,337754139,-250979589,0,-55195893]},
+"202512":{revenue:[6955200,0,0,13824000,6406160032,2272800682,0,3149998184],cogs:[0,0,0,14413488,4858238637,125389457,0,0],gross:[6955200,0,0,-589488,1547921395,2147411225,0,3149998184],sga:[203083681,0,0,0,715735046,422001894,0,52771726],op_income:[-196128481,0,0,-589488,832186349,1725409331,0,3097226458],other_income:[12810703,0,0,0,61645485,10601510,0,0],other_expense:[97499309,2770752,0,0,39818601,39826199,0,0],net_income:[-280817087,-2770752,0,-589488,854013233,1696184642,0,3097226458]},
+"202601":{revenue:[6920200,0,0,34393182,6308414080,430980851,0,283332728],cogs:[0,0,0,11986254,5886289790,140337692,0,0],gross:[6920200,0,0,22406928,422124290,290643159,0,283332728],sga:[141805927,0,0,0,520619769,494711516,0,55194828],op_income:[-134885727,0,0,22406928,-98495479,-204068357,0,228137900],other_income:[524976,0,0,0,23734,115205,0,0],other_expense:[112591160,0,0,0,129553,0,0,0],net_income:[-246951911,0,0,22406928,-98601298,-203953152,0,228137900]},
 };
 
 // 상태
@@ -1271,12 +1566,37 @@ function parseSheet(rows){
   }
   const hdr=rows[hi];
   console.log('[parseSheet] 헤더행:', hi, '/ 컬럼수:', hdr?.length, '/ hdr[0]:', hdr?.[0]);
-  const depts=[];
-  for(let i=2;i<hdr.length;i++){if(hdr[i])depts.push(String(hdr[i]).replace(/\(\d+\)/g,'').trim());}
-  if(!depts.length){
-    console.warn('[parseSheet] depts 없음 — hdr전체:', hdr);
+
+  // ── 헤더 이름 → 통일 8열 인덱스 매핑 ──────────────────────────
+  // 통일 구조: [0]경영지원실 [1]해외사업부 [2]사업총괄 [3]연구생산 [4]의약품 [5]건기식 [6]의료기기 [7]정보사업부
+  const UNIFIED_MAP=[
+    {idx:0, keywords:['경영지원']},
+    {idx:1, keywords:['해외']},
+    {idx:2, keywords:['사업총괄','총괄']},
+    {idx:3, keywords:['연구생산','연구']},
+    {idx:4, keywords:['의약품']},
+    {idx:5, keywords:['건기식']},
+    {idx:6, keywords:['의료기기']},
+    {idx:7, keywords:['정보사업','정보']},
+  ];
+  // col[2]부터 헤더를 읽어서 통일 인덱스로 매핑
+  const colToUnified={}; // 시트 원본 col index → 통일 index
+  for(let i=2;i<hdr.length;i++){
+    if(!hdr[i])continue;
+    const nm=String(hdr[i]).replace(/\(\d+\)/g,'').trim();
+    for(const {idx,keywords} of UNIFIED_MAP){
+      if(keywords.some(kw=>nm.includes(kw))){
+        if(!(idx in Object.values(colToUnified))){colToUnified[i]=idx;}
+        break;
+      }
+    }
+  }
+  if(!Object.keys(colToUnified).length){
+    console.warn('[parseSheet] 컬럼 매핑 실패 — hdr:', hdr);
     return null;
   }
+  console.log('[parseSheet] colToUnified:', colToUnified);
+
   const KM={
     'Ⅰ. 매출액':'revenue','Ⅱ. 매출원가':'cogs','Ⅲ. 매출총이익':'gross',
     'Ⅳ. 판매비와 관리비':'sga','Ⅴ. 영업손실':'op_raw','Ⅴ. 영업이익':'op_raw',
@@ -1288,13 +1608,19 @@ function parseSheet(rows){
   for(const row of rows){
     if(!row?.[0])continue;
     const rawKey=String(row[0]).trim();
-    // 완전일치 우선, 없으면 부분포함 매칭
     let k=KM[rawKey];
     if(!k){
       const found=Object.keys(KM).find(km=>rawKey.includes(km)||km.includes(rawKey));
       if(found)k=KM[found];
     }
-    if(k && !res[k].length) res[k]=Array.from({length:depts.length},(_,j)=>Number(row[2+j])||0);
+    if(k && !res[k].length){
+      // 통일 8열 배열로 변환
+      const unified=new Array(8).fill(0);
+      for(const [colStr,uIdx] of Object.entries(colToUnified)){
+        unified[uIdx]=Number(row[Number(colStr)])||0;
+      }
+      res[k]=unified;
+    }
   }
   if(!res.revenue.length){
     const rowKeys=rows.slice(0,15).map(r=>r?.[0]).filter(Boolean);
@@ -1302,10 +1628,10 @@ function parseSheet(rows){
     return null;
   }
   ['cogs','gross','sga','other_income','other_expense','net_income'].forEach(k=>{
-    if(!res[k].length)res[k]=new Array(depts.length).fill(0);
+    if(!res[k].length)res[k]=new Array(8).fill(0);
   });
   res.op_income=res.gross.map((g,i)=>g-(res.sga[i]||0));
-  // net_income: 시트값 우효성 검증 — 전부 0이면 공식으로 계산
+  // net_income: 시트값 유효성 검증 — 전부 0이면 공식으로 계산
   const niAllZero=res.net_income.every(v=>v===0);
   if(niAllZero){
     console.warn('[parseSheet] net_income 전부 0 → 공식으로 계산');
@@ -1509,11 +1835,24 @@ function updateSlicerSummary(){
   el.textContent=`${selYear}년 ${parseInt(selMonth)}월 · ${deptName}`;
 }
 
-// 슬라이서 sticky top을 헤더 실제 높이에 맞게 동적 설정
+// 슬라이서 sticky top을 헤더+탭바 실제 높이에 맞게 동적 설정
 function updateSlicerTop(){
   const hdr=document.querySelector('.hdr');
-  const slicer=document.querySelector('.slicer-bar');
-  if(hdr&&slicer) slicer.style.top=hdr.offsetHeight+'px';
+  const nav=document.querySelector('.nav-bar');
+  const root=document.documentElement;
+
+  const hdrH=hdr?hdr.getBoundingClientRect().height:50;
+  const navH=nav?nav.getBoundingClientRect().height:42;
+
+  root.style.setProperty('--hdr-h', Math.round(hdrH)+'px');
+  root.style.setProperty('--nav-h', Math.round(navH)+'px');
+
+  // 보고서 탭 슬라이서 높이: 보고서 탭이 active일 때만 측정
+  const rptSlicer=document.querySelector('.rpt-slicer');
+  if(rptSlicer){
+    const h=rptSlicer.getBoundingClientRect().height;
+    if(h>0) root.style.setProperty('--rpt-slicer-h', Math.round(h)+'px');
+  }
 }
 
 let resizeTimer;
@@ -1594,6 +1933,562 @@ window.addEventListener('resize',()=>{
     document.getElementById('lock-pw').focus();
   });
 })();
+
+
+// ════════════════════════════════════════════
+// 탭 네비게이션
+// ════════════════════════════════════════════
+let currentTab='dashboard';
+
+function switchTab(tab,el){
+  currentTab=tab;
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  // 탭 전환 후 sticky top 재계산 (rpt-slicer 높이가 이제 visible)
+  requestAnimationFrame(()=>{
+    updateSlicerTop();
+    if(tab==='report'){
+      if(!rptInited) initReport();
+      renderReport();
+      // 렌더 후 rpt-slicer 높이 재측정
+      requestAnimationFrame(updateSlicerTop);
+    }
+  });
+  if(tab!=='report'){
+    if(tab==='dashboard') render();
+  }
+}
+
+// ════════════════════════════════════════════
+// 보고서 탭 — 상태
+// ════════════════════════════════════════════
+let rptView='annual';   // 'annual' | 'yoy' | 'mom'
+let rptDept='all';
+let rptYear='';         // 연간비교: 대상연도 / 전년동월·전월: 기준연도
+let rptMonth='';        // 전년동월·전월 기준월
+let rptInited=false;
+
+const RPT_KEYS=['revenue','cogs','gross','sga','op_income','other_income','other_expense','net_income'];
+const RPT_ROWS=[
+  {l:'매출액',      k:'revenue',      isI:false, sec:true},
+  {l:'매출원가',    k:'cogs',         isI:false, rateA:'cogs',      rateB:'revenue'},
+  {l:'매출총손익',  k:'gross',        isI:true,  sec:true, rateA:'gross',     rateB:'revenue'},
+  {l:'판관비',      k:'sga',          isI:false, rateA:'sga',       rateB:'revenue'},
+  {l:'영업손익',    k:'op_income',    isI:true,  sec:true, rateA:'op_income', rateB:'revenue'},
+  {l:'영업외수익',  k:'other_income', isI:true},
+  {l:'영업외비용',  k:'other_expense',isI:false},
+  {l:'당기순손익',  k:'net_income',   isI:true,  sec:true, rateA:'net_income',rateB:'revenue'},
+];
+const RPT_KPI_CFG=[
+  {l:'매출액',     k:'revenue',       c:'#1d6fe8', isI:false},
+  {l:'매출원가',   k:'cogs',          c:'#e03030', isI:false},
+  {l:'매출총손익', k:'gross',         c:'#0a9e6e', isI:true},
+  {l:'판관비',     k:'sga',           c:'#cc8800', isI:false},
+  {l:'영업손익',   k:'op_income',     c:'#6d3fd6', isI:true},
+  {l:'영업외수익', k:'other_income',  c:'#0891b2', isI:true},
+  {l:'영업외비용', k:'other_expense', c:'#c05500', isI:false},
+  {l:'당기순손익', k:'net_income',    c:'#1a7a5e', isI:true},
+];
+
+function rD(){return rptDept==='all'?DEPT_ORDER:[rptDept];}
+function rV(month,key){return sum(rD().map(d=>deptVal(month,key,d)));}
+function rVs(months,key){return sum(months.map(m=>rV(m,key)));}
+function rLabel(){return rptDept==='all'?'전사':DEPT_LABELS[rptDept]||rptDept;}
+function allMonths(year){return Object.keys(DATA).filter(m=>m.slice(0,4)===year).sort();}
+
+function initReport(){
+  rptInited=true;
+  const years=[...new Set(Object.keys(DATA).map(m=>m.slice(0,4)))].sort();
+  rptYear=years[years.length-1]||selYear;
+  const ms=allMonths(rptYear);
+  rptMonth=ms[ms.length-1]?.slice(4)||selMonth;
+  _buildRptFilters();
+}
+
+function _buildRptFilters(){
+  // 사업부 칩
+  document.getElementById('rpt-dept-chips').innerHTML=
+    `<button class="chip ${rptDept==='all'?'on':''}" onclick="setRD('all',this)">전사</button>`+
+    DEPT_ORDER.map(d=>{
+      const on=rptDept===d; const col=DEPT_COLORS[d];
+      return`<button class="chip dept-chip ${on?'on':''}" style="${on?`border-color:${col};color:${col};border-width:2px`:''}" onclick="setRD('${d}',this)">${d}</button>`;
+    }).join('');
+
+  // 연도 칩
+  const years=[...new Set(Object.keys(DATA).map(m=>m.slice(0,4)))].sort();
+  document.getElementById('rpt-year-chips').innerHTML=
+    years.map(y=>`<button class="chip ${y===rptYear?'on':''}" onclick="setRY('${y}',this)">${y}년</button>`).join('');
+
+  // 월 칩
+  const ms=allMonths(rptYear);
+  document.getElementById('rpt-month-chips').innerHTML=
+    ms.map(m=>{const mo=m.slice(4);return`<button class="chip ${mo===rptMonth?'on':''}" onclick="setRM('${mo}',this)">${parseInt(mo)}월</button>`;}).join('');
+}
+
+function setRD(d,el){rptDept=d;document.querySelectorAll('#rpt-dept-chips .chip').forEach(c=>{
+    const k=c.getAttribute('onclick').match(/'([^']+)'/)[1];
+    const isOn=k==='all'?d==='all':k===d;
+    c.classList.toggle('on',isOn);
+    c.style.cssText='';
+    if(isOn&&k!=='all'){const col=DEPT_COLORS[k];c.style.borderColor=col;c.style.color=col;c.style.borderWidth='2px';}
+  });renderReport();}
+function setRY(y,el){
+  rptYear=y;
+  document.querySelectorAll('#rpt-year-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');
+  const ms=allMonths(y);rptMonth=ms[ms.length-1]?.slice(4)||'12';
+  // 월 칩 재생성
+  document.getElementById('rpt-month-chips').innerHTML=
+    ms.map(m=>{const mo=m.slice(4);return`<button class="chip ${mo===rptMonth?'on':''}" onclick="setRM('${mo}',this)">${parseInt(mo)}월</button>`;}).join('');
+  renderReport();
+}
+function setRM(mo,el){rptMonth=mo;document.querySelectorAll('#rpt-month-chips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderReport();}
+
+function setRptView(v){
+  rptView=v;
+  document.querySelectorAll('.rpt-view-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('rvb-'+v).classList.add('active');
+  document.querySelectorAll('.rpt-view').forEach(p=>p.classList.remove('active'));
+  document.getElementById('rv-'+v).classList.add('active');
+  // 필터 가시성
+  const needMonth=true; // 모든 뷰에서 기준월 표시 (연간비교: 누적 기준월)
+  document.getElementById('rpt-month-row').style.display=needMonth?'flex':'none';
+  const DESC={annual:'기준월까지의 누적 손익을 전년 동기와 비교합니다',yoy:'선택 월 기준 전년 동월과 비교합니다',mom:'선택 월 기준 전월과 비교합니다'};
+  document.getElementById('rpt-desc').textContent=DESC[v];
+  renderReport();
+}
+
+// ── 공통 값 계산 ──
+function calcVals(months){
+  const v={};
+  RPT_KEYS.forEach(k=>{v[k]=rVs(months,k);});
+  return v;
+}
+
+// ── KPI 카드 렌더 ──
+function renderRptKPI(curVals,prevVals,prevLabel){
+  document.getElementById('rpt-kpi-row').innerHTML=RPT_KPI_CFG.map(({l,k,c,isI})=>{
+    const cv=curVals[k], pv=prevVals?prevVals[k]:null;
+    const d=pv!=null?cv-pv:null;
+    const r=pv!=null&&pv!==0?d/Math.abs(pv)*100:null;
+    let diffHtml='—';
+    if(d!=null){
+      const good=isI?(d>0):(d<0);
+      const cls=good?'cp':'cn';
+      const rStr=r!=null?` (${Math.abs(r).toFixed(1)}%)`:'';
+      diffHtml=`<span class="${cls}">${arr(d)}${fmtN(Math.abs(d))}${rStr}</span>`;
+    }
+    const prevAmtHtml=pv!=null
+      ? `<div class="rpt-kpi-prev">${prevLabel} <span>${fmtN(pv)||'—'}</span></div>`
+      : '';
+    return`<div class="rpt-kpi-card" style="--kc:${c}">
+      <div class="rpt-kpi-lbl">${l}</div>
+      <div class="rpt-kpi-val">${fmtKPI(cv)||'—'}</div>
+      <div class="rpt-kpi-diff">${diffHtml}</div>
+      ${prevAmtHtml}
+    </div>`;
+  }).join('');
+}
+
+// ── 차트 공통 옵션 ──
+function chartOpts(extra={}){
+  return{
+    responsive:true,maintainAspectRatio:false,animation:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{position:'bottom',labels:{font:{size:9,weight:'600'},color:'#2a3a4a',padding:10,usePointStyle:true,pointStyleWidth:12}},
+      tooltip:{backgroundColor:'rgba(255,255,255,0.97)',borderColor:'#d0d8e4',borderWidth:1,titleColor:'#1a2333',bodyColor:'#2a3a4a',padding:10,
+        callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y>=0?'':'-'}${Math.abs(ctx.parsed.y).toFixed(1)}억`}
+      }
+    },
+    scales:{
+      x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:9},color:'#5a6a7a',maxRotation:0}},
+      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:v=>v+'억',font:{size:9},color:'#5a6a7a'},border:{display:false}}
+    },
+    ...extra
+  };
+}
+
+// ── 비교 테이블 공통 렌더 (yoy / mom 공용) ──
+// colGroups = [{label, months, hi}]
+// hi=true → 파랑 강조(당년 열), showDiff=true → 금액|증감|증감률|이익률 4열
+function renderCompTable(theadId,subheadId,tbodyId,colGroups,showDiff){
+  const thead=document.getElementById(theadId);
+  const subEl=document.getElementById(subheadId);
+  const tbody=document.getElementById(tbodyId);
+
+  const PAL={
+    base: {bd:'#d8e2ee'},
+    hi:   {bd:'#90baff'},
+    diff: {bd:'#bfadff'},
+  };
+  const BL=(bd)=>`border-left:2px solid ${bd};`;
+  const colspan=showDiff?4:1;
+
+  // ── 헤더 1행 ──
+  thead.innerHTML=
+    `<th class="L tbl-th-acc" rowspan="2">계정과목</th>`+
+    colGroups.map((g,i)=>{
+      const cls=g.hi?'col-cur':'col-prev';
+      const p=g.hi?PAL.hi:PAL.base;
+      return`<th class="tbl-th-grp ${cls}" colspan="${colspan}" style="${BL(p.bd)}">${g.label}</th>`;
+    }).join('');
+
+  // ── 헤더 2행 ──
+  if(subEl){
+    const sub=(cls,bd,bl,lbl)=>
+      `<th class="tbl-th-sub ${cls}" style="${bl?BL(bd):''}">${lbl}</th>`;
+    subEl.innerHTML=colGroups.map(g=>{
+      const cls=g.hi?'col-cur':'col-prev';
+      const p=g.hi?PAL.hi:PAL.base;
+      if(!showDiff) return sub(cls,p.bd,true,'금액');
+      return sub(cls,p.bd,true,'금액')+
+        sub('col-diff',PAL.diff.bd,false,'증감')+
+        sub('col-diff',PAL.diff.bd,false,'증감률')+
+        sub(cls,p.bd,false,'이익률');
+    }).join('');
+  }
+
+  // ── 데이터 ──
+  const groupVals=colGroups.map(g=>calcVals(g.months));
+
+  function rateBadge(vObj,row){
+    if(!row.rateA||!row.rateB) return'<span class="tbl-nil">—</span>';
+    const a=vObj[row.rateA],b=vObj[row.rateB];
+    if(!b) return'<span class="tbl-nil">—</span>';
+    const rt=a/b*100;
+    const isCost=(row.k==='cogs'||row.k==='sga');
+    const good=isCost?(rt<80):(rt>0);
+    const col=good?'#0a9e6e':rt<0?'#e03030':'#cc8800';
+    return`<span class="tbl-badge" style="color:${col};background:${col}18">${rt.toFixed(1)}%</span>`;
+  }
+
+  function amtSpan(v,row){
+    const col=(row.isI&&v<0)?'#e03030':'#1a2333';
+    return`<span class="tbl-num" style="color:${col}">${fmtN(v)||'—'}</span>`;
+  }
+
+  tbody.innerHTML=RPT_ROWS.map(row=>{
+    const rowCls=row.sec?'sec':'';
+
+    const cells=colGroups.map((g,gi)=>{
+      const v=groupVals[gi];
+      const cls=g.hi?'col-cur':'col-prev';
+      const p=g.hi?PAL.hi:PAL.base;
+      const amt=amtSpan(v[row.k],row);
+      const rate=rateBadge(v,row);
+
+      if(!showDiff){
+        return`<td class="mn tbl-cell ${cls}" style="${BL(p.bd)}">${amt}</td>`;
+      }
+
+      let dAmt='<span class="tbl-nil">—</span>',dRate='<span class="tbl-nil">—</span>',dCol='#8a98aa';
+      if(gi>0){
+        const cur=v[row.k], prev=groupVals[gi-1][row.k];
+        const d=cur-prev, r=prev&&prev!==0?d/Math.abs(prev)*100:null;
+        const good=row.isI?(d>0):(d<0);
+        dCol=d===0?'#8a98aa':good?'#0a9e6e':'#e03030';
+        dAmt=`<span class="tbl-num" style="color:${dCol}">${arr(d)}${fmtN(Math.abs(d))}</span>`;
+        dRate=r!=null?`<span class="tbl-badge" style="color:${dCol};background:${dCol}18">${arr(d)}${Math.abs(r).toFixed(1)}%</span>`:'<span class="tbl-nil">—</span>';
+      }
+
+      return`<td class="mn tbl-cell ${cls}" style="${BL(p.bd)}">${amt}</td>`+
+        `<td class="mn tbl-cell col-diff">${dAmt}</td>`+
+        `<td class="mn tbl-cell col-diff">${dRate}</td>`+
+        `<td class="mn tbl-cell ${cls}">${rate}</td>`;
+    }).join('');
+
+    return`<tr class="${rowCls}"><td class="L tbl-cell-acc">${row.l}</td>${cells}</tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════
+// renderReport — 뷰별 분기
+// ════════════════════════════════════════════
+function renderReport(){
+  if(!Object.keys(DATA).length)return;
+  if(!rptInited)initReport();
+
+  if(rptView==='annual') renderAnnual();
+  else if(rptView==='yoy') renderYoY();
+  else renderMoM2();
+}
+
+// ── [1] 연간 비교 ──
+function renderAnnual(){
+  const dL=rLabel();
+  const curY=rptYear;
+  const prevY=String(parseInt(curY)-1);
+
+  // 기준월(슬라이서 selMonth)까지의 누적으로 비교
+  // 예: 기준월=2월 → 당년 1~2월 vs 전년 1~2월
+  const monthPad=String(rptMonth).padStart(2,'0');
+  const curMs =Object.keys(DATA).filter(m=>m.slice(0,4)===curY  && m.slice(4)<=monthPad).sort();
+  const prevMs=Object.keys(DATA).filter(m=>m.slice(0,4)===prevY && m.slice(4)<=monthPad).sort();
+
+  const curV =calcVals(curMs);
+  const prevV=prevMs.length?calcVals(prevMs):null;
+
+  const rangeLabel=`1~${parseInt(rptMonth)}월 누적`;
+  renderRptKPI(curV,prevV,`${prevY}년 ${rangeLabel}`);
+
+  // 차트 — 전년 vs 당년 누적 8개 지표 막대 비교
+  const chartKeys=['revenue','cogs','gross','sga','op_income','other_income','other_expense','net_income'];
+  const chartLabels=['매출액','매출원가','매출총손익','판관비','영업손익','영업외수익','영업외비용','당기순손익'];
+  const chartColors=['#1d6fe8','#e03030','#0a9e6e','#cc8800','#6d3fd6','#0891b2','#c05500','#1a7a5e'];
+
+  const prevV2=calcVals(prevMs.length?prevMs:['_']);
+  const datasets=[
+    {
+      label:`${prevY}년 ${rangeLabel}`,
+      data:chartKeys.map(k=>prevV2[k]/1e8),
+      backgroundColor:chartColors.map(c=>c+'44'),
+      borderColor:chartColors,borderWidth:2,borderRadius:3,
+    },
+    {
+      label:`${curY}년 ${rangeLabel}`,
+      data:chartKeys.map(k=>curV[k]/1e8),
+      backgroundColor:chartColors.map(c=>c+'cc'),
+      borderColor:chartColors,borderWidth:2,borderRadius:3,
+    }
+  ];
+
+  const annSub=`${prevY}년 vs ${curY}년 ${rangeLabel} · ${dL} · 단위: 억원`;
+  document.getElementById('ann-chart-ttl').textContent=`전년 동기 대비 누적 손익 비교`;
+  document.getElementById('ann-chart-sub').textContent=annSub;
+  document.getElementById('ann-tbl-sub').textContent=annSub;
+
+  // 막대 위 금액 레이블 플러그인
+  const annBarLabel={
+    id:'annBarLabel',
+    afterDatasetsDraw(chart){
+      const ctx=chart.ctx;
+      chart.data.datasets.forEach((ds,di)=>{
+        const meta=chart.getDatasetMeta(di);
+        if(meta.hidden)return;
+        meta.data.forEach((bar,i)=>{
+          const val=ds.data[i];
+          if(val===null||val===undefined||Math.abs(val)<0.05)return;
+          const txt=(val<0?'-':'')+Math.abs(val).toFixed(1)+'억';
+          ctx.save();
+          ctx.font='700 8.5px "JetBrains Mono",monospace';
+          ctx.textAlign='center';
+          ctx.textBaseline= val>=0 ? 'bottom' : 'top';
+          const y = val>=0 ? bar.y-3 : bar.y+3;
+          // 흰 배경
+          const tw=ctx.measureText(txt).width;
+          ctx.fillStyle='rgba(255,255,255,0.85)';
+          ctx.fillRect(bar.x-tw/2-2, val>=0?y-9:y, tw+4, 10);
+          ctx.fillStyle=ds.borderColor[i]||ds.borderColor;
+          ctx.fillText(txt, bar.x, y);
+          ctx.restore();
+        });
+      });
+    }
+  };
+
+  if(charts['ann'])charts['ann'].destroy();
+  charts['ann']=new Chart(document.getElementById('ann-chart'),{
+    type:'bar',
+    plugins:[annBarLabel],
+    data:{labels:chartLabels,datasets},
+    options:{...chartOpts(),scales:{
+      x:{grid:{display:false},ticks:{font:{size:9},color:'#1a2333'}},
+      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:v=>v+'억',font:{size:9},color:'#5a6a7a'}}
+    }}
+  });
+
+  // 테이블 — 전년금액 | 당년금액 | 증감 | 증감률 | 이익률 (단일 비교)
+  renderAnnualTable(prevY, prevMs, curY, curMs, rangeLabel);
+}
+
+// 연간 비교 전용 테이블
+// 열: 계정과목 | [전년금액·이익률] | [당년금액·이익률] | [증감·증감률]
+function renderAnnualTable(prevY, prevMs, curY, curMs, rangeLabel){
+  const prevV=calcVals(prevMs.length?prevMs:['_']);
+  const curV =calcVals(curMs.length?curMs:['_']);
+
+  const PAL={
+    prev: {bg:'#f8fafc', bd:'#d8e2ee', tx:'#3a4a5a'},
+    cur:  {bg:'#eef4ff', bd:'#90baff', tx:'#1d6fe8'},
+    diff: {bg:'#f4f0ff', bd:'#bfadff', tx:'#6d3fd6'},
+  };
+  const BL=(bd)=>`border-left:2px solid ${bd};`;
+
+  // ── 헤더 1행 ──
+  document.getElementById('ann-thead').innerHTML=
+    `<th class="L tbl-th-acc" rowspan="2">계정과목</th>`+
+    `<th class="tbl-th-grp col-prev" colspan="2" style="${BL(PAL.prev.bd)}">${prevY}년 ${rangeLabel}</th>`+
+    `<th class="tbl-th-grp col-cur"  colspan="2" style="${BL(PAL.cur.bd)}">${curY}년 ${rangeLabel}</th>`+
+    `<th class="tbl-th-grp col-diff" colspan="2" style="${BL(PAL.diff.bd)}">전년 대비</th>`;
+
+  // ── 헤더 2행 ──
+  const sub=(cls,bd,bl,lbl)=>
+    `<th class="tbl-th-sub ${cls}" style="${bl?BL(bd):''}">${lbl}</th>`;
+  document.getElementById('ann-subhead').innerHTML=
+    sub('col-prev',PAL.prev.bd,true,'금액')+sub('col-prev',PAL.prev.bd,false,'이익률')+
+    sub('col-cur', PAL.cur.bd, true,'금액')+sub('col-cur', PAL.cur.bd, false,'이익률')+
+    sub('col-diff',PAL.diff.bd,true,'증감')+sub('col-diff',PAL.diff.bd,false,'증감률');
+
+  // ── 이익률 배지 ──
+  function rateBadge(vObj,row){
+    if(!row.rateA||!row.rateB) return'<span class="tbl-nil">—</span>';
+    const a=vObj[row.rateA],b=vObj[row.rateB];
+    if(!b) return'<span class="tbl-nil">—</span>';
+    const rt=a/b*100;
+    const isCost=(row.k==='cogs'||row.k==='sga');
+    const good=isCost?(rt<80):(rt>0);
+    const col=good?'#0a9e6e':rt<0?'#e03030':'#cc8800';
+    return`<span class="tbl-badge" style="color:${col};background:${col}18">${rt.toFixed(1)}%</span>`;
+  }
+
+  // ── 금액 span ── 금액은 검정, 손익류 음수만 빨강
+  function amtSpan(v,row){
+    const col=(row.isI&&v<0)?'#e03030':'#1a2333';
+    return`<span class="tbl-num" style="color:${col}">${fmtN(v)||'—'}</span>`;
+  }
+
+  // ── 본문 ──
+  document.getElementById('ann-tbody').innerHTML=RPT_ROWS.map(row=>{
+    const pv=prevV[row.k], cv=curV[row.k];
+    const d=cv-pv, r=pv&&pv!==0?d/Math.abs(pv)*100:null;
+    const good=row.isI?(d>0):(d<0);
+    const dCol=d===0?'#8a98aa':good?'#0a9e6e':'#e03030';
+
+    return`<tr class="${row.sec?'sec':''}">
+      <td class="L tbl-cell-acc">${row.l}</td>
+      <td class="mn tbl-cell col-prev" style="${BL(PAL.prev.bd)}">${amtSpan(pv,row)}</td>
+      <td class="mn tbl-cell col-prev">${rateBadge(prevV,row)}</td>
+      <td class="mn tbl-cell col-cur"  style="${BL(PAL.cur.bd)}">${amtSpan(cv,row)}</td>
+      <td class="mn tbl-cell col-cur">${rateBadge(curV,row)}</td>
+      <td class="mn tbl-cell col-diff" style="${BL(PAL.diff.bd)}">
+        <span class="tbl-num" style="color:${dCol}">${arr(d)}${fmtN(Math.abs(d))}</span>
+      </td>
+      <td class="mn tbl-cell col-diff">
+        ${r!=null?`<span class="tbl-badge" style="color:${dCol};background:${dCol}18">${arr(d)}${Math.abs(r).toFixed(1)}%</span>`:'<span class="tbl-nil">—</span>'}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── [2] 전년동월 비교 ──
+function renderYoY(){
+  const curKey=mkKey(rptYear,rptMonth);
+  const prevKey=mkKey(String(parseInt(rptYear)-1),rptMonth);
+  const curMs=allMonths(rptYear);
+  const prevY=String(parseInt(rptYear)-1);
+  const dL=rLabel();
+  const cm=parseInt(rptMonth);
+
+  document.getElementById('yoy-chart-ttl').textContent=`전년동월 월별 추이 비교`;
+  document.getElementById('yoy-chart-sub').textContent=`${prevY}년 vs ${rptYear}년 월별 · ${dL} · 단위: 억원`;
+  document.getElementById('yoy-tbl-ttl').textContent=`전년동월 대비 상세 (${rptYear}년 ${cm}월 vs ${prevY}년 ${cm}월)`;
+  document.getElementById('yoy-tbl-sub').textContent=`${dL} · 단위: 억원`;
+
+  // KPI: 당월 vs 전년동월
+  const curMsM=[curKey].filter(k=>DATA[k]);
+  const prevMsM=[prevKey].filter(k=>DATA[k]);
+  renderRptKPI(calcVals(curMsM.length?curMsM:['_']),prevMsM.length?calcVals(prevMsM):null,`${prevY}년 ${cm}월`);
+
+  // 차트 — 12개월 양년 추이
+  const months12=curMs.slice(-12);
+  const labelsM=months12.map(m=>parseInt(m.slice(4))+'월');
+  const prevMonths12=months12.map(m=>mkKey(prevY,m.slice(4)));
+
+  const lineDS=(months,label,color,dash=[])=>({
+    label,
+    data:months.map(m=>DATA[m]?rV(m,'revenue')/1e8:null),
+    borderColor:color,backgroundColor:color+'18',
+    borderWidth:2,fill:dash.length?false:true,tension:.4,
+    pointRadius:3,pointHoverRadius:5,
+    pointBackgroundColor:color,
+    borderDash:dash
+  });
+
+  // 매출액 + 영업손익 양년
+  const yoyChartDS=[
+    {months:months12,     label:`${rptYear}년 매출액`, color:'#1d6fe8', dash:[]},
+    {months:prevMonths12, label:`${prevY}년 매출액`,  color:'#93c5fd', dash:[4,3]},
+  ].map(({months,label,color,dash})=>({
+    label,
+    data:months.map(m=>DATA[m]?rV(m,'revenue')/1e8:null),
+    borderColor:color,backgroundColor:color+'15',borderWidth:2,
+    fill:false,tension:.4,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:color,borderDash:dash
+  })).concat([
+    {months:months12,     label:`${rptYear}년 영업손익`, color:'#6d3fd6', dash:[]},
+    {months:prevMonths12, label:`${prevY}년 영업손익`,  color:'#c4b5fd', dash:[4,3]},
+  ].map(({months,label,color,dash})=>({
+    label,
+    data:months.map(m=>DATA[m]?rV(m,'op_income')/1e8:null),
+    borderColor:color,backgroundColor:color+'10',borderWidth:2,
+    fill:false,tension:.4,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:color,borderDash:dash
+  })));
+
+  if(charts['yoy'])charts['yoy'].destroy();
+  charts['yoy']=new Chart(document.getElementById('yoy-chart'),{
+    type:'line',data:{labels:labelsM,datasets:yoyChartDS},options:chartOpts()
+  });
+
+  // 테이블: 전년동월 | 당월 열 (전사 or 사업부)
+  const hasPrev=!!DATA[prevKey];
+  const colGroups=[
+    {label:`${prevY}년 ${cm}월`,months:hasPrev?[prevKey]:[],hi:false},
+    {label:`${rptYear}년 ${cm}월`,months:DATA[curKey]?[curKey]:[],hi:true},
+  ];
+  renderCompTable('yoy-thead','yoy-subhead','yoy-tbody',colGroups,true);
+}
+
+// ── [3] 전월 비교 ──
+function renderMoM2(){
+  const curKey=mkKey(rptYear,rptMonth);
+  const allKeys=Object.keys(DATA).sort();
+  const ci=allKeys.indexOf(curKey);
+  const prevKey=ci>0?allKeys[ci-1]:null;
+  const dL=rLabel();
+  const cm=parseInt(rptMonth);
+  const prevM=prevKey?parseInt(prevKey.slice(4)):null;
+  const prevY2=prevKey?prevKey.slice(0,4):null;
+  const prevLabel=prevKey?(prevY2!==rptYear?`${prevY2}년 ${prevM}월`:`${prevM}월`):'전월없음';
+
+  document.getElementById('mom-chart-ttl').textContent='월별 손익 추이 (전월 비교)';
+  document.getElementById('mom-chart-sub').textContent=`${rptYear}년 · ${dL} · 단위: 억원`;
+  document.getElementById('mom-tbl-ttl').textContent=`전월 대비 상세 (${prevLabel} → ${cm}월)`;
+  document.getElementById('mom-tbl-sub').textContent=`${dL} · 단위: 억원`;
+
+  // KPI
+  const curMsM=DATA[curKey]?[curKey]:[];
+  const prevMsM=prevKey&&DATA[prevKey]?[prevKey]:[];
+  renderRptKPI(calcVals(curMsM.length?curMsM:['_']),prevMsM.length?calcVals(prevMsM):null,prevLabel);
+
+  // 차트 — 연도 전체 월별 막대 (매출/영업손익)
+  const ms=allMonths(rptYear);
+  const labelsM=ms.map(m=>parseInt(m.slice(4))+'월');
+  const bgR=ms.map(m=>m===curKey?'#1d6fe8':'#93c5fd44');
+  const bgO=ms.map(m=>m===curKey?'#6d3fd6':'#c4b5fd44');
+
+  if(charts['mom2'])charts['mom2'].destroy();
+  charts['mom2']=new Chart(document.getElementById('mom-chart'),{
+    type:'bar',
+    data:{
+      labels:labelsM,
+      datasets:[
+        {label:'매출액',    data:ms.map(m=>DATA[m]?rV(m,'revenue')/1e8:null),   backgroundColor:bgR,borderColor:'#1d6fe8',borderWidth:1.5,borderRadius:3},
+        {label:'영업손익',  data:ms.map(m=>DATA[m]?rV(m,'op_income')/1e8:null), backgroundColor:bgO,borderColor:'#6d3fd6',borderWidth:1.5,borderRadius:3},
+      ]
+    },
+    options:{...chartOpts(),plugins:{...chartOpts().plugins,
+      annotation:{annotations:{line1:{type:'line',xMin:labelsM.indexOf(cm+'월'),xMax:labelsM.indexOf(cm+'월'),borderColor:'rgba(0,0,0,0.2)',borderWidth:1}}}
+    }}
+  });
+
+  // 테이블: 전월 | 당월
+  const colGroups=[
+    {label:prevLabel,   months:prevMsM, hi:false},
+    {label:`${cm}월`,   months:curMsM,  hi:true},
+  ];
+  renderCompTable('mom-thead','mom-subhead','mom-tbody',colGroups,true);
+}
 
 window.onload=null;
 </script>
