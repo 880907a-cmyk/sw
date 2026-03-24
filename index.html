@@ -507,6 +507,19 @@ thead .col-diff          { background:rgba(180,200,228,0.22) !important; }
   background:rgba(180,200,228,0.13) !important;
 }
 
+/* 하위 계정과목 행 (isSub) */
+.rpt-tbl-wrap tbody tr.sub-row .tbl-cell-acc{
+  font-size:10px;font-weight:400;color:#6a7a8a;
+  padding-left:22px;
+  background:rgba(245,248,252,0.8) !important;
+}
+.rpt-tbl-wrap tbody tr.sub-row .tbl-cell{
+  font-size:10px;background:rgba(245,248,252,0.8) !important;
+}
+.rpt-tbl-wrap tbody tr.sub-row .tbl-num{
+  font-size:10px;color:#4a6080;
+}
+
 /* 하위 호환 (기존 .L .mn .grp .gsub 유지) */
 .rpt-tbl-wrap thead th.L{text-align:left;}
 .rpt-tbl-wrap thead th.grp{text-align:left;font-size:10px;font-weight:800;}
@@ -777,7 +790,7 @@ thead .col-diff          { background:rgba(180,200,228,0.22) !important; }
   </div>
   <div class="rpt-slicer-inner" id="rpt-slicer-inner">
     <div class="sg"><span class="slbl">기준연도</span><div class="chips" id="rpt-year-chips"></div></div>
-    <div class="sg"><span class="slbl">기준월</span><div class="chips" id="rpt-month-chips"></div></div>
+    <div class="sg" id="rpt-month-row"><span class="slbl">기준월</span><div class="chips" id="rpt-month-chips"></div></div>
     <div class="sg" style="border-right:none"><span class="slbl">사업부</span><div class="chips" id="rpt-dept-chips"></div></div>
   </div>
 </div>
@@ -806,7 +819,7 @@ thead .col-diff          { background:rgba(180,200,228,0.22) !important; }
           <div><div class="rpt-panel-ttl" id="ann-chart-ttl">연도별 누적 손익 비교</div><div class="rpt-panel-sub" id="ann-chart-sub">—</div></div>
           <span class="pill">YoY</span>
         </div>
-        <div class="rpt-chart-box" style="height:240px;"><canvas id="ann-chart"></canvas></div>
+        <div class="rpt-chart-box" style="height:240px;"><canvas id="ann-chart" style="width:100%;height:240px;"></canvas></div>
       </div>
       <div class="rpt-panel" style="margin-top:10px;">
         <div class="rpt-panel-hd">
@@ -820,10 +833,10 @@ thead .col-diff          { background:rgba(180,200,228,0.22) !important; }
     <div class="rpt-view" id="rv-yoy">
       <div class="rpt-panel">
         <div class="rpt-panel-hd">
-          <div><div class="rpt-panel-ttl" id="yoy-chart-ttl">전년동월 손익 추이 비교</div><div class="rpt-panel-sub" id="yoy-chart-sub">—</div></div>
+          <div><div class="rpt-panel-ttl" id="yoy-chart-ttl">전년 동월 손익 비교</div><div class="rpt-panel-sub" id="yoy-chart-sub">—</div></div>
           <span class="pill">YoY MoM</span>
         </div>
-        <div class="rpt-chart-box" style="height:240px;"><canvas id="yoy-chart"></canvas></div>
+        <div class="rpt-chart-box" style="height:240px;"><canvas id="yoy-chart" style="width:100%;height:240px;"></canvas></div>
       </div>
       <div class="rpt-panel" style="margin-top:10px;">
         <div class="rpt-panel-hd">
@@ -840,7 +853,7 @@ thead .col-diff          { background:rgba(180,200,228,0.22) !important; }
           <div><div class="rpt-panel-ttl" id="mom-chart-ttl">월별 손익 추이 (전월 비교)</div><div class="rpt-panel-sub" id="mom-chart-sub">—</div></div>
           <span class="pill">MoM</span>
         </div>
-        <div class="rpt-chart-box" style="height:240px;"><canvas id="mom-chart"></canvas></div>
+        <div class="rpt-chart-box" style="height:240px;"><canvas id="mom-chart" style="width:100%;height:240px;"></canvas></div>
       </div>
       <div class="rpt-panel" style="margin-top:10px;">
         <div class="rpt-panel-hd">
@@ -889,10 +902,36 @@ Chart.defaults.font.family="'Noto Sans KR',sans-serif";
 Chart.defaults.font.size=9;
 Chart.defaults.devicePixelRatio=window.devicePixelRatio||2;
 
-// 판관비 세부 계정 (top5 by 연간합계)
+// 판관비 세부 계정 (top5 by 연간합계) — 차트용으로만 유지
 const SGA_DETAIL={"202501": {"직원급여": 494061920, "판매촉진비": 115237275, "보험료": 49732098, "결제대행수수료": 51751369, "감가상각비": 49568387}, "202502": {"직원급여": 488906070, "판매촉진비": 147327389, "보험료": 49171141, "결제대행수수료": 52332033, "감가상각비": 49568386}, "202503": {"직원급여": 400668370, "판매촉진비": 96274208, "보험료": 39817259, "결제대행수수료": 47281276, "감가상각비": 50524698}, "202504": {"직원급여": 411340850, "판매촉진비": 131505935, "보험료": 48916607, "결제대행수수료": 43891754, "감가상각비": 48225502}, "202505": {"직원급여": 416102410, "판매촉진비": 128406808, "보험료": 40051791, "결제대행수수료": 48885291, "감가상각비": 48268726}, "202506": {"직원급여": 420018530, "판매촉진비": 134199288, "보험료": 40531721, "결제대행수수료": 47060405, "감가상각비": 44794342}, "202507": {"직원급여": 325671250, "판매촉진비": 83740983, "보험료": 37407610, "결제대행수수료": 46812208, "감가상각비": 45835107}, "202508": {"직원급여": 318009500, "판매촉진비": 122461078, "보험료": 33002786, "결제대행수수료": 47344403, "감가상각비": 45835004}, "202509": {"직원급여": 361730240, "판매촉진비": 119509909, "보험료": 37116441, "결제대행수수료": 52765645, "감가상각비": 45469899}, "202510": {"직원급여": 360591292, "판매촉진비": 105827216, "보험료": 36357600, "결제대행수수료": 58764101, "감가상각비": 45833295}, "202511": {"직원급여": 365839967, "판매촉진비": 146145794, "보험료": 136283945, "결제대행수수료": 59892290, "감가상각비": 45494797}, "202512": {"직원급여": 369998848, "판매촉진비": 218966491, "보험료": 166906889, "결제대행수수료": 68749051, "감가상각비": 45204595}};
 const SGA_TOP5=["직원급여", "판매촉진비", "보험료", "결제대행수수료", "감가상각비"];
 const SGA_COLORS={"직원급여":"#f97316","판매촉진비":"#a855f7","보험료":"#06b6d4","결제대행수수료":"#10b981","감가상각비":"#6b7280"};
+
+// ── 동적 하위계정 저장소 ──
+// parseSheet 실행 시 자동으로 채워짐: {yyyymm: {계정명: 합산값, ...}}
+const SUB_DATA = {
+  revenue: {},      // 매출액 하위계정 (전체)
+  cogs: {},         // 매출원가 하위계정 (상품매출원가·제품매출원가만)
+  sga: {},          // 판관비 하위계정 (전체)
+  other_income: {}, // 영업외수익 하위계정 (전체)
+  other_expense:{}, // 영업외비용 하위계정 (전체)
+};
+// 각 섹션에 등장한 모든 계정명 순서 보존 (처음 파싱된 시트 기준)
+const SUB_KEYS = {
+  revenue: [],
+  cogs: [],
+  sga: [],
+  other_income: [],
+  other_expense: [],
+};
+
+// 매출원가: 이 두 계정만 표시
+const COGS_SHOW_KEYS=['상품매출원가','제품매출원가'];
+
+// 동적 하위계정 조회 함수
+function getSubDetail(section, ym){ return SUB_DATA[section][ym] || null; }
+// 전 기간 등장한 하위계정 키 목록
+function getSubKeys(section){ return SUB_KEYS[section]; }
 
 // ════════════════════════════════════════════
 // 원본 데이터
@@ -1537,16 +1576,16 @@ function renderDeptTable(tbodyId,monthKey,isCum,cms){
 
   // 계정과목 행 정의
   const METRICS=[
-    {label:'매출액',      key:'revenue',   fmt2:(v)=>fmtN(v),        cls:(v)=>'mn',            rate:false},
-    {label:'매출원가',    key:'cogs',      fmt2:(v)=>fmtN(v),        cls:(v)=>`mn ${v>0?'cn':''}`, rate:false},
+    {label:'매출액',      key:'revenue',   fmt2:(v)=>fmtAuk(v),        cls:(v)=>'mn',            rate:false},
+    {label:'매출원가',    key:'cogs',      fmt2:(v)=>fmtAuk(v),        cls:(v)=>`mn ${v>0?'cn':''}`, rate:false},
     {label:'매출원가율',  key:'_cogsR',    fmt2:(v,rv)=>rv?`<span class="badge ${bc(100-v/rv*100)}">${(v/rv*100).toFixed(1)}%</span>`:'—', cls:()=>'', rate:true, dep:'cogs', ref:'revenue'},
-    {label:'매출총손익',  key:'gross',     fmt2:(v)=>fmtN(v),        cls:(v)=>`mn ${vc(v)}`,   rate:false},
-    {label:'판관비',      key:'sga',       fmt2:(v)=>fmtN(v),        cls:(v)=>`mn ${v>0?'cn':''}`, rate:false},
-    {label:'영업손익',    key:'op_income', fmt2:(v)=>fmtN(v),        cls:(v)=>`mn ${vc(v)}`,   rate:false},
+    {label:'매출총손익',  key:'gross',     fmt2:(v)=>fmtAuk(v),        cls:(v)=>`mn ${vc(v)}`,   rate:false},
+    {label:'판관비',      key:'sga',       fmt2:(v)=>fmtAuk(v),        cls:(v)=>`mn ${v>0?'cn':''}`, rate:false},
+    {label:'영업손익',    key:'op_income', fmt2:(v)=>fmtAuk(v),        cls:(v)=>`mn ${vc(v)}`,   rate:false},
     {label:'영업손익율',  key:'_opR',      fmt2:(v,rv)=>rv?`<span class="badge ${bc(v/rv*100)}">${(v/rv*100).toFixed(1)}%</span>`:'—', cls:()=>'', rate:true, dep:'op_income', ref:'revenue'},
-    {label:'영업외수익',  key:'other_income',  fmt2:(v)=>v?fmtN(v):'—', cls:()=>'mn cp',     rate:false},
-    {label:'영업외비용',  key:'other_expense', fmt2:(v)=>v?fmtN(v):'—', cls:()=>'mn cn',     rate:false},
-    {label:'당기순손익',  key:'net_income',fmt2:(v)=>fmtN(v),        cls:(v)=>`mn ${vc(v)}`,   rate:false},
+    {label:'영업외수익',  key:'other_income',  fmt2:(v)=>v?fmtAuk(v):'—', cls:()=>'mn cp',     rate:false},
+    {label:'영업외비용',  key:'other_expense', fmt2:(v)=>v?fmtAuk(v):'—', cls:()=>'mn cn',     rate:false},
+    {label:'당기순손익',  key:'net_income',fmt2:(v)=>fmtAuk(v),        cls:(v)=>`mn ${vc(v)}`,   rate:false},
     {label:'당기순손익율',key:'_niR',      fmt2:(v,rv)=>rv?`<span class="badge ${bc(v/rv*100)}">${(v/rv*100).toFixed(1)}%</span>`:'—', cls:()=>'', rate:true, dep:'net_income', ref:'revenue'},
   ];
 
@@ -1591,6 +1630,13 @@ function renderDeptTable(tbodyId,monthKey,isCum,cms){
 
 function fmtN(v){
   if(v===null||v===undefined)return'—';
+  return(v<0?'-':'')+Math.abs(Math.round(v)).toLocaleString('ko-KR')+'원';
+}
+// 보고서 테이블 전용 원 단위 포맷 (fmtN과 동일, 별칭)
+function fmtWon(v){ return fmtN(v); }
+// 경영지표 탭 테이블 전용 억 단위 포맷
+function fmtAuk(v){
+  if(v===null||v===undefined)return'—';
   const a=Math.abs(v)/1e8;
   return(v<0?'-':'')+a.toFixed(1)+'억';
 }
@@ -1608,7 +1654,7 @@ function onUpload(e){
         const wb=XLSX.read(evt.target.result,{type:'binary'});
         const ws=wb.Sheets[wb.SheetNames[0]];
         const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
-        const p=parseSheet(rows);
+        const p=parseSheet(rows, m[1]);
         if(p){
           DATA[m[1]]=p;
           document.getElementById('meta-txt').textContent=`${Object.keys(DATA).length}개월 · ${file.name} 추가됨`;
@@ -1620,7 +1666,7 @@ function onUpload(e){
   });
 }
 
-function parseSheet(rows){
+function parseSheet(rows, sheetName){
   if(!rows?.length)return null;
   // 헤더 행 탐색 ('계정' 포함 행)
   let hi=0;
@@ -1631,7 +1677,6 @@ function parseSheet(rows){
   console.log('[parseSheet] 헤더행:', hi, '/ 컬럼수:', hdr?.length, '/ hdr[0]:', hdr?.[0]);
 
   // ── 헤더 이름 → 통일 8열 인덱스 매핑 ──────────────────────────
-  // 통일 구조: [0]경영지원실 [1]해외사업부 [2]사업총괄 [3]연구생산 [4]의약품 [5]건기식 [6]의료기기 [7]정보사업부
   const UNIFIED_MAP=[
     {idx:0, keywords:['경영지원']},
     {idx:1, keywords:['해외']},
@@ -1642,8 +1687,7 @@ function parseSheet(rows){
     {idx:6, keywords:['의료기기']},
     {idx:7, keywords:['정보사업','정보']},
   ];
-  // col[2]부터 헤더를 읽어서 통일 인덱스로 매핑
-  const colToUnified={}; // 시트 원본 col index → 통일 index
+  const colToUnified={};
   for(let i=2;i<hdr.length;i++){
     if(!hdr[i])continue;
     const nm=String(hdr[i]).replace(/\(\d+\)/g,'').trim();
@@ -1658,33 +1702,83 @@ function parseSheet(rows){
     console.warn('[parseSheet] 컬럼 매핑 실패 — hdr:', hdr);
     return null;
   }
-  console.log('[parseSheet] colToUnified:', colToUnified);
+
+  // 행의 모든 사업부 수치를 합산하여 반환 (하위계정 전사 합산용)
+  function rowTotal(row){
+    let t=0;
+    for(const [colStr,uIdx] of Object.entries(colToUnified)){
+      t+=Number(row[Number(colStr)])||0;
+    }
+    return t;
+  }
+
+  // 행을 통일 8열 배열로 변환
+  function rowToUnified(row){
+    const unified=new Array(8).fill(0);
+    for(const [colStr,uIdx] of Object.entries(colToUnified)){
+      unified[uIdx]=Number(row[Number(colStr)])||0;
+    }
+    return unified;
+  }
 
   const KM={
     'Ⅰ. 매출액':'revenue','Ⅱ. 매출원가':'cogs','Ⅲ. 매출총이익':'gross',
+    'Ⅲ. 매출총손실':'gross',
     'Ⅳ. 판매비와 관리비':'sga','Ⅴ. 영업손실':'op_raw','Ⅴ. 영업이익':'op_raw',
     'Ⅵ. 영업외수익':'other_income','Ⅶ. 영업외비용':'other_expense',
     'Ⅷ. 당기순손익':'net_income','Ⅷ. 당기순이익':'net_income','Ⅷ. 당기순손실':'net_income',
     '당기순손익':'net_income','당기순이익':'net_income','당기순손실':'net_income','손익':'net_income'
   };
+
+  // 대분류 섹션 구분자 — 이 키들이 나오면 하위계정 수집 구간이 변경됨
+  const SECTION_KEYS=new Set(Object.keys(KM));
+
   const res={revenue:[],cogs:[],gross:[],sga:[],op_raw:[],other_income:[],other_expense:[],net_income:[]};
+
+  // 하위계정 수집: 현재 파싱 중인 섹션
+  let curSection=null; // 'revenue' | 'cogs' | 'sga' | 'other_income' | 'other_expense' | null
+  const subSections=['revenue','cogs','sga','other_income','other_expense'];
+  const subCollected={revenue:{}, cogs:{}, sga:{}, other_income:{}, other_expense:{}};
+
   for(const row of rows){
     if(!row?.[0])continue;
     const rawKey=String(row[0]).trim();
-    let k=KM[rawKey];
-    if(!k){
-      const found=Object.keys(KM).find(km=>rawKey.includes(km)||km.includes(rawKey));
-      if(found)k=KM[found];
+
+    // 대분류 행인지 체크
+    let sectionKey=KM[rawKey];
+    if(!sectionKey){
+      const found=Object.keys(KM).find(km=>rawKey===km||(rawKey.length>3&&km.includes(rawKey))||(rawKey.length>3&&rawKey.includes(km)));
+      if(found)sectionKey=KM[found];
     }
-    if(k && !res[k].length){
-      // 통일 8열 배열로 변환
-      const unified=new Array(8).fill(0);
-      for(const [colStr,uIdx] of Object.entries(colToUnified)){
-        unified[uIdx]=Number(row[Number(colStr)])||0;
+
+    if(sectionKey){
+      // 대분류 행 처리
+      if(!res[sectionKey].length){
+        res[sectionKey]=rowToUnified(row);
       }
-      res[k]=unified;
+      // 섹션 전환
+      curSection=subSections.includes(sectionKey)?sectionKey:null;
+      continue;
+    }
+
+    // 하위계정 행: 현재 섹션이 수집 대상이고, 들여쓰기된 계정명
+    if(curSection && rawKey){
+      // 다음 대분류 시작 감지 (로마숫자 또는 '당기' 등으로 시작하면 중단)
+      if(/^[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅰⅱⅲⅳⅴⅵⅶⅷ]/.test(rawKey)||rawKey.startsWith('당기')){
+        curSection=null;
+        continue;
+      }
+      // 계정명 정제: 앞뒤 공백, ▷, △, □ 등 기호 제거
+      const accName=rawKey.replace(/^[▷△□▶►\s]+/, '').trim();
+      if(!accName)continue;
+      // 매출원가: 상품매출원가·제품매출원가만 수집
+      if(curSection==='cogs' && !COGS_SHOW_KEYS.includes(accName)) continue;
+      // 전사 합산값
+      const total=rowTotal(row);
+      subCollected[curSection][accName]=(subCollected[curSection][accName]||0)+total;
     }
   }
+
   if(!res.revenue.length){
     const rowKeys=rows.slice(0,15).map(r=>r?.[0]).filter(Boolean);
     console.warn('[parseSheet] revenue 없음 — 행 키값들:', rowKeys);
@@ -1694,12 +1788,26 @@ function parseSheet(rows){
     if(!res[k].length)res[k]=new Array(8).fill(0);
   });
   res.op_income=res.gross.map((g,i)=>g-(res.sga[i]||0));
-  // net_income: 시트값 유효성 검증 — 전부 0이면 공식으로 계산
   const niAllZero=res.net_income.every(v=>v===0);
   if(niAllZero){
     console.warn('[parseSheet] net_income 전부 0 → 공식으로 계산');
     res.net_income=res.op_income.map((o,i)=>(o||0)+(res.other_income[i]||0)-(res.other_expense[i]||0));
   }
+
+  // ── 하위계정 SUB_DATA / SUB_KEYS 갱신 ──
+  if(sheetName){
+    subSections.forEach(sec=>{
+      const collected=subCollected[sec];
+      if(Object.keys(collected).length){
+        SUB_DATA[sec][sheetName]=collected;
+        // 새로운 계정명은 SUB_KEYS에 추가 (순서 보존)
+        Object.keys(collected).forEach(k=>{
+          if(!SUB_KEYS[sec].includes(k)) SUB_KEYS[sec].push(k);
+        });
+      }
+    });
+  }
+
   return res;
 }
 
@@ -1804,7 +1912,7 @@ async function fetchSheet(sheetName){
     if(text.trim().startsWith('<')){ console.warn(`[Sheet ${sheetName}] HTML 응답 — 시트 없음`); return null; }
     const rows=csvToRows(text);
     console.log(`[Sheet ${sheetName}] raw 앞100자:`, text.slice(0,100).replace(/\n/g,'↵'));
-    const parsed=parseSheet(rows);
+    const parsed=parseSheet(rows, sheetName);
     if(parsed) console.log(`[Sheet ${sheetName}] ✓ revenue[0]=${rows.length}행, 파싱성공`);
     else console.warn(`[Sheet ${sheetName}] 파싱실패 — 1행:`, rows[0]);
     return parsed;
@@ -2023,14 +2131,18 @@ function switchTab(tab,el){
   el.classList.add('active');
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
-  // 탭 전환 후 sticky top 재계산 (rpt-slicer 높이가 이제 visible)
+
   requestAnimationFrame(()=>{
     updateSlicerTop();
     if(tab==='report'){
       if(!rptInited) initReport();
-      renderReport();
-      // 렌더 후 rpt-slicer 높이 재측정
-      requestAnimationFrame(updateSlicerTop);
+      setTimeout(()=>{
+        renderReport();
+        setTimeout(()=>{
+          ['ann','yoy','mom2'].forEach(k=>{ try{charts[k]?.resize();}catch(e){} });
+          requestAnimationFrame(updateSlicerTop);
+        }, 50);
+      }, 0);
     }
   });
   if(tab!=='report'){
@@ -2048,16 +2160,32 @@ let rptMonth='';        // 전년동월·전월 기준월
 let rptInited=false;
 
 const RPT_KEYS=['revenue','cogs','gross','sga','op_income','other_income','other_expense','net_income'];
-const RPT_ROWS=[
-  {l:'매출액',      k:'revenue',      isI:false, sec:true},
-  {l:'매출원가',    k:'cogs',         isI:false, rateA:'cogs',      rateB:'revenue'},
-  {l:'매출총손익',  k:'gross',        isI:true,  sec:true, rateA:'gross',     rateB:'revenue'},
-  {l:'판관비',      k:'sga',          isI:false, rateA:'sga',       rateB:'revenue'},
-  {l:'영업손익',    k:'op_income',    isI:true,  sec:true, rateA:'op_income', rateB:'revenue'},
-  {l:'영업외수익',  k:'other_income', isI:true},
-  {l:'영업외비용',  k:'other_expense',isI:false},
-  {l:'당기순손익',  k:'net_income',   isI:true,  sec:true, rateA:'net_income',rateB:'revenue'},
-];
+
+// RPT_ROWS는 동적 하위계정을 반영해야 하므로 함수로 생성
+function buildRptRows(){
+  const revKeys=getSubKeys('revenue');
+  const cogsKeys=getSubKeys('cogs');   // COGS_SHOW_KEYS 필터링 후 실제 파싱된 것만
+  const sgaKeys=getSubKeys('sga');
+  const oiKeys=getSubKeys('other_income');
+  const oeKeys=getSubKeys('other_expense');
+  return [
+    {l:'매출액',      k:'revenue',      isI:false, sec:true},
+    ...revKeys.map(sk=>({l:'  └ '+sk, k:'rev_sub_'+sk, isI:false, isSub:true, parentK:'revenue'})),
+    {l:'매출원가',    k:'cogs',         isI:false, rateA:'cogs',      rateB:'revenue'},
+    ...cogsKeys.map(sk=>({l:'  └ '+sk, k:'cogs_sub_'+sk, isI:false, isSub:true, parentK:'cogs'})),
+    {l:'매출총손익',  k:'gross',        isI:true,  sec:true, rateA:'gross',     rateB:'revenue'},
+    {l:'판관비',      k:'sga',          isI:false, rateA:'sga',       rateB:'revenue'},
+    ...sgaKeys.map(sk=>({l:'  └ '+sk, k:'sga_sub_'+sk, isI:false, isSub:true, parentK:'sga'})),
+    {l:'영업손익',    k:'op_income',    isI:true,  sec:true, rateA:'op_income', rateB:'revenue'},
+    {l:'영업외수익',  k:'other_income', isI:true},
+    ...oiKeys.map(sk=>({l:'  └ '+sk, k:'oi_sub_'+sk, isI:true, isSub:true, parentK:'other_income'})),
+    {l:'영업외비용',  k:'other_expense',isI:false},
+    ...oeKeys.map(sk=>({l:'  └ '+sk, k:'oe_sub_'+sk, isI:false, isSub:true, parentK:'other_expense'})),
+    {l:'당기순손익',  k:'net_income',   isI:true,  sec:true, rateA:'net_income',rateB:'revenue'},
+  ];
+}
+// 초기값 (데이터 로드 전 기본 행 구조)
+let RPT_ROWS=buildRptRows();
 const RPT_KPI_CFG=[
   {l:'매출액',     k:'revenue',       c:'#1d6fe8', isI:false},
   {l:'매출원가',   k:'cogs',          c:'#e03030', isI:false},
@@ -2129,18 +2257,37 @@ function setRptView(v){
   document.getElementById('rvb-'+v).classList.add('active');
   document.querySelectorAll('.rpt-view').forEach(p=>p.classList.remove('active'));
   document.getElementById('rv-'+v).classList.add('active');
-  // 필터 가시성
-  const needMonth=true; // 모든 뷰에서 기준월 표시 (연간비교: 누적 기준월)
-  document.getElementById('rpt-month-row').style.display=needMonth?'flex':'none';
+  const needMonth=true;
+  const monthRow=document.getElementById('rpt-month-row');
+  if(monthRow) monthRow.style.display=needMonth?'flex':'none';
   const DESC={annual:'기준월까지의 누적 손익을 전년 동기와 비교합니다',yoy:'선택 월 기준 전년 동월과 비교합니다',mom:'선택 월 기준 전월과 비교합니다'};
   document.getElementById('rpt-desc').textContent=DESC[v];
-  renderReport();
+  // display:block 전환 후 렌더 → 차트 크기 정상 계산
+  setTimeout(()=>{
+    renderReport();
+    // 렌더 후 resize로 캔버스 크기 재조정 (display:none 상태에서 그려진 경우 대비)
+    setTimeout(()=>{
+      ['ann','yoy','mom2'].forEach(k=>{ try{charts[k]?.resize();}catch(e){} });
+    }, 50);
+  }, 0);
 }
 
 // ── 공통 값 계산 ──
 function calcVals(months){
   const v={};
   RPT_KEYS.forEach(k=>{v[k]=rVs(months,k);});
+
+  // 동적 하위계정 합산 (revenue / cogs / sga / other_income / other_expense)
+  const prefixMap={revenue:'rev_sub_', cogs:'cogs_sub_', sga:'sga_sub_', other_income:'oi_sub_', other_expense:'oe_sub_'};
+  ['revenue','cogs','sga','other_income','other_expense'].forEach(sec=>{
+    const prefix=prefixMap[sec];
+    getSubKeys(sec).forEach(sk=>{
+      v[prefix+sk]=months.reduce((s,m)=>{
+        const d=getSubDetail(sec,m);
+        return s+(d&&d[sk]!=null?d[sk]:0);
+      },0);
+    });
+  });
   return v;
 }
 
@@ -2155,10 +2302,10 @@ function renderRptKPI(curVals,prevVals,prevLabel){
       const good=isI?(d>0):(d<0);
       const cls=good?'cp':'cn';
       const rStr=r!=null?` (${Math.abs(r).toFixed(1)}%)`:'';
-      diffHtml=`<span class="${cls}">${arr(d)}${fmtN(Math.abs(d))}${rStr}</span>`;
+      diffHtml=`<span class="${cls}">${arr(d)}${fmtAuk(Math.abs(d))}${rStr}</span>`;
     }
     const prevAmtHtml=pv!=null
-      ? `<div class="rpt-kpi-prev">${prevLabel} <span>${fmtN(pv)||'—'}</span></div>`
+      ? `<div class="rpt-kpi-prev">${prevLabel} <span>${fmtAuk(pv)||'—'}</span></div>`
       : '';
     return`<div class="rpt-kpi-card" style="--kc:${c}">
       <div class="rpt-kpi-lbl">${l}</div>
@@ -2188,98 +2335,8 @@ function chartOpts(extra={}){
   };
 }
 
-// ── 비교 테이블 공통 렌더 (yoy / mom 공용) ──
-// colGroups = [{label, months, hi}]
-// hi=true → 파랑 강조(당년 열), showDiff=true → 금액|증감|증감률|이익률 4열
-function renderCompTable(theadId,subheadId,tbodyId,colGroups,showDiff){
-  const thead=document.getElementById(theadId);
-  const subEl=document.getElementById(subheadId);
-  const tbody=document.getElementById(tbodyId);
 
-  const PAL={
-    base: {bd:'#d8e2ee'},
-    hi:   {bd:'#90baff'},
-    diff: {bd:'#bfadff'},
-  };
-  const BL=(bd)=>`border-left:2px solid ${bd};`;
-  const colspan=showDiff?4:1;
 
-  // ── 헤더 1행 ──
-  thead.innerHTML=
-    `<th class="L tbl-th-acc" rowspan="2">계정과목</th>`+
-    colGroups.map((g,i)=>{
-      const cls=g.hi?'col-cur':'col-prev';
-      const p=g.hi?PAL.hi:PAL.base;
-      return`<th class="tbl-th-grp ${cls}" colspan="${colspan}" style="${BL(p.bd)}">${g.label}</th>`;
-    }).join('');
-
-  // ── 헤더 2행 ──
-  if(subEl){
-    const sub=(cls,bd,bl,lbl)=>
-      `<th class="tbl-th-sub ${cls}" style="${bl?BL(bd):''}">${lbl}</th>`;
-    subEl.innerHTML=colGroups.map(g=>{
-      const cls=g.hi?'col-cur':'col-prev';
-      const p=g.hi?PAL.hi:PAL.base;
-      if(!showDiff) return sub(cls,p.bd,true,'금액');
-      return sub(cls,p.bd,true,'금액')+
-        sub('col-diff',PAL.diff.bd,false,'증감')+
-        sub('col-diff',PAL.diff.bd,false,'증감률')+
-        sub(cls,p.bd,false,'이익률');
-    }).join('');
-  }
-
-  // ── 데이터 ──
-  const groupVals=colGroups.map(g=>calcVals(g.months));
-
-  function rateBadge(vObj,row){
-    if(!row.rateA||!row.rateB) return'<span class="tbl-nil">—</span>';
-    const a=vObj[row.rateA],b=vObj[row.rateB];
-    if(!b) return'<span class="tbl-nil">—</span>';
-    const rt=a/b*100;
-    const isCost=(row.k==='cogs'||row.k==='sga');
-    const good=isCost?(rt<80):(rt>0);
-    const col=good?'#0a9e6e':rt<0?'#e03030':'#cc8800';
-    return`<span class="tbl-badge" style="color:${col};background:${col}18">${rt.toFixed(1)}%</span>`;
-  }
-
-  function amtSpan(v,row){
-    const col=(row.isI&&v<0)?'#e03030':'#1a2333';
-    return`<span class="tbl-num" style="color:${col}">${fmtN(v)||'—'}</span>`;
-  }
-
-  tbody.innerHTML=RPT_ROWS.map(row=>{
-    const rowCls=row.sec?'sec':'';
-
-    const cells=colGroups.map((g,gi)=>{
-      const v=groupVals[gi];
-      const cls=g.hi?'col-cur':'col-prev';
-      const p=g.hi?PAL.hi:PAL.base;
-      const amt=amtSpan(v[row.k],row);
-      const rate=rateBadge(v,row);
-
-      if(!showDiff){
-        return`<td class="mn tbl-cell ${cls}" style="${BL(p.bd)}">${amt}</td>`;
-      }
-
-      let dAmt='<span class="tbl-nil">—</span>',dRate='<span class="tbl-nil">—</span>',dCol='#8a98aa';
-      if(gi>0){
-        const cur=v[row.k], prev=groupVals[gi-1][row.k];
-        const d=cur-prev, r=prev&&prev!==0?d/Math.abs(prev)*100:null;
-        const good=row.isI?(d>0):(d<0);
-        dCol=d===0?'#8a98aa':good?'#0a9e6e':'#e03030';
-        dAmt=`<span class="tbl-num" style="color:${dCol}">${arr(d)}${fmtN(Math.abs(d))}</span>`;
-        dRate=r!=null?`<span class="tbl-badge" style="color:${dCol};background:${dCol}18">${arr(d)}${Math.abs(r).toFixed(1)}%</span>`:'<span class="tbl-nil">—</span>';
-      }
-
-      return`<td class="mn tbl-cell ${cls}" style="${BL(p.bd)}">${amt}</td>`+
-        `<td class="mn tbl-cell col-diff">${dAmt}</td>`+
-        `<td class="mn tbl-cell col-diff">${dRate}</td>`+
-        `<td class="mn tbl-cell ${cls}">${rate}</td>`;
-    }).join('');
-
-    return`<tr class="${rowCls}"><td class="L tbl-cell-acc">${row.l}</td>${cells}</tr>`;
-  }).join('');
-}
 
 // ════════════════════════════════════════════
 // renderReport — 뷰별 분기
@@ -2287,129 +2344,45 @@ function renderCompTable(theadId,subheadId,tbodyId,colGroups,showDiff){
 function renderReport(){
   if(!Object.keys(DATA).length)return;
   if(!rptInited)initReport();
+  // 데이터 로드 후 최신 하위계정 목록으로 RPT_ROWS 재생성
+  RPT_ROWS=buildRptRows();
+  // KPI 카드 초기화 (뷰 전환 시 이전 뷰 KPI가 잔류하지 않도록)
+  document.getElementById('rpt-kpi-row').innerHTML='';
 
   if(rptView==='annual') renderAnnual();
   else if(rptView==='yoy') renderYoY();
   else renderMoM2();
 }
 
-// ── [1] 연간 비교 ──
-function renderAnnual(){
-  const dL=rLabel();
-  const curY=rptYear;
-  const prevY=String(parseInt(curY)-1);
-
-  // 기준월(슬라이서 selMonth)까지의 누적으로 비교
-  // 예: 기준월=2월 → 당년 1~2월 vs 전년 1~2월
-  const monthPad=String(rptMonth).padStart(2,'0');
-  const curMs =Object.keys(DATA).filter(m=>m.slice(0,4)===curY  && m.slice(4)<=monthPad).sort();
-  const prevMs=Object.keys(DATA).filter(m=>m.slice(0,4)===prevY && m.slice(4)<=monthPad).sort();
-
-  const curV =calcVals(curMs);
-  const prevV=prevMs.length?calcVals(prevMs):null;
-
-  const rangeLabel=`1~${parseInt(rptMonth)}월 누적`;
-  renderRptKPI(curV,prevV,`${prevY}년 ${rangeLabel}`);
-
-  // 차트 — 전년 vs 당년 누적 8개 지표 막대 비교
-  const chartKeys=['revenue','cogs','gross','sga','op_income','other_income','other_expense','net_income'];
-  const chartLabels=['매출액','매출원가','매출총손익','판관비','영업손익','영업외수익','영업외비용','당기순손익'];
-  const chartColors=['#1d6fe8','#e03030','#0a9e6e','#cc8800','#6d3fd6','#0891b2','#c05500','#1a7a5e'];
-
-  const prevV2=calcVals(prevMs.length?prevMs:['_']);
-  const datasets=[
-    {
-      label:`${prevY}년 ${rangeLabel}`,
-      data:chartKeys.map(k=>prevV2[k]/1e8),
-      backgroundColor:chartColors.map(c=>c+'44'),
-      borderColor:chartColors,borderWidth:2,borderRadius:3,
-    },
-    {
-      label:`${curY}년 ${rangeLabel}`,
-      data:chartKeys.map(k=>curV[k]/1e8),
-      backgroundColor:chartColors.map(c=>c+'cc'),
-      borderColor:chartColors,borderWidth:2,borderRadius:3,
-    }
-  ];
-
-  const annSub=`${prevY}년 vs ${curY}년 ${rangeLabel} · ${dL} · 단위: 억원`;
-  document.getElementById('ann-chart-ttl').textContent=`전년 동기 대비 누적 손익 비교`;
-  document.getElementById('ann-chart-sub').textContent=annSub;
-  document.getElementById('ann-tbl-sub').textContent=annSub;
-
-  // 막대 위 금액 레이블 플러그인
-  const annBarLabel={
-    id:'annBarLabel',
-    afterDatasetsDraw(chart){
-      const ctx=chart.ctx;
-      chart.data.datasets.forEach((ds,di)=>{
-        const meta=chart.getDatasetMeta(di);
-        if(meta.hidden)return;
-        meta.data.forEach((bar,i)=>{
-          const val=ds.data[i];
-          if(val===null||val===undefined||Math.abs(val)<0.05)return;
-          const txt=(val<0?'-':'')+Math.abs(val).toFixed(1)+'억';
-          ctx.save();
-          ctx.font='700 8.5px "JetBrains Mono",monospace';
-          ctx.textAlign='center';
-          ctx.textBaseline= val>=0 ? 'bottom' : 'top';
-          const y = val>=0 ? bar.y-3 : bar.y+3;
-          // 흰 배경
-          const tw=ctx.measureText(txt).width;
-          ctx.fillStyle='rgba(255,255,255,0.85)';
-          ctx.fillRect(bar.x-tw/2-2, val>=0?y-9:y, tw+4, 10);
-          ctx.fillStyle=ds.borderColor[i]||ds.borderColor;
-          ctx.fillText(txt, bar.x, y);
-          ctx.restore();
-        });
-      });
-    }
-  };
-
-  if(charts['ann'])charts['ann'].destroy();
-  charts['ann']=new Chart(document.getElementById('ann-chart'),{
-    type:'bar',
-    plugins:[annBarLabel],
-    data:{labels:chartLabels,datasets},
-    options:{...chartOpts(),scales:{
-      x:{grid:{display:false},ticks:{font:{size:9},color:'#1a2333'}},
-      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:v=>v+'억',font:{size:9},color:'#5a6a7a'}}
-    }}
-  });
-
-  // 테이블 — 전년금액 | 당년금액 | 증감 | 증감률 | 이익률 (단일 비교)
-  renderAnnualTable(prevY, prevMs, curY, curMs, rangeLabel);
-}
-
-// 연간 비교 전용 테이블
-// 열: 계정과목 | [전년금액·이익률] | [당년금액·이익률] | [증감·증감률]
-function renderAnnualTable(prevY, prevMs, curY, curMs, rangeLabel){
-  const prevV=calcVals(prevMs.length?prevMs:['_']);
-  const curV =calcVals(curMs.length?curMs:['_']);
-
+// ══════════════════════════════════════════════
+// 공통 비교 테이블 렌더러
+// prevLabel: 왼쪽 열 제목 / curLabel: 가운데 열 제목 / diffLabel: 오른쪽 열 제목
+// prevV, curV: calcVals() 결과
+// theadId, subheadId, tbodyId: 대상 DOM id
+// ══════════════════════════════════════════════
+function renderCompareTable(theadId, subheadId, tbodyId, prevLabel, curLabel, diffLabel, prevV, curV){
   const PAL={
-    prev: {bg:'#f8fafc', bd:'#d8e2ee', tx:'#3a4a5a'},
-    cur:  {bg:'#eef4ff', bd:'#90baff', tx:'#1d6fe8'},
-    diff: {bg:'#f4f0ff', bd:'#bfadff', tx:'#6d3fd6'},
+    prev: {bd:'#d8e2ee'},
+    cur:  {bd:'#90baff'},
+    diff: {bd:'#bfadff'},
   };
   const BL=(bd)=>`border-left:2px solid ${bd};`;
 
-  // ── 헤더 1행 ──
-  document.getElementById('ann-thead').innerHTML=
+  // 헤더 1행
+  document.getElementById(theadId).innerHTML=
     `<th class="L tbl-th-acc" rowspan="2">계정과목</th>`+
-    `<th class="tbl-th-grp col-prev" colspan="2" style="${BL(PAL.prev.bd)}">${prevY}년 ${rangeLabel}</th>`+
-    `<th class="tbl-th-grp col-cur"  colspan="2" style="${BL(PAL.cur.bd)}">${curY}년 ${rangeLabel}</th>`+
-    `<th class="tbl-th-grp col-diff" colspan="2" style="${BL(PAL.diff.bd)}">전년 대비</th>`;
+    `<th class="tbl-th-grp col-prev" colspan="2" style="${BL(PAL.prev.bd)}">${prevLabel}</th>`+
+    `<th class="tbl-th-grp col-cur"  colspan="2" style="${BL(PAL.cur.bd)}">${curLabel}</th>`+
+    `<th class="tbl-th-grp col-diff" colspan="2" style="${BL(PAL.diff.bd)}">${diffLabel}</th>`;
 
-  // ── 헤더 2행 ──
+  // 헤더 2행
   const sub=(cls,bd,bl,lbl)=>
     `<th class="tbl-th-sub ${cls}" style="${bl?BL(bd):''}">${lbl}</th>`;
-  document.getElementById('ann-subhead').innerHTML=
+  document.getElementById(subheadId).innerHTML=
     sub('col-prev',PAL.prev.bd,true,'금액')+sub('col-prev',PAL.prev.bd,false,'이익률')+
     sub('col-cur', PAL.cur.bd, true,'금액')+sub('col-cur', PAL.cur.bd, false,'이익률')+
     sub('col-diff',PAL.diff.bd,true,'증감')+sub('col-diff',PAL.diff.bd,false,'증감률');
 
-  // ── 이익률 배지 ──
   function rateBadge(vObj,row){
     if(!row.rateA||!row.rateB) return'<span class="tbl-nil">—</span>';
     const a=vObj[row.rateA],b=vObj[row.rateB];
@@ -2420,21 +2393,18 @@ function renderAnnualTable(prevY, prevMs, curY, curMs, rangeLabel){
     const col=good?'#0a9e6e':rt<0?'#e03030':'#cc8800';
     return`<span class="tbl-badge" style="color:${col};background:${col}18">${rt.toFixed(1)}%</span>`;
   }
-
-  // ── 금액 span ── 금액은 검정, 손익류 음수만 빨강
   function amtSpan(v,row){
     const col=(row.isI&&v<0)?'#e03030':'#1a2333';
     return`<span class="tbl-num" style="color:${col}">${fmtN(v)||'—'}</span>`;
   }
 
-  // ── 본문 ──
-  document.getElementById('ann-tbody').innerHTML=RPT_ROWS.map(row=>{
+  document.getElementById(tbodyId).innerHTML=RPT_ROWS.map(row=>{
     const pv=prevV[row.k], cv=curV[row.k];
     const d=cv-pv, r=pv&&pv!==0?d/Math.abs(pv)*100:null;
     const good=row.isI?(d>0):(d<0);
     const dCol=d===0?'#8a98aa':good?'#0a9e6e':'#e03030';
-
-    return`<tr class="${row.sec?'sec':''}">
+    const rowCls=(row.sec?'sec':'')+(row.isSub?' sub-row':'');
+    return`<tr class="${rowCls}">
       <td class="L tbl-cell-acc">${row.l}</td>
       <td class="mn tbl-cell col-prev" style="${BL(PAL.prev.bd)}">${amtSpan(pv,row)}</td>
       <td class="mn tbl-cell col-prev">${rateBadge(prevV,row)}</td>
@@ -2450,71 +2420,192 @@ function renderAnnualTable(prevY, prevMs, curY, curMs, rangeLabel){
   }).join('');
 }
 
+// ── [1] 연간 비교 ──
+function renderAnnual(){
+  const dL=rLabel();
+  const curY=rptYear;
+  const prevY=String(parseInt(curY)-1);
+
+  const monthPad=String(rptMonth).padStart(2,'0');
+  const curMs =Object.keys(DATA).filter(m=>m.slice(0,4)===curY  && m.slice(4)<=monthPad).sort();
+  const prevMs=Object.keys(DATA).filter(m=>m.slice(0,4)===prevY && m.slice(4)<=monthPad).sort();
+
+  const curV =calcVals(curMs);
+  const prevV=calcVals(prevMs.length?prevMs:['_']);
+
+  const rangeLabel=`1~${parseInt(rptMonth)}월 누적`;
+  renderRptKPI(curV,prevMs.length?calcVals(prevMs):null,`${prevY}년 ${rangeLabel}`);
+
+  // 차트
+  const chartKeys=['revenue','cogs','gross','sga','op_income','other_income','other_expense','net_income'];
+  const chartLabels=['매출액','매출원가','매출총손익','판관비','영업손익','영업외수익','영업외비용','당기순손익'];
+  const chartColors=['#1d6fe8','#e03030','#0a9e6e','#cc8800','#6d3fd6','#0891b2','#c05500','#1a7a5e'];
+
+  const datasets=[
+    {
+      label:`${prevY}년 ${rangeLabel}`,
+      data:chartKeys.map(k=>prevV[k]/1e8),
+      backgroundColor:chartColors.map(c=>c+'44'),
+      borderColor:chartColors,borderWidth:2,borderRadius:3,
+    },
+    {
+      label:`${curY}년 ${rangeLabel}`,
+      data:chartKeys.map(k=>curV[k]/1e8),
+      backgroundColor:chartColors.map(c=>c+'cc'),
+      borderColor:chartColors,borderWidth:2,borderRadius:3,
+    }
+  ];
+
+  const annSub=`${prevY}년 vs ${curY}년 ${rangeLabel} · ${dL} · 단위: 원`;
+  document.getElementById('ann-chart-ttl').textContent=`전년 동기 대비 누적 손익 비교`;
+  document.getElementById('ann-chart-sub').textContent=annSub;
+  document.getElementById('ann-tbl-sub').textContent=annSub;
+
+  const barLabelPlugin=makeBarLabelPlugin();
+  makeRptChart('ann','ann-chart','bar',{labels:chartLabels,datasets},{},[ makeBarLabelPlugin()]);
+
+  // 테이블
+  renderCompareTable(
+    'ann-thead','ann-subhead','ann-tbody',
+    `${prevY}년 ${rangeLabel}`, `${curY}년 ${rangeLabel}`, '전년 대비',
+    prevV, curV
+  );
+}
+
+// 막대 위 수치 레이블 플러그인 (공통)
+function makeBarLabelPlugin(){
+  return {
+    id:'barLabelPlugin',
+    afterDatasetsDraw(chart){
+      const ctx=chart.ctx;
+      chart.data.datasets.forEach((ds,di)=>{
+        const meta=chart.getDatasetMeta(di);
+        if(meta.hidden)return;
+        meta.data.forEach((bar,i)=>{
+          const val=ds.data[i];
+          if(val===null||val===undefined||Math.abs(val)<0.05)return;
+          const txt=(val<0?'-':'')+Math.abs(val).toFixed(1)+'억';
+          ctx.save();
+          ctx.font='700 8.5px "JetBrains Mono",monospace';
+          ctx.textAlign='center';
+          ctx.textBaseline=val>=0?'bottom':'top';
+          const y=val>=0?bar.y-3:bar.y+3;
+          const tw=ctx.measureText(txt).width;
+          ctx.fillStyle='rgba(255,255,255,0.85)';
+          ctx.fillRect(bar.x-tw/2-2,val>=0?y-9:y,tw+4,10);
+          ctx.fillStyle=ds.borderColor[i]||ds.borderColor;
+          ctx.fillText(txt,bar.x,y);
+          ctx.restore();
+        });
+      });
+    }
+  };
+}
+
+// 차트 안전 제거
+function safeDestroyChart(key){
+  if(charts[key]){charts[key].destroy();charts[key]=null;}
+}
+
+// 캔버스 크기 강제 설정
+function setCanvasSize(id, w, h){
+  const c=document.getElementById(id);
+  if(!c)return;
+  c.width=w; c.height=h;
+  c.style.width=w+'px'; c.style.height=h+'px';
+}
+
+// 보고서 차트 생성 헬퍼: display:none 상태도 대응
+function makeRptChart(key, canvasId, type, data, extraOpts, plugins){
+  safeDestroyChart(key);
+  // 캔버스 크기 미리 지정 (display:none이어도 Chart.js가 올바른 크기로 그림)
+  const box=document.getElementById(canvasId)?.parentElement;
+  const w=box?.offsetWidth>0 ? box.offsetWidth : (document.getElementById('rv-annual')?.offsetWidth||document.querySelector('.report-wrap')?.offsetWidth||900);
+  setCanvasSize(canvasId, w, 240);
+
+  const opts={
+    responsive:true,
+    maintainAspectRatio:false,
+    animation:false,
+    interaction:{mode:'index',intersect:false},
+    layout:{padding:{top:18}},
+    plugins:{
+      legend:{position:'bottom',labels:{font:{size:9,weight:'600'},color:'#2a3a4a',padding:10,usePointStyle:true,pointStyleWidth:12}},
+      tooltip:{backgroundColor:'rgba(255,255,255,0.97)',borderColor:'#d0d8e4',borderWidth:1,titleColor:'#1a2333',bodyColor:'#2a3a4a',padding:10,
+        callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y>=0?'':'-'}${Math.abs(ctx.parsed.y).toFixed(1)}억`}
+      },
+      ...(extraOpts?.plugins||{})
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:9},color:'#1a2333'}},
+      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:v=>v+'억',font:{size:9},color:'#5a6a7a'}},
+      ...(extraOpts?.scales||{})
+    },
+    ...extraOpts
+  };
+  delete opts.plugins?.plugins; delete opts.scales?.scales;
+
+  const chart=new Chart(document.getElementById(canvasId),{
+    type, data, options:opts, plugins:plugins||[]
+  });
+  charts[key]=chart;
+  // 생성 직후 resize 강제 호출 (display:none → display:block 전환 후 크기 재계산)
+  requestAnimationFrame(()=>{ try{chart.resize();}catch(e){} });
+  return chart;
+}
+
 // ── [2] 전년동월 비교 ──
 function renderYoY(){
   const curKey=mkKey(rptYear,rptMonth);
   const prevKey=mkKey(String(parseInt(rptYear)-1),rptMonth);
-  const curMs=allMonths(rptYear);
   const prevY=String(parseInt(rptYear)-1);
   const dL=rLabel();
   const cm=parseInt(rptMonth);
 
-  document.getElementById('yoy-chart-ttl').textContent=`전년동월 월별 추이 비교`;
-  document.getElementById('yoy-chart-sub').textContent=`${prevY}년 vs ${rptYear}년 월별 · ${dL} · 단위: 억원`;
-  document.getElementById('yoy-tbl-ttl').textContent=`전년동월 대비 상세 (${rptYear}년 ${cm}월 vs ${prevY}년 ${cm}월)`;
-  document.getElementById('yoy-tbl-sub').textContent=`${dL} · 단위: 억원`;
+  const curMsM=DATA[curKey]?[curKey]:[];
+  const prevMsM=DATA[prevKey]?[prevKey]:[];
+  const curV=calcVals(curMsM.length?curMsM:['_']);
+  const prevV=calcVals(prevMsM.length?prevMsM:['_']);
 
-  // KPI: 당월 vs 전년동월
-  const curMsM=[curKey].filter(k=>DATA[k]);
-  const prevMsM=[prevKey].filter(k=>DATA[k]);
-  renderRptKPI(calcVals(curMsM.length?curMsM:['_']),prevMsM.length?calcVals(prevMsM):null,`${prevY}년 ${cm}월`);
+  const prevLabel=`${prevY}년 ${cm}월`;
+  const curLabel=`${rptYear}년 ${cm}월`;
 
-  // 차트 — 12개월 양년 추이
-  const months12=curMs.slice(-12);
-  const labelsM=months12.map(m=>parseInt(m.slice(4))+'월');
-  const prevMonths12=months12.map(m=>mkKey(prevY,m.slice(4)));
+  document.getElementById('yoy-chart-ttl').textContent=`전년 동월 손익 비교`;
+  document.getElementById('yoy-chart-sub').textContent=`${prevLabel} vs ${curLabel} · ${dL} · 단위: 억원`;
+  document.getElementById('yoy-tbl-ttl').textContent=`전년동월 대비 상세 (${prevLabel} vs ${curLabel})`;
+  document.getElementById('yoy-tbl-sub').textContent=`${dL} · 단위: 원`;
 
-  const lineDS=(months,label,color,dash=[])=>({
-    label,
-    data:months.map(m=>DATA[m]?rV(m,'revenue')/1e8:null),
-    borderColor:color,backgroundColor:color+'18',
-    borderWidth:2,fill:dash.length?false:true,tension:.4,
-    pointRadius:3,pointHoverRadius:5,
-    pointBackgroundColor:color,
-    borderDash:dash
-  });
+  // KPI
+  renderRptKPI(curV, prevMsM.length?calcVals(prevMsM):null, prevLabel);
 
-  // 매출액 + 영업손익 양년
-  const yoyChartDS=[
-    {months:months12,     label:`${rptYear}년 매출액`, color:'#1d6fe8', dash:[]},
-    {months:prevMonths12, label:`${prevY}년 매출액`,  color:'#93c5fd', dash:[4,3]},
-  ].map(({months,label,color,dash})=>({
-    label,
-    data:months.map(m=>DATA[m]?rV(m,'revenue')/1e8:null),
-    borderColor:color,backgroundColor:color+'15',borderWidth:2,
-    fill:false,tension:.4,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:color,borderDash:dash
-  })).concat([
-    {months:months12,     label:`${rptYear}년 영업손익`, color:'#6d3fd6', dash:[]},
-    {months:prevMonths12, label:`${prevY}년 영업손익`,  color:'#c4b5fd', dash:[4,3]},
-  ].map(({months,label,color,dash})=>({
-    label,
-    data:months.map(m=>DATA[m]?rV(m,'op_income')/1e8:null),
-    borderColor:color,backgroundColor:color+'10',borderWidth:2,
-    fill:false,tension:.4,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:color,borderDash:dash
-  })));
+  // 차트 — 연간비교와 동일한 grouped bar (8개 지표)
+  const chartKeys=['revenue','cogs','gross','sga','op_income','other_income','other_expense','net_income'];
+  const chartLabels=['매출액','매출원가','매출총손익','판관비','영업손익','영업외수익','영업외비용','당기순손익'];
+  const chartColors=['#1d6fe8','#e03030','#0a9e6e','#cc8800','#6d3fd6','#0891b2','#c05500','#1a7a5e'];
 
-  if(charts['yoy'])charts['yoy'].destroy();
-  charts['yoy']=new Chart(document.getElementById('yoy-chart'),{
-    type:'line',data:{labels:labelsM,datasets:yoyChartDS},options:chartOpts()
-  });
-
-  // 테이블: 전년동월 | 당월 열 (전사 or 사업부)
-  const hasPrev=!!DATA[prevKey];
-  const colGroups=[
-    {label:`${prevY}년 ${cm}월`,months:hasPrev?[prevKey]:[],hi:false},
-    {label:`${rptYear}년 ${cm}월`,months:DATA[curKey]?[curKey]:[],hi:true},
+  const datasets=[
+    {
+      label:prevLabel,
+      data:chartKeys.map(k=>prevV[k]/1e8),
+      backgroundColor:chartColors.map(c=>c+'44'),
+      borderColor:chartColors,borderWidth:2,borderRadius:3,
+    },
+    {
+      label:curLabel,
+      data:chartKeys.map(k=>curV[k]/1e8),
+      backgroundColor:chartColors.map(c=>c+'cc'),
+      borderColor:chartColors,borderWidth:2,borderRadius:3,
+    }
   ];
-  renderCompTable('yoy-thead','yoy-subhead','yoy-tbody',colGroups,true);
+
+  makeRptChart('yoy','yoy-chart','bar',{labels:chartLabels,datasets},{},[ makeBarLabelPlugin()]);
+
+  // 테이블 — 연간비교와 동일한 형식
+  renderCompareTable(
+    'yoy-thead','yoy-subhead','yoy-tbody',
+    prevLabel, curLabel, '전년동월 대비',
+    prevV, curV
+  );
 }
 
 // ── [3] 전월 비교 ──
@@ -2528,44 +2619,49 @@ function renderMoM2(){
   const prevM=prevKey?parseInt(prevKey.slice(4)):null;
   const prevY2=prevKey?prevKey.slice(0,4):null;
   const prevLabel=prevKey?(prevY2!==rptYear?`${prevY2}년 ${prevM}월`:`${prevM}월`):'전월없음';
+  const curLabel=`${cm}월`;
 
-  document.getElementById('mom-chart-ttl').textContent='월별 손익 추이 (전월 비교)';
-  document.getElementById('mom-chart-sub').textContent=`${rptYear}년 · ${dL} · 단위: 억원`;
-  document.getElementById('mom-tbl-ttl').textContent=`전월 대비 상세 (${prevLabel} → ${cm}월)`;
-  document.getElementById('mom-tbl-sub').textContent=`${dL} · 단위: 억원`;
-
-  // KPI
   const curMsM=DATA[curKey]?[curKey]:[];
   const prevMsM=prevKey&&DATA[prevKey]?[prevKey]:[];
-  renderRptKPI(calcVals(curMsM.length?curMsM:['_']),prevMsM.length?calcVals(prevMsM):null,prevLabel);
+  const curV=calcVals(curMsM.length?curMsM:['_']);
+  const prevV=calcVals(prevMsM.length?prevMsM:['_']);
 
-  // 차트 — 연도 전체 월별 막대 (매출/영업손익)
-  const ms=allMonths(rptYear);
-  const labelsM=ms.map(m=>parseInt(m.slice(4))+'월');
-  const bgR=ms.map(m=>m===curKey?'#1d6fe8':'#93c5fd44');
-  const bgO=ms.map(m=>m===curKey?'#6d3fd6':'#c4b5fd44');
+  document.getElementById('mom-chart-ttl').textContent=`전월 대비 손익 비교`;
+  document.getElementById('mom-chart-sub').textContent=`${prevLabel} vs ${curLabel} · ${dL} · 단위: 억원`;
+  document.getElementById('mom-tbl-ttl').textContent=`전월 대비 상세 (${prevLabel} → ${curLabel})`;
+  document.getElementById('mom-tbl-sub').textContent=`${dL} · 단위: 원`;
 
-  if(charts['mom2'])charts['mom2'].destroy();
-  charts['mom2']=new Chart(document.getElementById('mom-chart'),{
-    type:'bar',
-    data:{
-      labels:labelsM,
-      datasets:[
-        {label:'매출액',    data:ms.map(m=>DATA[m]?rV(m,'revenue')/1e8:null),   backgroundColor:bgR,borderColor:'#1d6fe8',borderWidth:1.5,borderRadius:3},
-        {label:'영업손익',  data:ms.map(m=>DATA[m]?rV(m,'op_income')/1e8:null), backgroundColor:bgO,borderColor:'#6d3fd6',borderWidth:1.5,borderRadius:3},
-      ]
+  // KPI
+  renderRptKPI(curV, prevMsM.length?calcVals(prevMsM):null, prevLabel);
+
+  // 차트 — 연간비교와 동일한 grouped bar (8개 지표)
+  const chartKeys=['revenue','cogs','gross','sga','op_income','other_income','other_expense','net_income'];
+  const chartLabels=['매출액','매출원가','매출총손익','판관비','영업손익','영업외수익','영업외비용','당기순손익'];
+  const chartColors=['#1d6fe8','#e03030','#0a9e6e','#cc8800','#6d3fd6','#0891b2','#c05500','#1a7a5e'];
+
+  const datasets=[
+    {
+      label:prevLabel,
+      data:chartKeys.map(k=>prevV[k]/1e8),
+      backgroundColor:chartColors.map(c=>c+'44'),
+      borderColor:chartColors,borderWidth:2,borderRadius:3,
     },
-    options:{...chartOpts(),plugins:{...chartOpts().plugins,
-      annotation:{annotations:{line1:{type:'line',xMin:labelsM.indexOf(cm+'월'),xMax:labelsM.indexOf(cm+'월'),borderColor:'rgba(0,0,0,0.2)',borderWidth:1}}}
-    }}
-  });
-
-  // 테이블: 전월 | 당월
-  const colGroups=[
-    {label:prevLabel,   months:prevMsM, hi:false},
-    {label:`${cm}월`,   months:curMsM,  hi:true},
+    {
+      label:curLabel,
+      data:chartKeys.map(k=>curV[k]/1e8),
+      backgroundColor:chartColors.map(c=>c+'cc'),
+      borderColor:chartColors,borderWidth:2,borderRadius:3,
+    }
   ];
-  renderCompTable('mom-thead','mom-subhead','mom-tbody',colGroups,true);
+
+  makeRptChart('mom2','mom-chart','bar',{labels:chartLabels,datasets},{},[ makeBarLabelPlugin()]);
+
+  // 테이블 — 연간비교와 동일한 형식
+  renderCompareTable(
+    'mom-thead','mom-subhead','mom-tbody',
+    prevLabel, curLabel, '전월 대비',
+    prevV, curV
+  );
 }
 
 window.onload=null;
