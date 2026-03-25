@@ -246,7 +246,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8
     </div>
   </div>
   <div class="header-right">
-    <div class="category-legend" id="legend"><span class="legend-item"><span class="legend-dot" style="background:#4F6BF6"></span>회의</span><span class="legend-item"><span class="legend-dot" style="background:#E8573A"></span>업무</span><span class="legend-item"><span class="legend-dot" style="background:#D946A8"></span>마감</span><span class="legend-item"><span class="legend-dot" style="background:#10A37F"></span>개인</span><span class="legend-item"><span class="legend-dot" style="background:#8B8FA3"></span>기타</span></div>
+    <div class="category-legend" id="legend"><span class="legend-item"><span class="legend-dot" style="background:#8B8FA3"></span>경영지원실</span><span class="legend-item"><span class="legend-dot" style="background:#4F6BF6"></span>임현진</span><span class="legend-item"><span class="legend-dot" style="background:#E8573A"></span>천성민</span><span class="legend-item"><span class="legend-dot" style="background:#D946A8"></span>신다예나</span><span class="legend-item"><span class="legend-dot" style="background:#10A37F"></span>황아람</span></div>
     <div class="data-btns">
       <button class="data-btn" id="autoSaveBtn" onclick="enableAutoSave()" title="파일에 자동 저장 연결">🔗 자동저장</button>
       <button class="data-btn" onclick="exportJSON()" title="일정 내보내기">💾 백업</button>
@@ -333,7 +333,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8
         <input class="input" id="evEndDate" type="date" onchange="validateDate()">
         <div class="error-msg" id="dateError">종료일은 시작일 이후여야 합니다</div>
       </div>
-      <label class="field-label">카테고리</label>
+      <label class="field-label">작성자</label>
       <div class="cat-grid" id="catGrid"></div>
     </div>
     <div class="modal-footer">
@@ -345,17 +345,17 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8
 
 <script>
 const CAT=[
-  {id:"meeting",label:"회의",color:"#4F6BF6",bg:"#EEF0FE"},
-  {id:"task",label:"업무",color:"#E8573A",bg:"#FEF0ED"},
-  {id:"deadline",label:"마감",color:"#D946A8",bg:"#FDECF8"},
-  {id:"personal",label:"개인",color:"#10A37F",bg:"#E8F8F3"},
-  {id:"other",label:"기타",color:"#8B8FA3",bg:"#F2F3F5"}
+  {id:"mgmt",label:"경영지원실",color:"#8B8FA3",bg:"#F2F3F5"},
+  {id:"lhj",label:"임현진",color:"#4F6BF6",bg:"#EEF0FE"},
+  {id:"csm",label:"천성민",color:"#E8573A",bg:"#FEF0ED"},
+  {id:"sdy",label:"신다예나",color:"#D946A8",bg:"#FDECF8"},
+  {id:"har",label:"황아람",color:"#10A37F",bg:"#E8F8F3"}
 ];
 const DAYS=["일","월","화","수","목","금","토"];
 const MON=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
 const now=new Date();
-let cY=now.getFullYear(),cM=now.getMonth(),selDate=null,showNote=false,editId=null,selCat="meeting",eventType="day";
+let cY=now.getFullYear(),cM=now.getMonth(),selDate=null,showNote=false,editId=null,selCat="mgmt",eventType="day";
 let dragEv=null,dragSrc=null,dpOpen=false;
 let ganttEditTarget=null; // {key, id}
 
