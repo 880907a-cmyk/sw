@@ -575,22 +575,6 @@ thead .col-diff          { background:rgba(180,200,228,0.22) !important; }
 </head>
 <body>
 
-<!-- ─── 잠금 화면 ─── -->
-<div id="lock-screen">
-  <div class="lock-box">
-    <div class="lock-icon">🔒</div>
-    <div class="lock-title">(주)에스더블유헬스케어</div>
-    <div class="lock-sub">경영지표 대시보드 · 접근 제한</div>
-    <div class="lock-input-wrap">
-      <input class="lock-input" id="lock-pw" type="password" placeholder="비밀번호 입력" maxlength="20"
-        onkeydown="if(event.key==='Enter')tryUnlock()">
-      <button class="lock-toggle" id="lock-eye" onclick="togglePw()" tabindex="-1">👁</button>
-    </div>
-    <button class="lock-btn" onclick="tryUnlock()">확인</button>
-    <div class="lock-error" id="lock-err"></div>
-    <div class="lock-footer">Unauthorized access is prohibited</div>
-  </div>
-</div>
 <div class="app">
 
 <!-- ─── 헤더 ─── -->
@@ -2047,78 +2031,10 @@ window.addEventListener('resize',()=>{
   resizeTimer=setTimeout(()=>{updateSlicerTop();render();},200);
 });
 
-// ════ 잠금 화면 (PBKDF2 + 브루트포스 방지) ════
-(function(){
-  // PBKDF2-HMAC-SHA256, 310000회 반복, salt: SWH_DASHBOARD_2025
-  // password: 3907
-  const STORED_HASH='39a17d1a5da78fd2dc4df7b6ccbc03b3a0f3cb47825e7c2c1f7ab66225e325b9';
-  const SALT='SWH_DASHBOARD_2025';
-  const ITERATIONS=310000;
-  let failCount=0, lockUntil=0;
-
-  async function pbkdf2Hash(pw){
-    const enc=new TextEncoder();
-    const key=await crypto.subtle.importKey('raw',enc.encode(pw),{name:'PBKDF2'},false,['deriveBits']);
-    const bits=await crypto.subtle.deriveBits(
-      {name:'PBKDF2',salt:enc.encode(SALT),iterations:ITERATIONS,hash:'SHA-256'},
-      key, 256
-    );
-    return Array.from(new Uint8Array(bits)).map(b=>b.toString(16).padStart(2,'0')).join('');
-  }
-
-  window.tryUnlock=async function(){
-    const now=Date.now();
-    const err=document.getElementById('lock-err');
-    // 잠금 시간 체크
-    if(now<lockUntil){
-      const sec=Math.ceil((lockUntil-now)/1000);
-      err.textContent=`${sec}초 후 다시 시도하세요.`;
-      return;
-    }
-    const pw=document.getElementById('lock-pw').value;
-    if(!pw){err.textContent='비밀번호를 입력해주세요.';return;}
-    // 로딩 표시
-    const btn=document.querySelector('.lock-btn');
-    btn.textContent='확인 중…';btn.disabled=true;
-    try{
-      const h=await pbkdf2Hash(pw);
-      if(h===STORED_HASH){
-        failCount=0;
-        document.getElementById('lock-screen').classList.add('hidden');
-        if(typeof init==='function')init();
-      } else {
-        failCount++;
-        const inp=document.getElementById('lock-pw');
-        inp.value='';inp.focus();
-        if(failCount>=5){
-          lockUntil=Date.now()+30000; // 30초 잠금
-          err.textContent='5회 실패 — 30초 후 다시 시도하세요.';
-          failCount=0;
-          let t=setInterval(()=>{
-            const s=Math.ceil((lockUntil-Date.now())/1000);
-            if(s<=0){clearInterval(t);err.textContent='';}
-            else err.textContent=`${s}초 후 다시 시도하세요.`;
-          },1000);
-        } else {
-          err.textContent=`비밀번호가 올바르지 않습니다. (${failCount}/5)`;
-          setTimeout(()=>{if(failCount<5)err.textContent='';},3000);
-        }
-      }
-    }finally{
-      btn.textContent='확인';btn.disabled=false;
-    }
-  };
-  window.togglePw=function(){
-    const inp=document.getElementById('lock-pw');
-    const eye=document.getElementById('lock-eye');
-    if(inp.type==='password'){inp.type='text';eye.textContent='🙈';}
-    else{inp.type='password';eye.textContent='👁';}
-  };
-  window.onload=null;
-  document.addEventListener('DOMContentLoaded',()=>{
-    document.getElementById('lock-pw').focus();
-  });
-})();
+// ════ 자동 초기화 (잠금 해제) ════
+document.addEventListener('DOMContentLoaded',()=>{
+  if(typeof init==='function') init();
+});
 
 
 // ════════════════════════════════════════════
