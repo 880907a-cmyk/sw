@@ -234,9 +234,10 @@
     position: relative;
     background: #f4f6f9;
   }
-  .content iframe {
+  .content .page-frame {
     width: 100%; height: 100%;
     border: none; display: block;
+    position: absolute; inset: 0;
   }
 
   /* Loading */
@@ -641,8 +642,10 @@
     <div class="loading-text">페이지를 불러오는 중...</div>
   </div>
 
-  <!-- Page iframe -->
-  <iframe id="pageFrame" style="display:none;"></iframe>
+  <!-- Persistent iframes — one per page, loaded once -->
+  <iframe id="frame-dashboard" class="page-frame" style="display:none;"></iframe>
+  <iframe id="frame-work" class="page-frame" style="display:none;"></iframe>
+  <iframe id="frame-pcare" class="page-frame" style="display:none;"></iframe>
 </main>
 
 <script>
@@ -722,11 +725,22 @@
 </script>
 
 <script>
-  const frame     = document.getElementById('pageFrame');
   const loader    = document.getElementById('loader');
   const welcome   = document.getElementById('welcome');
   const pip       = document.getElementById('pip');
   const navItems  = document.querySelectorAll('.sidebar-nav .nav-item');
+  const allFrames = document.querySelectorAll('.page-frame');
+
+  // Map page filenames to iframe IDs
+  const frameMap = {
+    'dashboard.html': 'frame-dashboard',
+    'work.html':      'frame-work',
+    'pcare.html':     'frame-pcare'
+  };
+
+  // Track which pages have been loaded
+  const loaded = {};
+  let activeFrame = null;
 
   function updatePip(idx) {
     pip.style.top = (70 + idx * 46 + 13) + 'px';
@@ -736,25 +750,42 @@
   function navigate(el) {
     const page = el.dataset.page;
     const idx  = parseInt(el.dataset.idx);
+    const frameId = frameMap[page];
+    const frame = document.getElementById(frameId);
 
+    // Update sidebar active state
     navItems.forEach(n => n.classList.remove('active'));
     el.classList.add('active');
     updatePip(idx);
 
+    // Hide welcome
     welcome.classList.add('hidden');
-    loader.classList.remove('hidden');
-    frame.style.display = 'block';
-    frame.src = page + '?v=' + Date.now();
+
+    // Hide all iframes
+    allFrames.forEach(f => f.style.display = 'none');
+
+    // First visit: load the page & show loader
+    if (!loaded[page]) {
+      loader.classList.remove('hidden');
+      frame.src = page + '?v=' + Date.now();
+      frame.addEventListener('load', function onLoad() {
+        frame.removeEventListener('load', onLoad);
+        loaded[page] = true;
+        loader.classList.add('hidden');
+        frame.style.display = 'block';
+      });
+    } else {
+      // Already loaded: just show it instantly
+      frame.style.display = 'block';
+    }
+
+    activeFrame = frame;
   }
 
   function navigateByPage(page) {
     const el = document.querySelector(`.nav-item[data-page="${page}"]`);
     if (el) navigate(el);
   }
-
-  frame.addEventListener('load', () => {
-    setTimeout(() => loader.classList.add('hidden'), 250);
-  });
 </script>
 
 </body>
