@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>맞춤형 건강기능식품 대시보드</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Malgun Gothic','맑은 고딕',sans-serif;background:#f0f4f8;color:#1a202c;min-width:1200px;font-size:13px;}
+
+  .header{background:linear-gradient(135deg,#1e3a5f 0%,#2d6a9f 100%);color:white;padding:18px 30px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+  .header h1{font-size:20px;font-weight:700;}
+  .header .sub{font-size:11px;opacity:.75;margin-top:3px;}
+  .badge-range{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:20px;font-size:11px;}
+
+  /* ── TABS ── */
+  .tab-bar{background:white;border-bottom:2px solid #e2e8f0;display:flex;padding:0 24px;box-shadow:0 2px 6px rgba(0,0,0,.05);position:sticky;top:var(--tab-top,62px);z-index:99;}
+  .tab-btn{padding:14px 24px;font-size:13px;font-weight:700;color:#718096;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;}
+  .tab-btn:hover{color:#2d6a9f;}
+  .tab-btn.active{color:#2d6a9f;border-bottom-color:#2d6a9f;}
+  .tab-pane{display:none;}
+  .tab-pane.active{display:block;}
+
+  /* ── FILTERS ── */
+  .sticky-filters{position:sticky;top:var(--filter-top,109px);z-index:98;background:white;border-bottom:2px solid #e2e8f0;box-shadow:0 2px 6px rgba(0,0,0,.07);}
+  .filters{background:white;padding:12px 24px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;}
+  .filters-hidden{display:none;}
+  .fg{display:flex;flex-direction:column;gap:3px;}
+  .fg label{font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.5px;}
+  select{padding:7px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;color:#2d3748;background:#f7fafc;cursor:pointer;min-width:130px;}
+  select:focus{outline:none;border-color:#2d6a9f;background:white;}
+  .btn{padding:7px 16px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+  .btn-reset{background:#e2e8f0;color:#4a5568;}
+  .btn-reset:hover{background:#cbd5e0;}
+
+  /* ── KPI ── */
+  .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:14px 24px 10px;}
+  .kpi{background:white;border-radius:10px;padding:13px 15px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid #2d6a9f;}
+
+  .kpi.g{border-left-color:#38a169;} .kpi.o{border-left-color:#dd6b20;}
+  .kpi.p{border-left-color:#805ad5;} .kpi.t{border-left-color:#319795;}
+  .kpi.r{border-left-color:#e53e3e;}
+  .kpi-label{font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;}
+  .kpi-val{font-size:17px;font-weight:700;color:#1a202c;line-height:1.2;}
+  .kpi-sub{font-size:10px;color:#a0aec0;margin-top:2px;}
+
+  /* ── CHART ── */
+  .chart-wrap{padding:14px 24px;}
+  .chart-card{background:white;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:16px 18px;}
+  .chart-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+  .chart-title{font-size:13px;font-weight:700;color:#2d3748;}
+  .slicer-grp{display:flex;gap:6px;flex-wrap:wrap;}
+  .sl-btn{padding:4px 12px;border-radius:20px;border:1.5px solid #cbd5e0;background:white;font-size:11px;font-weight:700;cursor:pointer;color:#4a5568;transition:all .15s;user-select:none;}
+  .sl-btn.on{color:white;border-color:transparent;}
+  .sl-btn[data-k="결제금액"].on{background:#2d6a9f;}
+  .sl-btn[data-k="배송비"].on{background:#dd6b20;}
+  .sl-btn[data-k="합계건수"].on{background:#e53e3e;}
+  .sl-btn[data-k="유료건수"].on{background:#38a169;}
+  .sl-btn[data-k="무료건수"].on{background:#805ad5;}
+  .sl-btn[data-mk="결제금액"].on{background:#2d6a9f;}
+  .sl-btn[data-mk="합계건수"].on{background:#e53e3e;}
+  .sl-btn[data-mk="유료건수"].on{background:#38a169;}
+  .sl-btn[data-mk="무료건수"].on{background:#805ad5;}
+
+  /* ── TABLES ── */
+  .sec{padding:0 24px 14px;}
+  .sum-layout{display:flex;gap:16px;align-items:stretch;}
+  .sum-table-wrap{flex:0 0 60%;min-width:0;max-width:60%;max-height:600px;overflow-y:auto;border-radius:10px;}
+  .sum-chart-wrap{flex:0 0 40%;min-width:0;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.10);border:1.5px solid #b0bec5;padding:16px 18px;overflow:hidden;max-height:600px;display:flex;flex-direction:column;}
+  .sum-chart-title{font-size:12px;font-weight:700;color:#2d3748;margin-bottom:10px;}
+  #sumBarChart{flex:1 1 0;min-height:0;}
+  .sum-chart-slicer{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .sc-btn{padding:3px 10px;border-radius:20px;border:1.5px solid #cbd5e0;background:white;font-size:11px;font-weight:600;cursor:pointer;color:#4a5568;transition:all .15s;}
+  .sc-btn.on{color:white;border-color:transparent;}
+  .sc-btn[data-m="tot"].on{background:#2d6a9f;}
+  .sc-btn[data-m="cnt"].on{background:#e53e3e;}
+  .sc-btn[data-m="paid"].on{background:#38a169;}
+  .sc-btn[data-m="free"].on{background:#805ad5;}
+  .sec-title{font-size:13px;font-weight:700;color:#2d3748;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .tcard{background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.10);overflow:hidden;border:1.5px solid #b0bec5;outline:1.5px solid #b0bec5;outline-offset:-1px;}
+  .thead-row{padding:11px 16px;border-bottom:1.5px solid #cbd5e0;display:flex;justify-content:space-between;align-items:center;}
+  .thead-row h3{font-size:12px;font-weight:700;color:#2d3748;}
+  .rc{font-size:11px;color:#718096;}
+  .twrap{overflow-x:auto;}
+  .twrap-cmp{overflow-x:auto;width:100%;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  thead th{padding:6px 8px;font-weight:700;color:#4a5568;font-size:11px;border-bottom:2px solid #cbd5e0;border-right:1px solid #e2e8f0;border-top:none;white-space:normal;word-break:keep-all;cursor:pointer;user-select:none;text-align:center;background:#f7fafc;min-width:60px;line-height:1.3;}
+  thead th:hover{background:#edf2f7;}
+  thead th.l{text-align:left;}
+  .gp{background:#ede9fe;border-bottom:2px solid #6b46c1 !important;border-right:1px solid #c4b5fd;color:#553c9a;white-space:normal;word-break:keep-all;text-align:center;}
+  .gc{background:#dbeafe;border-bottom:2px solid #2b6cb0 !important;border-right:1px solid #93c5fd;color:#1a4f72;white-space:normal;word-break:keep-all;text-align:center;}
+  .gd{background:#dcfce7;border-bottom:2px solid #276749 !important;border-right:1px solid #86efac;color:#1c4532;white-space:normal;word-break:keep-all;text-align:center;}
+  .cgh{text-align:center;font-size:11px;font-weight:700;padding:5px 0;border-bottom:1px solid #e2e8f0;border-top:1.5px solid #b0bec5;}
+  .cgh.p{background:#ede9fe;color:#553c9a;font-weight:800;border-left:2px solid #b0bec5;border-right:1px solid #ddd6fe;}.cgh.c{background:#dbeafe;color:#1a4f72;font-weight:800;border-left:2px solid #b0bec5;border-right:1px solid #bfdbfe;}.cgh.d{background:#dcfce7;color:#1c4532;font-weight:800;border-left:2px solid #b0bec5;}
+  tbody tr{border-bottom:1px solid #e8edf2;}
+  tbody tr:hover{background:#ebf4ff;}
+  tbody td{padding:7px 10px;text-align:right;border-right:1px solid #edf1f5;}
+  thead th:last-child{border-right:none !important;}
+  tbody td:last-child{border-right:none !important;}
+  .cgh:last-child{border-right:none !important;}
+  tbody td.l{text-align:left;font-weight:500;white-space:nowrap;}
+  .total-row td{background:#f0f4f8;font-weight:700;border-top:2px solid #cbd5e0;border-bottom:2px solid #cbd5e0;}
+  .dp{color:#276749;font-weight:700;} .dn{color:#c53030;font-weight:700;} .dz{color:#a0aec0;}
+  .bpaid{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;min-width:36px;text-align:center;background:#dbeafe;color:#1a4f72;border:1px solid #90cdf4;}
+  .bfree{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;min-width:36px;text-align:center;background:#ede9fe;color:#553c9a;border:1px solid #b794f4;}
+  .bcnt{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;min-width:36px;text-align:center;background:#f1f5f9;color:#334155;border:1px solid #94a3b8;}
+  .sep-prev{border-left:2px solid #b0bec5 !important;}
+  .sep-cur{border-left:2px solid #b0bec5 !important;}
+  .sep-diff{border-left:2px solid #b0bec5 !important;}
+  .sep-nm{border-right:2px solid #b0bec5 !important;}
+
+  /* ── PRINT ── */
+  .btn-print{background:#2d6a9f;color:white;padding:7px 16px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;}
+  .btn-print:hover{background:#1e3a5f;}
+  @media print{
+    /* ── 페이지 설정: A4 가로, 여백 최소 ── */
+    @page{size:A4 landscape;margin:5mm 6mm;}
+
+    /* ── 숨길 요소 ── */
+    .sticky-filters,.btn-print,.btn-reset,
+    .tab-pane:not(.active){display:none!important;}
+
+    /* ── 전체 레이아웃 ── */
+    html,body{
+      width:277mm!important;        /* A4 landscape 가로 - 여백 */
+      min-width:unset!important;
+      background:white!important;
+      margin:0!important;padding:0!important;
+      font-size:8px!important;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+
+    /* ── 헤더 ── */
+    .header{
+      position:static!important;
+      background:linear-gradient(135deg,#1e3a5f 0%,#2d6a9f 100%)!important;
+      padding:6px 14px!important;
+    }
+    .header h1{font-size:13px!important;}
+    .header .sub{font-size:9px!important;}
+    .badge-range{font-size:9px!important;padding:2px 8px!important;}
+
+    /* ── 탭 바 ── */
+    .tab-bar{
+      position:static!important;
+      box-shadow:none!important;
+      border-bottom:1.5px solid #2d6a9f!important;
+      padding:0 10px!important;
+      display:flex!important;justify-content:space-between!important;align-items:center!important;
+    }
+    .tab-btn{display:none!important;}
+    .tab-btn.active{
+      display:block!important;color:#2d6a9f!important;
+      font-size:11px!important;font-weight:700!important;
+      padding:4px 0!important;border-bottom:none!important;
+    }
+    .slicer-grp{display:flex!important;gap:3px!important;flex-wrap:wrap!important;}
+    .sl-btn{display:none!important;}
+    .sl-btn.on{
+      display:inline-block!important;padding:1px 6px!important;
+      font-size:8px!important;border-radius:8px!important;border:none!important;
+    }
+
+    /* ── KPI ── */
+    .kpi-grid{
+      display:grid!important;grid-template-columns:repeat(6,1fr)!important;
+      gap:3px!important;padding:4px 6px!important;
+    }
+    .kpi{padding:4px 6px!important;box-shadow:none!important;border:1px solid #ddd!important;}
+    .kpi-label{font-size:8px!important;}
+    .kpi-val{font-size:11px!important;}
+    .kpi-sub{font-size:7px!important;}
+
+    /* ── 섹션/카드 ── */
+    .sec{padding:0 4px 5px!important;}
+    .sec-title{font-size:9px!important;margin-bottom:3px!important;}
+    .thead-row{padding:4px 8px!important;}
+    .thead-row h3{font-size:9px!important;}
+    .rc{font-size:8px!important;}
+    .tcard{
+      box-shadow:none!important;
+      border:1.5px solid #b0bec5!important;
+      overflow:hidden!important;
+      outline:1.5px solid #b0bec5!important;
+    }
+
+    /* ── 차트 ── */
+    .chart-card{box-shadow:none!important;border:1px solid #ddd!important;break-inside:avoid;}
+    .chart-wrap{padding:2px 4px!important;}
+    canvas{max-height:130px!important;max-width:100%!important;}
+
+    /* ── 테이블 핵심: 폭 맞춤 ── */
+    .twrap,.twrap-cmp{overflow:visible!important;width:100%!important;}
+    table{
+      font-size:7.5px!important;
+      width:100%!important;
+      border-collapse:collapse!important;
+      table-layout:fixed!important;   /* 고정 폭으로 A4에 맞게 압축 */
+    }
+    /* 비교표만 컬럼 폭 균등 배분 */
+    #cmpBody~* th,#cmpBody th{word-break:break-all!important;}
+    thead th{
+      padding:2px 3px!important;
+      font-size:7.5px!important;
+      white-space:normal!important;
+      word-break:keep-all!important;
+      line-height:1.2!important;
+      min-width:unset!important;
+    }
+    tbody td{
+      padding:2px 3px!important;
+      font-size:7.5px!important;
+      white-space:nowrap!important;
+    }
+    tbody td.l{
+      max-width:80px!important;
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+      white-space:nowrap!important;
+    }
+    tbody tr{break-inside:avoid;}
+
+    /* 배지 압축 */
+    .bpaid,.bfree,.bcnt{
+      padding:1px 3px!important;
+      font-size:7px!important;
+      min-width:24px!important;
+    }
+
+    /* 섹션 분리 방지 */
+    .sec{break-inside:auto!important;}
+    .tcard{break-inside:auto!important;}
+  }
+
+  /* ── LOADING ── */
+  #loadingOverlay{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:linear-gradient(135deg,#1e3a5f 0%,#2d6a9f 100%);
+    z-index:9999;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:16px;
+  }
+  .loading-spinner{
+    width:48px;height:48px;border:5px solid rgba(255,255,255,.3);
+    border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;
+  }
+  .loading-text{color:white;font-size:15px;font-weight:600;}
+  .loading-sub{color:rgba(255,255,255,.7);font-size:12px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">📊 구글 시트에서 데이터를 불러오는 중...</div>
+  <div class="loading-sub">잠시만 기다려 주세요</div>
+</div>
+
+<div class="header">
+  <div>
+    <h1>🏥 맞춤형 건강기능식품 통계 대시보드</h1>
+  </div>
+  <div class="badge-range" id="dataRange">-</div>
+</div>
+
+<!-- TAB BAR + 인쇄 버튼 -->
+<div class="tab-bar" style="justify-content:space-between;align-items:center;">
+  <div style="display:flex;">
+    <button class="tab-btn active" onclick="switchTab('tab-total', this)">📊 Total</button>
+    <button class="tab-btn" onclick="switchTab('tab-period', this)">📅 하루건식 기간별</button>
+    <button class="tab-btn" onclick="switchTab('tab-compare', this)">🔀 하루건식 전월비교</button>
+    <button class="tab-btn" onclick="switchTab('tab-medicok', this)">💊 메디콕 기간별</button>
+  </div>
+  <button class="btn-print" onclick="printCurrentTab()">🖨️ 인쇄</button>
+</div>
+
+<!-- 고정 필터 영역 -->
+<div class="sticky-filters">
+  <!-- Total 탭 필터 -->
+  <div id="filter-total" class="filters">
+    <div class="fg"><label>시작월</label><select id="totalStart" onchange="totalRender()"></select></div>
+    <div class="fg"><label>종료월</label><select id="totalEnd" onchange="totalRender()"></select></div>
+    <button class="btn btn-reset" onclick="totalReset()">초기화</button>
+  </div>
+  <!-- 기간별 탭 필터 -->
+  <div id="filter-period" class="filters filters-hidden">
+    <div class="fg"><label>시작월</label><select id="chartStart" onchange="renderChart()"></select></div>
+    <div class="fg"><label>종료월</label><select id="chartEnd" onchange="renderChart()"></select></div>
+    <div class="fg"><label>병원명</label><select id="chartHosp" onchange="renderChart()"><option value="all">전체 병원</option></select></div>
+    <div class="slicer-grp" style="align-self:flex-end;">
+      <button class="sl-btn on" data-k="결제금액" onclick="toggleSl(this)">결제금액</button>
+      <button class="sl-btn on" data-k="배송비" onclick="toggleSl(this)">배송비</button>
+      <button class="sl-btn on" data-k="합계건수" onclick="toggleSl(this)">합계<br>건수</button>
+      <button class="sl-btn on" data-k="유료건수" onclick="toggleSl(this)">유료<br>건수</button>
+      <button class="sl-btn on" data-k="무료건수" onclick="toggleSl(this)">무료<br>건수</button>
+    </div>
+    <button class="btn btn-reset" onclick="resetPeriod()">초기화</button>
+  </div>
+  <!-- 메디콕 탭 필터 -->
+  <div id="filter-medicok" class="filters filters-hidden">
+    <div class="fg"><label>시작월</label><select id="mkStart" onchange="mkRenderChart()"></select></div>
+    <div class="fg"><label>종료월</label><select id="mkEnd" onchange="mkRenderChart()"></select></div>
+    <div class="fg"><label>결제수단</label><select id="mkType" onchange="mkRenderChart()"><option value="all">전체</option></select></div>
+    <div class="slicer-grp" style="align-self:flex-end;">
+      <button class="sl-btn on" data-mk="결제금액" onclick="mkToggleSl(this)">결제금액</button>
+      <button class="sl-btn on" data-mk="합계건수" onclick="mkToggleSl(this)">합계<br>건수</button>
+      <button class="sl-btn on" data-mk="유료건수" onclick="mkToggleSl(this)">유료<br>건수</button>
+      <button class="sl-btn on" data-mk="무료건수" onclick="mkToggleSl(this)">무료<br>건수</button>
+    </div>
+    <button class="btn btn-reset" onclick="mkReset()">초기화</button>
+  </div>
+  <!-- 전월비교 탭 필터 -->
+  <div id="filter-compare" class="filters filters-hidden">
+    <div class="fg"><label>기준월</label><select id="selMonth" onchange="applyFilters()"></select></div>
+    <div class="fg"><label>병원명</label><select id="selHosp" onchange="applyFilters()"><option value="all">전체 병원</option></select></div>
+    <button class="btn btn-reset" onclick="resetFilters()">초기화</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     탭 0: Total
+════════════════════════════════════════════ -->
+<div id="tab-total" class="tab-pane active">
+
+  <!-- KPI 비교 카드 -->
+  <div style="padding:14px 24px 10px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+    <!-- 결제금액 -->
+    <div class="tcard" style="padding:14px 16px;">
+      <div style="font-size:11px;font-weight:700;color:#718096;margin-bottom:8px;">💰 결제금액 합계</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+        <div><div style="font-size:10px;color:#16a34a;font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-haru-pay">-</div></div>
+        <div style="font-size:13px;font-weight:900;color:#94a3b8;letter-spacing:1px;padding:0 6px;">VS</div>
+        <div style="text-align:right;"><div style="font-size:10px;color:#1d4ed8;font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-mk-pay">-</div></div>
+      </div>
+    </div>
+    <!-- 합계건수 -->
+    <div class="tcard" style="padding:14px 16px;">
+      <div style="font-size:11px;font-weight:700;color:#718096;margin-bottom:8px;">📦 합계 건수</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+        <div><div style="font-size:10px;color:#16a34a;font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-haru-cnt">-</div></div>
+        <div style="font-size:13px;font-weight:900;color:#94a3b8;letter-spacing:1px;padding:0 6px;">VS</div>
+        <div style="text-align:right;"><div style="font-size:10px;color:#1d4ed8;font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-mk-cnt">-</div></div>
+      </div>
+    </div>
+    <!-- 유료건수 -->
+    <div class="tcard" style="padding:14px 16px;">
+      <div style="font-size:11px;font-weight:700;color:#718096;margin-bottom:8px;">✅ 유료 건수</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+        <div><div style="font-size:10px;color:#16a34a;font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-haru-paid">-</div></div>
+        <div style="font-size:13px;font-weight:900;color:#94a3b8;letter-spacing:1px;padding:0 6px;">VS</div>
+        <div style="text-align:right;"><div style="font-size:10px;color:#1d4ed8;font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-mk-paid">-</div></div>
+      </div>
+    </div>
+    <!-- 무료건수 -->
+    <div class="tcard" style="padding:14px 16px;">
+      <div style="font-size:11px;font-weight:700;color:#718096;margin-bottom:8px;">🆓 무료 건수</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+        <div><div style="font-size:10px;color:#16a34a;font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-haru-free">-</div></div>
+        <div style="font-size:13px;font-weight:900;color:#94a3b8;letter-spacing:1px;padding:0 6px;">VS</div>
+        <div style="text-align:right;"><div style="font-size:10px;color:#1d4ed8;font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-mk-free">-</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 비교 그래프 2개 나란히 -->
+  <div style="padding:0 24px 14px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <!-- 결제금액 추이 -->
+    <div class="chart-card">
+      <div class="chart-top">
+        <div class="chart-title">💰 결제금액 월별 비교</div>
+        <span id="tot-range-label" style="font-size:11px;color:#718096;"></span>
+      </div>
+      <canvas id="totPayChart" height="120"></canvas>
+    </div>
+    <!-- 건수 추이 -->
+    <div class="chart-card">
+      <div class="chart-top">
+        <div class="chart-title">📦 합계건수 월별 비교</div>
+      </div>
+      <canvas id="totCntChart" height="120"></canvas>
+    </div>
+  </div>
+
+  <!-- 월별 비교 도표 -->
+  <div class="sec" style="padding-bottom:28px;">
+    <div class="sec-title">📋 맞춤형 건강기능식품 현황</div>
+    <div class="tcard">
+      <div class="thead-row">
+        <h3 id="tot-table-title">-</h3>
+        <span class="rc" id="tot-table-cnt">-</span>
+      </div>
+      <div class="twrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="l" rowspan="2" style="vertical-align:middle;min-width:90px;border-right:2px solid #b0bec5;">월</th>
+              <th colspan="4" style="background:#f1f5f9;color:#334155;font-weight:800;text-align:center;border-bottom:2px solid #64748b;border-right:2px solid #b0bec5;">합계</th>
+              <th colspan="4" style="background:#dcfce7;color:#166534;font-weight:800;text-align:center;border-bottom:2px solid #16a34a;border-right:2px solid #b0bec5;">하루건식</th>
+              <th colspan="4" style="background:#dbeafe;color:#1e40af;font-weight:800;text-align:center;border-bottom:2px solid #1d4ed8;">메디콕</th>
+            </tr>
+            <tr>
+              <th style="background:#f1f5f9;color:#334155;">결제금액</th>
+              <th style="background:#f1f5f9;color:#334155;">무료<br>건수</th>
+              <th style="background:#f1f5f9;color:#334155;">유료<br>건수</th>
+              <th style="background:#f1f5f9;color:#334155;border-right:2px solid #b0bec5;">합계<br>건수</th>
+              <th style="background:#dcfce7;color:#166534;">결제금액</th>
+              <th style="background:#dcfce7;color:#166534;">무료<br>건수</th>
+              <th style="background:#dcfce7;color:#166534;">유료<br>건수</th>
+              <th style="background:#dcfce7;color:#166534;border-right:2px solid #b0bec5;">합계<br>건수</th>
+              <th style="background:#dbeafe;color:#1e40af;">결제금액</th>
+              <th style="background:#dbeafe;color:#1e40af;">무료<br>건수</th>
+              <th style="background:#dbeafe;color:#1e40af;">유료<br>건수</th>
+              <th style="background:#dbeafe;color:#1e40af;">합계<br>건수</th>
+            </tr>
+          </thead>
+          <tbody id="totTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     탭 1: 기간별 데이터
+════════════════════════════════════════════ -->
+<div id="tab-period" class="tab-pane">
+
+
+  <!-- 추이 차트 -->
+  <div class="chart-wrap">
+    <div class="chart-card">
+      <div class="chart-top">
+        <div class="chart-title">📈 기간별 월별 추이</div>
+        <span id="period-range-label" style="font-size:11px;color:#718096;"></span>
+      </div>
+      <canvas id="trendChart" height="85"></canvas>
+    </div>
+  </div>
+
+  <!-- 기간별 월별 합계표 -->
+  <div class="sec" style="padding-bottom:28px;">
+    <div class="sec-title">📅 기간별 월별 합계표 <span id="range-label" style="font-weight:400;color:#718096;font-size:12px;"></span></div>
+    <div class="tcard">
+      <div class="thead-row">
+        <h3 id="range-title">-</h3>
+        <span class="rc" id="range-cnt">-</span>
+      </div>
+      <div class="twrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="l" style="min-width:90px;">월</th>
+              <th>결제금액</th>
+              <th>배송비</th>
+              <th>총결제<br>금액</th>
+              <th>평균단가<br>(전체)</th>
+              <th>평균단가<br>(유료)</th>
+              <th>무료<br>건수</th>
+              <th>유료<br>건수</th>
+              <th>합계<br>건수</th>
+            </tr>
+          </thead>
+          <tbody id="rangeBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     탭 3: 메디콕
+════════════════════════════════════════════ -->
+<div id="tab-medicok" class="tab-pane">
+  <!-- KPI -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);">
+    <div class="kpi g"><div class="kpi-label">결제금액 합계</div><div class="kpi-val" id="mk-kv-pay">-</div><div class="kpi-sub" id="mk-ks-pay">-</div></div>
+    <div class="kpi"><div class="kpi-label">총 건수</div><div class="kpi-val" id="mk-kv-cnt">-</div><div class="kpi-sub" id="mk-ks-cnt">-</div></div>
+    <div class="kpi t"><div class="kpi-label">유료 건수</div><div class="kpi-val" id="mk-kv-paid">-</div><div class="kpi-sub" id="mk-ks-paid">-</div></div>
+    <div class="kpi r"><div class="kpi-label">무료 건수</div><div class="kpi-val" id="mk-kv-free">-</div><div class="kpi-sub" id="mk-ks-free">-</div></div>
+    <div class="kpi o"><div class="kpi-label">유료 비율</div><div class="kpi-val" id="mk-kv-rate">-</div><div class="kpi-sub" id="mk-ks-rate">-</div></div>
+  </div>
+
+  <!-- 추이 차트 -->
+  <div class="chart-wrap">
+    <div class="chart-card">
+      <div class="chart-top">
+        <div class="chart-title">📈 메디콕 월별 추이</div>
+        <span id="mk-range-label" style="font-size:11px;color:#718096;"></span>
+      </div>
+      <canvas id="mkTrendChart" height="85"></canvas>
+    </div>
+  </div>
+
+  <!-- 월별 합계표 -->
+  <div class="sec" style="padding-bottom:12px;">
+    <div class="sec-title">📅 메디콕 월별 합계표</div>
+    <div class="tcard">
+      <div class="thead-row">
+        <h3 id="mk-range-title">-</h3>
+        <span class="rc" id="mk-range-cnt">-</span>
+      </div>
+      <div class="twrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="l" style="min-width:90px;">월</th>
+              <th>결제금액</th>
+              <th>평균단가(전체)</th>
+              <th>평균단가(유료)</th>
+              <th>무료<br>건수</th>
+              <th>유료<br>건수</th>
+              <th>합계<br>건수</th>
+            </tr>
+          </thead>
+          <tbody id="mkRangeBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 주문형태별 집계 -->
+  <div class="sec" style="padding-bottom:28px;">
+    <div class="sec-title">💳 결제수단별 집계표</div>
+    <div class="tcard">
+      <div class="thead-row">
+        <h3 id="mk-type-title">-</h3>
+        <span class="rc" id="mk-type-cnt">-</span>
+      </div>
+      <div class="twrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="l" style="min-width:140px;">결제수단</th>
+              <th>결제금액</th>
+              <th>평균단가(전체)</th>
+              <th>평균단가(유료)</th>
+              <th>무료<br>건수</th>
+              <th>유료<br>건수</th>
+              <th>합계<br>건수</th>
+            </tr>
+          </thead>
+          <tbody id="mkTypeBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     탭 2: 전월비교 데이터
+════════════════════════════════════════════ -->
+<div id="tab-compare" class="tab-pane">
+
+
+  <!-- KPI -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(7,1fr);">
+    <div class="kpi g"><div class="kpi-label">결제금액 합계</div><div class="kpi-val" id="kv-pay">-</div><div class="kpi-sub" id="ks-pay">-</div></div>
+    <div class="kpi o"><div class="kpi-label">배송비 합계</div><div class="kpi-val" id="kv-ship">-</div><div class="kpi-sub" id="ks-ship">-</div></div>
+    <div class="kpi p"><div class="kpi-label">총 결제금액</div><div class="kpi-val" id="kv-tot">-</div><div class="kpi-sub" id="ks-tot">-</div></div>
+    <div class="kpi"><div class="kpi-label">총 주문건수</div><div class="kpi-val" id="kv-cnt">-</div><div class="kpi-sub" id="ks-cnt">-</div></div>
+    <div class="kpi t"><div class="kpi-label">유료 건수</div><div class="kpi-val" id="kv-paid">-</div><div class="kpi-sub" id="ks-paid">-</div></div>
+    <div class="kpi r"><div class="kpi-label">무료 건수</div><div class="kpi-val" id="kv-free">-</div><div class="kpi-sub" id="ks-free">-</div></div>
+    <div class="kpi" style="border-left-color:#276749;"><div class="kpi-label">유료 비율</div><div class="kpi-val" id="kv-rate">-</div><div class="kpi-sub" id="ks-rate">-</div></div>
+  </div>
+
+  <!-- 전월 vs 기준월 비교표 -->
+  <div class="sec">
+    <div class="sec-title">🔀 전월 vs 기준월 비교 <span id="cmp-label" style="font-weight:400;color:#718096;font-size:12px;"></span></div>
+    <div class="tcard">
+      <div class="thead-row">
+        <h3 id="cmp-title">-</h3>
+        <span class="rc" id="cmp-cnt">-</span>
+      </div>
+      <div class="twrap-cmp">
+        <table style="table-layout:auto;min-width:max-content;">
+          <thead>
+            <tr>
+              <th class="l" rowspan="2" style="vertical-align:middle;border-right:2px solid #b0bec5;min-width:100px;background:#f7fafc;white-space:nowrap;">병원명</th>
+              <th colspan="6" class="cgh p" id="prevHdr">전월</th>
+              <th colspan="6" class="cgh c" id="curHdr">기준월</th>
+              <th colspan="6" class="cgh d">증감 (기준 − 전월)</th>
+            </tr>
+            <tr>
+              <th class="gp sep-prev" onclick="sc('prev_pay')">총결제<br>금액<span id="sa-prev_pay"> ↕</span></th>
+              <th class="gp" onclick="sc('prev_aa')">평균단가<br>(전체)<span id="sa-prev_aa"> ↕</span></th>
+              <th class="gp" onclick="sc('prev_ap')">평균단가<br>(유료)<span id="sa-prev_ap"> ↕</span></th>
+              <th class="gp" onclick="sc('prev_free')">무료<br>건수<span id="sa-prev_free"> ↕</span></th>
+              <th class="gp" onclick="sc('prev_paid')">유료<br>건수<span id="sa-prev_paid"> ↕</span></th>
+              <th class="gp" onclick="sc('prev_cnt')">합계<br>건수<span id="sa-prev_cnt"> ↕</span></th>
+              <th class="gc sep-cur" onclick="sc('cur_pay')">총결제<br>금액<span id="sa-cur_pay"> ↕</span></th>
+              <th class="gc" onclick="sc('cur_aa')">평균단가<br>(전체)<span id="sa-cur_aa"> ↕</span></th>
+              <th class="gc" onclick="sc('cur_ap')">평균단가<br>(유료)<span id="sa-cur_ap"> ↕</span></th>
+              <th class="gc" onclick="sc('cur_free')">무료<br>건수<span id="sa-cur_free"> ↕</span></th>
+              <th class="gc" onclick="sc('cur_paid')">유료<br>건수<span id="sa-cur_paid"> ↕</span></th>
+              <th class="gc" onclick="sc('cur_cnt')">합계<br>건수<span id="sa-cur_cnt"> ↕</span></th>
+              <th class="gd sep-diff" onclick="sc('d_pay')">총결제<br>금액<span id="sa-d_pay"> ↕</span></th>
+              <th class="gd" onclick="sc('d_aa')">평균단가<br>(전체)<span id="sa-d_aa"> ↕</span></th>
+              <th class="gd" onclick="sc('d_ap')">평균단가<br>(유료)<span id="sa-d_ap"> ↕</span></th>
+              <th class="gd" onclick="sc('d_free')">무료<br>건수<span id="sa-d_free"> ↕</span></th>
+              <th class="gd" onclick="sc('d_paid')">유료<br>건수<span id="sa-d_paid"> ↕</span></th>
+              <th class="gd" onclick="sc('d_cnt')">합계<br>건수<span id="sa-d_cnt"> ↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="cmpBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 병원별 집계표 -->
+  <div class="sec" style="padding-bottom:28px;">
+    <div class="sec-title">🏥 병원별 집계표 <span id="sum-label" style="font-weight:400;color:#718096;font-size:12px;"></span></div>
+    <div class="sum-layout">
+      <div class="sum-table-wrap">
+        <div class="tcard">
+          <div class="thead-row">
+            <h3 id="sum-title">-</h3>
+            <span class="rc" id="sum-cnt">-</span>
+          </div>
+          <div class="twrap">
+            <table>
+          <thead>
+            <tr>
+              <th class="l" onclick="ss('nm')" style="min-width:100px;">병원명<span id="sb-nm"> ↕</span></th>
+              <th onclick="ss('pay')">결제금액<span id="sb-pay"> ↕</span></th>
+              <th onclick="ss('ship')">배송비<span id="sb-ship"> ↕</span></th>
+              <th onclick="ss('tot')">총결제<br>금액<span id="sb-tot"> ↕</span></th>
+              <th onclick="ss('aa')">평균단가<br>(전체)<span id="sb-aa"> ↕</span></th>
+              <th onclick="ss('ap')">평균단가<br>(유료)<span id="sb-ap"> ↕</span></th>
+              <th onclick="ss('free')">무료<br>건수<span id="sb-free"> ↕</span></th>
+              <th onclick="ss('paid')">유료<br>건수<span id="sb-paid"> ↕</span></th>
+              <th onclick="ss('cnt')">합계<br>건수<span id="sb-cnt"> ↕</span></th>
+            </tr>
+          </thead>
+              <tbody id="sumBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /sum-table-wrap -->
+
+      <!-- 우측 차트 -->
+      <div class="sum-chart-wrap">
+        <div class="sum-chart-title">📊 병원별 현황</div>
+        <div class="sum-chart-slicer">
+          <button class="sc-btn on" data-m="tot" onclick="toggleSumChart(this)">총결제금액</button>
+          <button class="sc-btn" data-m="cnt" onclick="toggleSumChart(this)">합계건수</button>
+          <button class="sc-btn" data-m="paid" onclick="toggleSumChart(this)">유료건수</button>
+          <button class="sc-btn" data-m="free" onclick="toggleSumChart(this)">무료건수</button>
+        </div>
+
+        <canvas id="sumBarChart"></canvas>
+      </div>
+    </div><!-- /sum-layout -->
+  </div>
+</div>
+
+<script>
+// ── Google Apps Script 중계 URL (CORS 없이 작동) ──
+const APPS_URL = 'https://script.google.com/macros/s/AKfycbybqS6aV_s0lo4xxL67KKhsmG8B-bRXLb_LHSnmpk0ocS34KaL3wYykje6L26QskzL2/exec';
+
+// CSV 파싱 (천단위 쉼표 제거 포함)
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if(lines.length < 2) return [];
+  function parseLine(line) {
+    const result = []; let cur = '', inQ = false;
+    for(let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if(c === '"') { if(inQ && line[i+1]==='"'){cur+='"';i++;} else inQ=!inQ; }
+      else if((c === ',' || c === ';') && !inQ) { result.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    result.push(cur.trim());
+    return result;
+  }
+  const headers = parseLine(lines[0]).map(h => h.replace(/^"|"$/g,''));
+  const rows = [];
+  for(let i = 1; i < lines.length; i++) {
+    if(!lines[i].trim()) continue;
+    const vals = parseLine(lines[i]).map(v => v.replace(/^"|"$/g,''));
+    const obj = {};
+    headers.forEach((h,idx) => obj[h] = vals[idx] || '');
+    rows.push(obj);
+  }
+  return rows;
+}
+
+let D = [];
+
+// Apps Script에서 시트 목록 가져오기 (index 시트)
+async function fetchSheetList() {
+  try {
+    const resp = await fetch(APPS_URL + '?sheet=index');
+    if(!resp.ok) return null;
+    const text = await resp.text();
+    if(text.trim().startsWith('<')) return null;
+    // index 시트 A열: 한 줄에 하나씩 (2503, 2504 ... 형식)
+    const names = text.trim().split(/\r?\n/)
+      .map(l => l.split(',')[0].replace(/"/g,'').trim())
+      .filter(n => /^\d{4}$/.test(n));
+    return names.length ? names : null;
+  } catch(e) { return null; }
+}
+
+async function loadSheetData() {
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  try {
+    // 시트 목록 가져오기 (실패 시 고정 목록 fallback)
+    let sheetNames = await fetchSheetList();
+    if(!sheetNames) {
+      sheetNames = ['2503','2504','2505','2506','2507','2508','2509','2510','2511','2512','2601','2602','2603'];
+    }
+
+    // 병렬 fetch
+    const results = await Promise.all(sheetNames.map(async sheet => {
+      try {
+        const resp = await fetch(APPS_URL + '?sheet=' + encodeURIComponent(sheet));
+        if(!resp.ok) return [];
+        const text = await resp.text();
+        if(text.trim().startsWith('<')) return [];
+        return parseCSV(text);
+      } catch(e) { return []; }
+    }));
+
+    const allRows = [];
+    results.forEach(rows => {
+      rows.forEach(r => {
+        const 병원명 = r['병원명'] || '';
+        const 주문일자 = (r['주문일자'] || '').substring(0,10);
+        const 월 = 주문일자.substring(0,7);
+        const 결제금액 = parseInt((r['결제금액']||'0').replace(/,/g,''))||0;
+        const 배송비 = parseInt((r['배송비']||'0').replace(/,/g,''))||0;
+        const 결제총금액 = parseInt((r['결제총금액']||'0').replace(/,/g,''))||0;
+        const 유무료 = 결제총금액 > 0 ? '유료' : '무료';
+        const 주문번호 = r['주문번호'] || '';
+        const 결제타입 = r['결제타입'] || '';
+        if(병원명 && 주문일자) {
+          allRows.push({병원명, 주문일자, 월, 결제금액, 배송비, 결제총금액, 유무료, 주문번호, 결제타입});
+        }
+      });
+    });
+
+    D = allRows;
+
+    // ── 메디콕 실시간 fetch ──
+    try {
+      const mkResp = await fetch(APPS_URL + '?sheet=medicok');
+      const mkText = await mkResp.text();
+      if(!mkText.trim().startsWith('<')) {
+        const lines = mkText.split('\n');
+        // 인덱스3 행이 실제 헤더 (0=제목, 1=기준일, 2=빈행, 3=헤더)
+        const mkHeaders = lines[3].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+        const iStat = mkHeaders.indexOf('결제상태');
+        const iDate = mkHeaders.indexOf('결제일');
+        const iPay  = mkHeaders.indexOf('결제금액');
+        const iMean = mkHeaders.indexOf('결제수단');
+        const iType = mkHeaders.indexOf('주문형태');
+        const iProd = mkHeaders.indexOf('상품금액');
+        const iShip = mkHeaders.indexOf('배송비');
+        const toNum = v => parseInt((String(v||'0')).replace(/,/g,'').replace(/-/g,'0'))||0;
+
+        MK = lines.slice(4)
+          .filter(l => l.trim())
+          .map(line => line.split(','))
+          .filter(cols => (cols[iStat]||'').trim() === '결제완료' && cols[iDate])
+          .map(cols => {
+            const get = i => (cols[i]||'').trim().replace(/^"|"$/g,'');
+            const 결제일 = get(iDate).substring(0,10);
+            const 결제금액 = toNum(get(iPay));
+            return {
+              주문일자: 결제일,
+              월: 결제일.substring(0,7),
+              결제금액,
+              상품금액: toNum(get(iProd)),
+              배송비: toNum(get(iShip)),
+              결제수단: get(iMean) || '기타',
+              주문형태: get(iType) || '기타',
+              유무료: 결제금액 > 0 ? '유료' : '무료',
+            };
+          })
+          .filter(r => r.월 && r.월.match(/^\d{4}-\d{2}$/));
+      }
+    } catch(e) { console.warn('메디콕 fetch 실패:', e.message); }
+
+    document.getElementById('loadingOverlay').style.display = 'none';
+    document.getElementById('dataRange').textContent = (() => {
+      const months = [...new Set(D.map(d=>d.월))].sort();
+      return fmtYM(months[0]) + ' ~ ' + fmtYM(months[months.length-1]);
+    })();
+    init();
+  } catch(e) {
+    document.getElementById('loadingOverlay').innerHTML = `<div style="text-align:center;color:white"><div style="font-size:18px;margin-bottom:10px">⚠️ 데이터 로드 실패</div><div style="font-size:13px;opacity:.8">${e.message}</div><button onclick="loadSheetData()" style="margin-top:16px;padding:8px 20px;background:white;color:#2d3748;border:none;border-radius:8px;font-weight:700;cursor:pointer">다시 시도</button></div>`;
+  }
+}
+
+let curM='', prevM='';
+let fCur=[], fPrev=[];
+let cmpRows=[], sumRows=[];
+let cmpSK='cur_pay', cmpAsc=false;
+let sumSK='tot', sumAsc=false;
+let slicers=new Set(['결제금액','배송비','합계건수','유료건수','무료건수']);
+let tChart=null;
+
+const COL={결제금액:'#2d6a9f',합계건수:'#e53e3e',유료건수:'#38a169',무료건수:'#805ad5',배송비:'#dd6b20'};
+
+Chart.register(ChartDataLabels);
+
+function setStickyTops(){
+  const hh = document.querySelector('.header').offsetHeight;
+  const tb = document.querySelector('.tab-bar').offsetHeight;
+  document.documentElement.style.setProperty('--tab-top', hh+'px');
+  document.documentElement.style.setProperty('--filter-top', (hh+tb)+'px');
+}
+
+function switchTab(tabId, btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('filter-total').classList.toggle('filters-hidden', tabId!=='tab-total');
+  document.getElementById('filter-period').classList.toggle('filters-hidden', tabId!=='tab-period');
+  document.getElementById('filter-compare').classList.toggle('filters-hidden', tabId!=='tab-compare');
+  document.getElementById('filter-medicok').classList.toggle('filters-hidden', tabId!=='tab-medicok');
+  // 탭별 기간 뱃지 업데이트
+  updateRangeBadge(tabId);
+}
+
+function updateRangeBadge(tabId) {
+  const el = document.getElementById('dataRange');
+  if(!el) return;
+  if(tabId === 'tab-total') {
+    const s = document.getElementById('totalStart')?.value;
+    const e = document.getElementById('totalEnd')?.value;
+    if(s && e) el.textContent = fmtYM(s) + ' ~ ' + fmtYM(e);
+  } else if(tabId === 'tab-period') {
+    const s = document.getElementById('chartStart')?.value;
+    const e = document.getElementById('chartEnd')?.value;
+    if(s && e) el.textContent = fmtYM(s) + ' ~ ' + fmtYM(e);
+  } else if(tabId === 'tab-compare') {
+    const m = document.getElementById('selMonth')?.value;
+    if(m) el.textContent = fmtYM(m) + ' 기준';
+  } else if(tabId === 'tab-medicok') {
+    const s = document.getElementById('mkStart')?.value;
+    const e = document.getElementById('mkEnd')?.value;
+    if(s && e) el.textContent = mkFmtYM(s) + ' ~ ' + mkFmtYM(e);
+  }
+}
+
+function printCurrentTab(){
+  // 비활성 탭은 이미 display:none (active 탭만 .active 클래스)
+  window.print();
+}
+
+function init(){
+  const months=[...new Set(D.map(d=>d.월))].sort();
+
+  // 전월비교 탭 - 기준월
+  const ms=document.getElementById('selMonth');
+  months.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=fmtYM(m);ms.appendChild(o);});
+  ms.value=months[months.length-1];
+
+  // 기간별 탭 - 시작/종료월
+  const cs=document.getElementById('chartStart');
+  const ce=document.getElementById('chartEnd');
+  months.forEach(m=>{
+    const o1=document.createElement('option');o1.value=m;o1.textContent=fmtYM(m);cs.appendChild(o1);
+    const o2=document.createElement('option');o2.value=m;o2.textContent=fmtYM(m);ce.appendChild(o2);
+  });
+  cs.value=months[0];
+  ce.value=months[months.length-1];
+
+  // 병원명 - 전월비교 탭
+  const hosps=[...new Set(D.map(d=>d.병원명))].sort();
+  const hs=document.getElementById('selHosp');
+  hosps.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;hs.appendChild(o);});
+
+  // 병원명 - 기간별 탭
+  const ch=document.getElementById('chartHosp');
+  hosps.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;ch.appendChild(o);});
+
+  const minM=months[0], maxM=months[months.length-1];
+  document.getElementById('dataRange').textContent=fmtYM(minM)+' ~ '+fmtYM(maxM);
+  // 실제 높이로 sticky top 동적 계산
+  requestAnimationFrame(()=>{ setStickyTops(); window.addEventListener('resize', setStickyTops); });
+  applyFilters();
+  renderChart();
+  mkInit();
+  totInit();
+  updateRangeBadge('tab-total');
+}
+
+function fmtYM(ym){ return ym.replace('-','년 ')+'월'; }
+
+function prevMonth(ym){
+  const [y,m]=ym.split('-').map(Number);
+  const d=new Date(y,m-2,1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+
+function applyFilters(){
+  curM=document.getElementById('selMonth').value;
+  prevM=prevMonth(curM);
+  const hosp=document.getElementById('selHosp').value;
+  const paid='all';
+
+  const base=D.filter(d=>{
+    if(hosp!=='all'&&d.병원명!==hosp) return false;
+    if(paid!=='all'&&d.유무료!==paid) return false;
+    return true;
+  });
+  fCur=base.filter(d=>d.월===curM);
+  fPrev=base.filter(d=>d.월===prevM);
+
+  const cl=fmtYM(curM), pl=fmtYM(prevM);
+  document.getElementById('curHdr').textContent=cl;
+  document.getElementById('prevHdr').textContent=pl;
+  document.getElementById('cmp-title').textContent=pl+' vs '+cl;
+  if(document.getElementById('tab-compare').classList.contains('active')) updateRangeBadge('tab-compare');
+  document.getElementById('cmp-label').textContent='(기준월: '+cl+')';
+  document.getElementById('sum-title').textContent=cl+' 기준';
+  document.getElementById('sum-label').textContent='('+cl+')';
+
+  renderKPI(); renderCmp(); renderSum();
+}
+
+function resetFilters(){
+  const months=[...new Set(D.map(d=>d.월))].sort();
+  document.getElementById('selMonth').value=months[months.length-1];
+  document.getElementById('selHosp').value='all';
+  applyFilters();
+}
+
+function resetPeriod(){
+  const months=[...new Set(D.map(d=>d.월))].sort();
+  document.getElementById('chartStart').value=months[0];
+  document.getElementById('chartEnd').value=months[months.length-1];
+  document.getElementById('chartHosp').value='all';
+  renderChart();
+}
+
+function agg(arr){
+  const cnt=arr.length;
+  const pay=arr.reduce((s,r)=>s+r.결제금액,0);
+  const ship=arr.reduce((s,r)=>s+r.배송비,0);
+  const tot=arr.reduce((s,r)=>s+r.결제총금액,0);
+  const paid=arr.filter(r=>r.유무료==='유료').length;
+  const free=arr.filter(r=>r.유무료==='무료').length;
+  const aa=cnt>0?Math.round(pay/cnt):0;
+  const ap=paid>0?Math.round(pay/paid):0;
+  return {cnt,pay,ship,tot,paid,free,aa,ap};
+}
+
+function fS(n){
+  if(!n) return '-';
+  const a=Math.abs(n);
+  if(a>=1e8) return (n/1e8).toFixed(1)+'억';
+  if(a>=10000) return Math.round(n/10000)+'만';
+  return n.toLocaleString('ko-KR');
+}
+function fW(n){ return n?n.toLocaleString('ko-KR')+'원':'-'; }
+function fWM(n){ if(!n) return '-'; const m=Math.round(n/10000); return m.toLocaleString('ko-KR')+'만원'; }
+function fWS(n){ return n?fS(n)+'원':'-'; }
+function dc(v){ return v>0?'dp':v<0?'dn':'dz'; }
+function dN(v){ return v===0?'-':(v>0?'+':'')+v.toLocaleString(); }
+function dW(v){ return v===0?'-':(v>0?'+':'')+fS(v)+'원'; }
+function diffAmtM(c,p){
+  if(!p&&p!==0) return '전월 없음';
+  const d=c-p;
+  const sign=d>0?'▲':d<0?'▼':'';
+  const diffStr=d!==0?' ('+sign+fWM(Math.abs(d))+')':'';
+  return '전월 '+fWM(p)+diffStr;
+}
+function diffAmt(c,p){
+  if(!p&&p!==0) return '전월 없음';
+  const d=c-p;
+  const sign=d>0?'▲':d<0?'▼':'';
+  const diffStr=d!==0?' ('+sign+fW(Math.abs(d))+')':'';
+  return '전월 '+fW(p)+diffStr;
+}
+function diffCnt(c,p){
+  if(!p&&p!==0) return '전월 없음';
+  const d=c-p;
+  const sign=d>0?'▲':d<0?'▼':'';
+  const diffStr=d!==0?' ('+sign+Math.abs(d).toLocaleString()+'건)':'';
+  return '전월 '+p.toLocaleString()+'건'+diffStr;
+}
+
+function renderKPI(){
+  const c=agg(fCur),p=agg(fPrev);
+  const set=(k,v,s,d)=>{
+    document.getElementById('kv-'+k).textContent=v;
+    const sub=document.getElementById('ks-'+k);
+    sub.textContent=s;
+    sub.style.color = d>0?'#276749' : d<0?'#c53030' : '#a0aec0';
+  };
+  set('cnt',  c.cnt.toLocaleString()+'건',  diffCnt(c.cnt,  p.cnt),  c.cnt-p.cnt);
+  set('pay',  fWM(c.pay),                    diffAmtM(c.pay,  p.pay),  c.pay-p.pay);
+  set('ship', fWM(c.ship),                  diffAmtM(c.ship, p.ship), c.ship-p.ship);
+  set('tot',  fWM(c.tot),                   diffAmtM(c.tot,  p.tot),  c.tot-p.tot);
+  set('paid', c.paid.toLocaleString()+'건', diffCnt(c.paid, p.paid), c.paid-p.paid);
+  set('free', c.free.toLocaleString()+'건', diffCnt(c.free, p.free), c.free-p.free);
+  const rate = c.cnt ? (c.paid/c.cnt*100).toFixed(1) : null;
+  const pRate = p.cnt ? (p.paid/p.cnt*100).toFixed(1) : null;
+  const rateDiff = (rate !== null && pRate !== null) ? (rate - pRate).toFixed(1) : null;
+  const rateSign = rateDiff > 0 ? '▲' : rateDiff < 0 ? '▼' : '';
+  const rateColor = rateDiff > 0 ? '#276749' : rateDiff < 0 ? '#c53030' : '#a0aec0';
+  const rateSub = pRate !== null
+    ? `전월 ${pRate}% ${rateDiff !== null && rateDiff != 0 ? `(${rateSign}${Math.abs(rateDiff)}%p)` : '(동일)'}`
+    : '전월 없음';
+  const rateEl = document.getElementById('kv-rate');
+  rateEl.textContent = rate !== null ? rate+'%' : '-';
+  rateEl.style.color = rateColor;
+  const rateSubEl = document.getElementById('ks-rate');
+  rateSubEl.textContent = rateSub;
+  rateSubEl.style.color = rateColor;
+}
+
+function get12M(base){
+  const res=[];
+  for(let i=11;i>=0;i--){
+    const [y,m]=base.split('-').map(Number);
+    const d=new Date(y,m-1-i,1);
+    res.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
+  }
+  return res;
+}
+
+function renderChart(){
+  const startM=document.getElementById('chartStart').value;
+  const endM=document.getElementById('chartEnd').value;
+  const hosp=document.getElementById('chartHosp').value;
+
+  // build sorted month range
+  const allMonths=[...new Set(D.map(d=>d.월))].sort();
+  const months=allMonths.filter(m=>m>=startM&&m<=endM);
+  if(months.length===0) return;
+
+  const bm={};
+  months.forEach(m=>bm[m]=[]);
+  D.forEach(d=>{
+    if(!bm.hasOwnProperty(d.월)) return;
+    if(hosp!=='all'&&d.병원명!==hosp) return;
+    bm[d.월].push(d);
+  });
+
+  const labels=months.map(fmtYM);
+  const metrics={
+    결제금액:months.map(m=>bm[m].reduce((s,r)=>s+r.결제금액,0)),
+    배송비:months.map(m=>bm[m].reduce((s,r)=>s+r.배송비,0)),
+    합계건수:months.map(m=>bm[m].length),
+    유료건수:months.map(m=>bm[m].filter(r=>r.유무료==='유료').length),
+    무료건수:months.map(m=>bm[m].filter(r=>r.유무료==='무료').length),
+  };
+
+  const barKeys=new Set(['유료건수','무료건수']);
+  const datasets=Object.entries(metrics)
+    .filter(([k])=>slicers.has(k))
+    .map(([k,data])=>{
+      const isBar=barKeys.has(k);
+      return {
+        type: isBar?'bar':'line',
+        label:k, data,
+        borderColor:COL[k],
+        backgroundColor: isBar ? COL[k]+'cc' : COL[k]+'22',
+        borderWidth: isBar?0:2.5,
+        pointRadius: isBar?0:(months.length>1?4:6),
+        pointHoverRadius: isBar?0:7,
+        tension:0.35,
+        fill:false,
+        stack: isBar?'건수stack':undefined,
+        yAxisID:(k==='결제금액'||k==='배송비')?'y':'y2',
+        datalabels: isBar ? {
+          display: true,
+          anchor: 'center',
+          align: 'center',
+          font:{size:9,weight:'700'},
+          color:'white',
+          formatter:(v)=> v>0 ? v.toLocaleString()+'건' : null,
+        } : {
+          display: true,
+          align:'top',
+          anchor:'end',
+          font:{size:10,weight:'600'},
+          color:COL[k],
+          formatter:(v)=>{
+            if(v===0) return null;
+            if(k==='결제금액'||k==='배송비'){
+              if(v>=1e8) return (v/1e8).toFixed(1)+'억';
+              if(v>=10000) return Math.round(v/10000)+'만';
+              return v.toLocaleString();
+            }
+            return v.toLocaleString()+'건';
+          },
+          offset:4,
+        }
+      };
+    });
+
+  const ctx=document.getElementById('trendChart').getContext('2d');
+  if(tChart) tChart.destroy();
+  const hasA=slicers.has('결제금액')||slicers.has('배송비');
+  const hasC=slicers.has('유료건수')||slicers.has('무료건수')||slicers.has('합계건수');
+
+  tChart=new Chart(ctx,{
+    type:'bar',data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:11},padding:14}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.dataset.yAxisID==='y'?c.raw.toLocaleString()+'원':c.raw.toLocaleString()+'건')}},
+        datalabels:{display:false}
+      },
+      scales:{
+        x:{ticks:{font:{size:10}}},
+        y:{display:hasA,position:'left',ticks:{callback:v=>fS(v)+'원',font:{size:10}},title:{display:hasA,text:'금액',font:{size:10}}},
+        y2:{display:hasC,position:'right',grid:{drawOnChartArea:false},ticks:{callback:v=>v+'건',font:{size:10}},title:{display:hasC,text:'건수',font:{size:10}}}
+      }
+    }
+  });
+
+  // also render the range summary table
+  renderRangeTable(months, bm);
+}
+
+function renderRangeTable(months, bm){
+  const startM=document.getElementById('chartStart').value;
+  const endM=document.getElementById('chartEnd').value;
+  document.getElementById('range-label').textContent='('+fmtYM(startM)+' ~ '+fmtYM(endM)+')';
+  document.getElementById('period-range-label').textContent=fmtYM(startM)+' ~ '+fmtYM(endM);
+  if(document.getElementById('tab-period').classList.contains('active')) updateRangeBadge('tab-period');
+  document.getElementById('range-title').textContent=fmtYM(startM)+' ~ '+fmtYM(endM)+' 월별 집계';
+  document.getElementById('range-cnt').textContent=months.length+'개월';
+
+  // grand total across range
+  const allRows=months.flatMap(m=>bm[m]);
+  const gt=agg(allRows);
+
+  const totalRow=`<tr class="total-row">
+    <td class="l">합 계</td>
+    <td>${fW(gt.pay)}</td>
+    <td>${fW(gt.ship)}</td>
+    <td>${fW(gt.tot)}</td>
+    <td>${gt.aa?gt.aa.toLocaleString()+'원':'-'}</td>
+    <td>${gt.ap?gt.ap.toLocaleString()+'원':'-'}</td>
+    <td><span class="bfree">${gt.free}</span></td>
+    <td><span class="bpaid">${gt.paid}</span></td>
+    <td><span class="bcnt">${gt.cnt.toLocaleString()}</span></td>
+  </tr>`;
+
+  const rowsHtml=[...months].reverse().map(m=>{
+    const a=agg(bm[m]);
+    return `<tr>
+      <td class="l" style="font-weight:600;">${fmtYM(m)}</td>
+      <td>${fW(a.pay)}</td>
+      <td>${a.ship?a.ship.toLocaleString()+'원':'-'}</td>
+      <td style="font-weight:700;">${fW(a.tot)}</td>
+      <td>${a.aa?a.aa.toLocaleString()+'원':'-'}</td>
+      <td>${a.ap?a.ap.toLocaleString()+'원':'-'}</td>
+      <td><span class="bfree">${a.free}</span></td>
+      <td><span class="bpaid">${a.paid}</span></td>
+      <td><span class="bcnt">${a.cnt.toLocaleString()}</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('rangeBody').innerHTML=totalRow+rowsHtml;
+}
+
+function toggleSl(btn){
+  const k=btn.dataset.k;
+  slicers.has(k)?slicers.delete(k):slicers.add(k);
+  btn.classList.toggle('on');
+  renderChart();
+}
+
+// ── 비교표 ──
+function renderCmp(){
+  const hosps=[...new Set([...fCur.map(d=>d.병원명),...fPrev.map(d=>d.병원명)])];
+  const mc={},mp={};
+  fCur.forEach(d=>{if(!mc[d.병원명])mc[d.병원명]=[];mc[d.병원명].push(d);});
+  fPrev.forEach(d=>{if(!mp[d.병원명])mp[d.병원명]=[];mp[d.병원명].push(d);});
+
+  cmpRows=hosps.map(h=>{
+    const c=agg(mc[h]||[]),p=agg(mp[h]||[]);
+    return {nm:h,
+      prev_cnt:p.cnt,prev_pay:p.tot,prev_aa:p.aa,prev_ap:p.ap,prev_paid:p.paid,prev_free:p.free,
+      cur_cnt:c.cnt,cur_pay:c.tot,cur_aa:c.aa,cur_ap:c.ap,cur_paid:c.paid,cur_free:c.free,
+      d_cnt:c.cnt-p.cnt,d_pay:c.tot-p.tot,d_aa:c.aa-p.aa,d_ap:c.ap-p.ap,
+      d_free:c.free-p.free,d_paid:c.paid-p.paid,
+    };
+  });
+
+  document.getElementById('cmp-cnt').textContent='총 '+cmpRows.length+'개 병원';
+  sortCmpRender();
+}
+
+function sc(k){cmpSK===k?cmpAsc=!cmpAsc:(cmpSK=k,cmpAsc=false);sortCmpRender();}
+
+function sortCmpRender(){
+  ['prev_pay','prev_aa','prev_ap','prev_free','prev_paid','prev_cnt','cur_pay','cur_aa','cur_ap','cur_free','cur_paid','cur_cnt','d_pay','d_aa','d_ap','d_free','d_paid','d_cnt'].forEach(k=>{
+    const el=document.getElementById('sa-'+k);
+    if(el)el.textContent=k===cmpSK?(cmpAsc?' ↑':' ↓'):' ↕';
+  });
+
+  const sorted=[...cmpRows].sort((a,b)=>{
+    const va=a[cmpSK],vb=b[cmpSK];
+    return typeof va==='string'?(cmpAsc?va.localeCompare(vb):vb.localeCompare(va)):(cmpAsc?va-vb:vb-va);
+  });
+
+  // 합계
+  const tc=agg(fCur),tp=agg(fPrev);
+  const totalHtml=`<tr class="total-row">
+    <td class="l sep-nm">합 계</td>
+    <td class="sep-prev">${fWM(tp.tot)}</td>
+    <td>${tp.aa?tp.aa.toLocaleString()+'원':'-'}</td>
+    <td>${tp.ap?tp.ap.toLocaleString()+'원':'-'}</td>
+    <td><span class="bfree">${tp.free}</span></td>
+    <td><span class="bpaid">${tp.paid}</span></td>
+    <td><span class="bcnt">${tp.cnt.toLocaleString()}</span></td>
+    <td class="sep-cur">${fWM(tc.tot)}</td>
+    <td>${tc.aa?tc.aa.toLocaleString()+'원':'-'}</td>
+    <td>${tc.ap?tc.ap.toLocaleString()+'원':'-'}</td>
+    <td><span class="bfree">${tc.free}</span></td>
+    <td><span class="bpaid">${tc.paid}</span></td>
+    <td><span class="bcnt">${tc.cnt.toLocaleString()}</span></td>
+    <td class="${dc(tc.tot-tp.tot)} sep-diff">${fWM(tc.tot-tp.tot)}</td>
+    <td class="${dc(tc.aa-tp.aa)}">${dW(tc.aa-tp.aa)}</td>
+    <td class="${dc(tc.ap-tp.ap)}">${dW(tc.ap-tp.ap)}</td>
+    <td>${tc.free-tp.free===0?'-':`<span class="bfree ${dc(tc.free-tp.free)}" style="background:${tc.free-tp.free>0?'#dcfce7':tc.free-tp.free<0?'#fee2e2':'#f1f5f9'};color:${tc.free-tp.free>0?'#166534':tc.free-tp.free<0?'#991b1b':'#334155'}">${tc.free>tp.free?'+':''}${(tc.free-tp.free).toLocaleString()}</span>`}</td>
+    <td>${tc.paid-tp.paid===0?'-':`<span class="bpaid ${dc(tc.paid-tp.paid)}" style="background:${tc.paid-tp.paid>0?'#dbeafe':tc.paid-tp.paid<0?'#fee2e2':'#f1f5f9'};color:${tc.paid-tp.paid>0?'#1e40af':tc.paid-tp.paid<0?'#991b1b':'#334155'}">${tc.paid>tp.paid?'+':''}${(tc.paid-tp.paid).toLocaleString()}</span>`}</td>
+    <td>${tc.cnt-tp.cnt===0?'-':`<span class="bcnt ${dc(tc.cnt-tp.cnt)}" style="background:${tc.cnt-tp.cnt>0?'#f1f5f9':tc.cnt-tp.cnt<0?'#fee2e2':'#f1f5f9'};color:${tc.cnt-tp.cnt>0?'#1e293b':tc.cnt-tp.cnt<0?'#991b1b':'#334155'}">${tc.cnt>tp.cnt?'+':''}${(tc.cnt-tp.cnt).toLocaleString()}</span>`}</td>
+  </tr>`;
+
+  const rowsHtml=sorted.map(r=>`<tr>
+    <td class="l sep-nm">${r.nm}</td>
+    <td class="sep-prev">${fWM(r.prev_pay)}</td>
+    <td>${r.prev_aa?r.prev_aa.toLocaleString()+'원':'-'}</td>
+    <td>${r.prev_ap?r.prev_ap.toLocaleString()+'원':'-'}</td>
+    <td>${r.prev_cnt?`<span class="bfree">${r.prev_free}</span>`:'-'}</td>
+    <td>${r.prev_cnt?`<span class="bpaid">${r.prev_paid}</span>`:'-'}</td>
+    <td>${r.prev_cnt?`<span class="bcnt">${r.prev_cnt}</span>`:'-'}</td>
+    <td class="sep-cur">${fWM(r.cur_pay)}</td>
+    <td>${r.cur_aa?r.cur_aa.toLocaleString()+'원':'-'}</td>
+    <td>${r.cur_ap?r.cur_ap.toLocaleString()+'원':'-'}</td>
+    <td>${r.cur_cnt?`<span class="bfree">${r.cur_free}</span>`:'-'}</td>
+    <td>${r.cur_cnt?`<span class="bpaid">${r.cur_paid}</span>`:'-'}</td>
+    <td>${r.cur_cnt?`<span class="bcnt">${r.cur_cnt}</span>`:'-'}</td>
+    <td class="${dc(r.d_pay)} sep-diff">${fWM(r.d_pay)}</td>
+    <td class="${dc(r.d_aa)}">${dW(r.d_aa)}</td>
+    <td class="${dc(r.d_ap)}">${dW(r.d_ap)}</td>
+    <td>${r.d_free===0?'-':`<span class="bfree" style="background:${r.d_free>0?'#dcfce7':'#fee2e2'};color:${r.d_free>0?'#166534':'#991b1b'};border-color:${r.d_free>0?'#86efac':'#fca5a5'}">${r.d_free>0?'+':''}${r.d_free.toLocaleString()}</span>`}</td>
+    <td>${r.d_paid===0?'-':`<span class="bpaid" style="background:${r.d_paid>0?'#dbeafe':'#fee2e2'};color:${r.d_paid>0?'#1e40af':'#991b1b'};border-color:${r.d_paid>0?'#93c5fd':'#fca5a5'}">${r.d_paid>0?'+':''}${r.d_paid.toLocaleString()}</span>`}</td>
+    <td>${r.d_cnt===0?'-':`<span class="bcnt" style="background:${r.d_cnt>0?'#f1f5f9':'#fee2e2'};color:${r.d_cnt>0?'#1e293b':'#991b1b'};border-color:${r.d_cnt>0?'#94a3b8':'#fca5a5'}">${r.d_cnt>0?'+':''}${r.d_cnt.toLocaleString()}</span>`}</td>
+  </tr>`).join('');
+
+  document.getElementById('cmpBody').innerHTML=totalHtml+rowsHtml;
+}
+
+// ── 집계표 ──
+
+
+let sumBarChart = null;
+let sumChartMetric = 'tot';
+
+function toggleSumChart(btn){
+  sumChartMetric = btn.dataset.m;
+  document.querySelectorAll('.sc-btn').forEach(b => b.classList.toggle('on', b===btn));
+  renderSumChart();
+}
+
+
+const SUM_COL = {tot:'#2d6a9f', cnt:'#e53e3e', paid:'#38a169', free:'#805ad5'};
+const SUM_LABEL = {tot:'총결제금액(만원)', cnt:'합계건수', paid:'유료건수', free:'무료건수'};
+
+function renderSumChart(){
+  const sorted = [...sumRows].sort((a,b) => b[sumChartMetric] - a[sumChartMetric]);
+  const labels = sorted.map(r => r.nm.length > 12 ? r.nm.slice(0,12)+'…' : r.nm);
+  const values = sorted.map(r =>
+    sumChartMetric === 'tot' ? Math.round(r[sumChartMetric]/10000) : r[sumChartMetric]
+  );
+
+  const canvas = document.getElementById('sumBarChart');
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+
+  const ctx = canvas.getContext('2d');
+  if(sumBarChart) sumBarChart.destroy();
+  sumBarChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets:[{
+        label: SUM_LABEL[sumChartMetric],
+        data: values,
+        backgroundColor: SUM_COL[sumChartMetric]+'cc',
+        borderColor: SUM_COL[sumChartMetric],
+        borderWidth: 1,
+        borderRadius: 3,
+        datalabels:{
+          display: true,
+          anchor: 'end',
+          align: 'end',
+          font:{size:9, weight:'600'},
+          color: SUM_COL[sumChartMetric],
+          formatter: v => sumChartMetric==='tot' ? v.toLocaleString()+'만' : v.toLocaleString()+'건',
+          offset: 2,
+          clip: false,
+        }
+      }]
+    },
+    options:{
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins:{
+        legend:{display:false},
+        datalabels:{display:true},
+        tooltip:{callbacks:{label: c => {
+          const v = c.raw;
+          return SUM_LABEL[sumChartMetric]+': '+(sumChartMetric==='tot'?v.toLocaleString()+'만원':v.toLocaleString()+'건');
+        }}}
+      },
+      scales:{
+        x:{
+          ticks:{font:{size:9}, callback: v => sumChartMetric==='tot'?v.toLocaleString()+'만':v},
+          grid:{color:'#f0f4f8'}
+        },
+        y:{ticks:{font:{size:10}, maxRotation:0}, grid:{display:false}}
+      },
+      layout:{padding:{right:44}}
+    }
+  });
+}
+
+function renderSum(){
+  const map={};
+  fCur.forEach(d=>{if(!map[d.병원명])map[d.병원명]=[];map[d.병원명].push(d);});
+  sumRows=Object.entries(map).map(([h,arr])=>{
+    const a=agg(arr);
+    return {nm:h,cnt:a.cnt,pay:a.pay,ship:a.ship,tot:a.tot,aa:a.aa,ap:a.ap,paid:a.paid,free:a.free};
+  });
+  document.getElementById('sum-cnt').textContent='총 '+sumRows.length+'개 병원';
+  sortSumRender();
+  requestAnimationFrame(renderSumChart);
+}
+
+function ss(k){sumSK===k?sumAsc=!sumAsc:(sumSK=k,sumAsc=false);sortSumRender();}
+
+function sortSumRender(){
+  ['nm','pay','ship','tot','aa','ap','free','paid','cnt'].forEach(k=>{
+    const el=document.getElementById('sb-'+k);
+    if(el)el.textContent=k===sumSK?(sumAsc?' ↑':' ↓'):' ↕';
+  });
+
+  const sorted=[...sumRows].sort((a,b)=>{
+    const va=a[sumSK],vb=b[sumSK];
+    return typeof va==='string'?(sumAsc?va.localeCompare(vb):vb.localeCompare(va)):(sumAsc?va-vb:vb-va);
+  });
+
+  // 합계 행
+  const tc=agg(fCur);
+  const totRow=`<tr class="total-row">
+    <td class="l">합 계</td>
+    <td>${fW(tc.pay)}</td>
+    <td>${fW(tc.ship)}</td>
+    <td>${fW(tc.tot)}</td>
+    <td>${tc.aa?tc.aa.toLocaleString()+'원':'-'}</td>
+    <td>${tc.ap?tc.ap.toLocaleString()+'원':'-'}</td>
+    <td><span class="bfree">${tc.free}</span></td>
+    <td><span class="bpaid">${tc.paid}</span></td>
+    <td><span class="bcnt">${tc.cnt.toLocaleString()}</span></td>
+  </tr>`;
+
+  // 차트도 동기화 - DOM 렌더 후 집계표 높이 기준으로 그리기
+  if(typeof renderSumChart === 'function') requestAnimationFrame(renderSumChart);
+
+  document.getElementById('sumBody').innerHTML=totRow+sorted.map(r=>`<tr>
+    <td class="l">${r.nm}</td>
+    <td>${fW(r.pay)}</td>
+    <td>${r.ship?r.ship.toLocaleString()+'원':'-'}</td>
+    <td style="font-weight:700;">${fW(r.tot)}</td>
+    <td>${r.aa?r.aa.toLocaleString()+'원':'-'}</td>
+    <td>${r.ap?r.ap.toLocaleString()+'원':'-'}</td>
+    <td><span class="bfree">${r.free}</span></td>
+    <td><span class="bpaid">${r.paid}</span></td>
+    <td><span class="bcnt">${r.cnt.toLocaleString()}</span></td>
+  </tr>`).join('');
+}
+
+
+// ══════════════════════════════════════════
+// 메디콕 데이터 & 로직
+// ══════════════════════════════════════════
+let MK = []
+
+let mkChart = null;
+let mkSlicers = new Set(['결제금액','합계건수','유료건수','무료건수']);
+
+function mkFmtYM(ym) {
+  if(!ym) return '';
+  const [y,m] = ym.split('-');
+  return y+'년 '+parseInt(m)+'월';
+}
+
+function mkFW(n) { return n ? n.toLocaleString('ko-KR')+'원' : '-'; }
+function mkFWM(n) { if(!n) return '-'; return Math.round(n/10000).toLocaleString()+'만원'; }
+
+function mkAgg(rows) {
+  const pay = rows.reduce((s,r)=>s+r.결제금액,0);
+  const prod = rows.reduce((s,r)=>s+r.상품금액,0);
+  const cnt = rows.length;
+  const paid = rows.filter(r=>r.유무료==='유료').length;
+  const free = rows.filter(r=>r.유무료==='무료').length;
+  const aa = cnt ? Math.round(pay/cnt) : 0;
+  const ap = paid ? Math.round(pay/paid) : 0;
+  return {pay, prod, cnt, paid, free, aa, ap};
+}
+
+function mkInit() {
+  const months = [...new Set(MK.map(r=>r.월))].sort();
+  const types = [...new Set(MK.map(r=>r.결제수단))].sort();
+
+  // 필터 초기화
+  const mkStart = document.getElementById('mkStart');
+  const mkEnd = document.getElementById('mkEnd');
+  const mkType = document.getElementById('mkType');
+
+  mkStart.innerHTML = months.map(m=>`<option value="${m}">${mkFmtYM(m)}</option>`).join('');
+  mkEnd.innerHTML = months.map(m=>`<option value="${m}">${mkFmtYM(m)}</option>`).join('');
+  mkEnd.value = months[months.length-1];
+  mkStart.value = months[0];
+
+  mkType.innerHTML = '<option value="all">전체</option>' +
+    types.map(t=>`<option value="${t}">${t}</option>`).join('');
+
+  mkRenderChart();
+}
+
+function mkGetFiltered() {
+  const s = document.getElementById('mkStart').value;
+  const e = document.getElementById('mkEnd').value;
+  const t = document.getElementById('mkType').value;
+  return MK.filter(r => r.월 >= s && r.월 <= e && (t==='all' || r.결제수단===t));
+}
+
+function mkRenderChart() {
+  const s = document.getElementById('mkStart').value;
+  const e = document.getElementById('mkEnd').value;
+  const rows = mkGetFiltered();
+  const months = [...new Set(MK.filter(r=>r.월>=s&&r.월<=e).map(r=>r.월))].sort();
+
+  document.getElementById('mk-range-label').textContent = mkFmtYM(s)+' ~ '+mkFmtYM(e);
+  if(document.getElementById('tab-medicok').classList.contains('active')) updateRangeBadge('tab-medicok');
+
+  // KPI
+  const a = mkAgg(rows);
+  const set = (k,v,s) => {
+    document.getElementById('mk-kv-'+k).textContent = v;
+    document.getElementById('mk-ks-'+k).textContent = s;
+  };
+  set('cnt', a.cnt.toLocaleString()+'건', '전체');
+  set('pay', mkFWM(a.pay), '결제금액');
+  set('paid', a.paid.toLocaleString()+'건', '유료');
+  set('free', a.free.toLocaleString()+'건', '무료');
+  set('rate', a.cnt ? (a.paid/a.cnt*100).toFixed(1)+'%' : '-', '유료 비율');
+
+  // 차트
+  const bm = {};
+  months.forEach(m => bm[m] = []);
+  rows.forEach(r => { if(bm[r.월]) bm[r.월].push(r); });
+
+  const labels = months.map(m => mkFmtYM(m));
+  const payData = months.map(m => Math.round(mkAgg(bm[m]||[]).pay/10000));
+  const paidData = months.map(m => mkAgg(bm[m]||[]).paid);
+  const freeData = months.map(m => mkAgg(bm[m]||[]).free);
+  const cntData = months.map(m => mkAgg(bm[m]||[]).cnt);
+
+  if(mkChart) mkChart.destroy();
+  mkChart = new Chart(document.getElementById('mkTrendChart').getContext('2d'), {
+    data: {
+      labels,
+      datasets: [
+        ...(mkSlicers.has('무료건수') ? [{ type:'bar', label:'무료건수', data:freeData, backgroundColor:'#805ad5cc', borderColor:'#805ad5', borderWidth:1, borderRadius:3, stack:'cnt', yAxisID:'y2', datalabels:{display:true, anchor:'center', align:'center', font:{size:8,weight:'600'}, color:'white', formatter:v=>v>0?v.toLocaleString()+'건':null} }] : []),
+        ...(mkSlicers.has('유료건수') ? [{ type:'bar', label:'유료건수', data:paidData, backgroundColor:'#38a169cc', borderColor:'#38a169', borderWidth:1, borderRadius:3, stack:'cnt', yAxisID:'y2', datalabels:{display:true, anchor:'center', align:'center', font:{size:8,weight:'600'}, color:'white', formatter:v=>v>0?v.toLocaleString()+'건':null} }] : []),
+        ...(mkSlicers.has('합계건수') ? [{ type:'line', label:'합계건수', data:cntData, borderColor:'#e53e3e', borderWidth:2, pointRadius:3, tension:0.3, fill:false, yAxisID:'y2',
+          datalabels:{ display:true, anchor:'end', align:'top', font:{size:9,weight:'700'}, color:'#e53e3e', formatter:v=>v>0?v.toLocaleString()+'건':null } }] : []),
+        ...(mkSlicers.has('결제금액') ? [{ type:'line', label:'결제금액(만원)', data:payData, borderColor:'#2d6a9f', borderWidth:2, pointRadius:3, tension:0.3, fill:false, yAxisID:'y1',
+          datalabels:{ display:true, anchor:'end', align:'top', font:{size:9,weight:'700'}, color:'#2d6a9f', formatter:v=>v>0?v.toLocaleString()+'만':null } }] : []),
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{position:'bottom',labels:{font:{size:10},padding:10,boxWidth:12}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.dataset.yAxisID==='y1'?c.raw.toLocaleString()+'만원':c.raw.toLocaleString()+'건')}}
+      },
+      scales:{
+        x:{ticks:{font:{size:9},maxRotation:40,minRotation:30},grid:{color:'#f0f4f8'}},
+        y1:{display:mkSlicers.has('결제금액'),type:'linear',position:'left',ticks:{font:{size:9},callback:v=>v.toLocaleString()+'만'},title:{display:true,text:'금액(만원)',font:{size:9},color:'#2d6a9f'},grid:{color:'#f0f4f8'}},
+        y2:{display:mkSlicers.has('합계건수')||mkSlicers.has('유료건수')||mkSlicers.has('무료건수'),type:'linear',position:'right',ticks:{font:{size:9},callback:v=>v+'건'},title:{display:true,text:'건수',font:{size:9},color:'#e53e3e'},grid:{drawOnChartArea:false}}
+      },
+      layout:{padding:{top:20,right:10}}
+    }
+  });
+
+  // 월별 합계표
+  document.getElementById('mk-range-title').textContent = mkFmtYM(s)+' ~ '+mkFmtYM(e)+' 월별 집계';
+  document.getElementById('mk-range-cnt').textContent = months.length+'개월';
+
+  const totalA = mkAgg(rows);
+  const totRow = `<tr class="total-row">
+    <td class="l">합 계</td>
+    <td>${mkFW(totalA.pay)}</td>
+    <td>${totalA.aa?totalA.aa.toLocaleString()+'원':'-'}</td>
+    <td>${totalA.ap?totalA.ap.toLocaleString()+'원':'-'}</td>
+    <td><span class="bfree">${totalA.free}</span></td>
+    <td><span class="bpaid">${totalA.paid}</span></td>
+    <td><span class="bcnt">${totalA.cnt.toLocaleString()}</span></td>
+  </tr>`;
+
+  const rowsHtml = [...months].reverse().map(m => {
+    const a = mkAgg(bm[m]||[]);
+    return `<tr>
+      <td class="l" style="font-weight:600;">${mkFmtYM(m)}</td>
+      <td>${mkFW(a.pay)}</td>
+      <td>${a.aa?a.aa.toLocaleString()+'원':'-'}</td>
+      <td>${a.ap?a.ap.toLocaleString()+'원':'-'}</td>
+      <td><span class="bfree">${a.free}</span></td>
+      <td><span class="bpaid">${a.paid}</span></td>
+      <td><span class="bcnt">${a.cnt.toLocaleString()}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('mkRangeBody').innerHTML = totRow + rowsHtml;
+
+  // 주문형태별 집계표
+  document.getElementById('mk-type-title').textContent = '결제수단별 집계';
+  document.getElementById('mk-type-cnt').textContent = '총 '+[...new Set(rows.map(r=>r.결제수단))].length+'개 결제수단';
+
+  const typeMap = {};
+  rows.forEach(r => {
+    if(!typeMap[r.결제수단]) typeMap[r.결제수단] = [];
+    typeMap[r.결제수단].push(r);
+  });
+
+  const typeTotal = mkAgg(rows);
+  const typeTotRow = `<tr class="total-row">
+    <td class="l">합 계</td>
+    <td>${mkFW(typeTotal.pay)}</td>
+    <td>${typeTotal.aa?typeTotal.aa.toLocaleString()+'원':'-'}</td>
+    <td>${typeTotal.ap?typeTotal.ap.toLocaleString()+'원':'-'}</td>
+    <td><span class="bfree">${typeTotal.free}</span></td>
+    <td><span class="bpaid">${typeTotal.paid}</span></td>
+    <td><span class="bcnt">${typeTotal.cnt.toLocaleString()}</span></td>
+  </tr>`;
+
+  const typeRowsHtml = Object.entries(typeMap)
+    .sort((a,b)=>mkAgg(b[1]).cnt - mkAgg(a[1]).cnt)
+    .map(([type, rws]) => {
+      const a = mkAgg(rws);
+      return `<tr>
+        <td class="l">${type}</td>
+        <td>${mkFW(a.pay)}</td>
+        <td>${a.aa?a.aa.toLocaleString()+'원':'-'}</td>
+        <td>${a.ap?a.ap.toLocaleString()+'원':'-'}</td>
+        <td><span class="bfree">${a.free}</span></td>
+        <td><span class="bpaid">${a.paid}</span></td>
+        <td><span class="bcnt">${a.cnt.toLocaleString()}</span></td>
+      </tr>`;
+    }).join('');
+  document.getElementById('mkTypeBody').innerHTML = typeTotRow + typeRowsHtml;
+}
+
+function mkToggleSl(btn){
+  const k = btn.dataset.mk;
+  mkSlicers.has(k) ? mkSlicers.delete(k) : mkSlicers.add(k);
+  btn.classList.toggle('on', mkSlicers.has(k));
+  mkRenderChart();
+}
+
+function mkReset() {
+  const months = [...new Set(MK.map(r=>r.월))].sort();
+  document.getElementById('mkStart').value = months[0];
+  document.getElementById('mkEnd').value = months[months.length-1];
+  document.getElementById('mkType').value = 'all';
+  mkRenderChart();
+}
+
+// ══════════════════════════════════════════
+// Total 탭 로직
+// ══════════════════════════════════════════
+let totPayChart = null, totCntChart = null;
+
+function totFmtYM(ym) {
+  if(!ym) return '';
+  const [y,m] = ym.split('-');
+  return y+'년 '+parseInt(m)+'월';
+}
+function totFWM(n) { return n ? Math.round(n/10000).toLocaleString()+'만원' : '-'; }
+
+function totGetMonths() {
+  const haruMonths = [...new Set(D.map(r=>r.월))].sort();
+  const mkMonths   = [...new Set(MK.map(r=>r.월))].sort();
+  const all = [...new Set([...haruMonths, ...mkMonths])].sort();
+  return all;
+}
+
+function totInit() {
+  const months = totGetMonths();
+  const s = document.getElementById('totalStart');
+  const e = document.getElementById('totalEnd');
+  s.innerHTML = months.map(m=>`<option value="${m}">${totFmtYM(m)}</option>`).join('');
+  e.innerHTML = months.map(m=>`<option value="${m}">${totFmtYM(m)}</option>`).join('');
+  e.value = months[months.length-1];
+  s.value = months[0];
+  totalRender();
+}
+
+function totAgg(rows) {
+  return {
+    pay:  rows.reduce((s,r)=>s+(r.결제총금액||r.결제금액||0),0),
+    cnt:  rows.length,
+    paid: rows.filter(r=>r.유무료==='유료').length,
+    free: rows.filter(r=>r.유무료==='무료').length,
+  };
+}
+
+function totalRender() {
+  const s = document.getElementById('totalStart').value;
+  const e = document.getElementById('totalEnd').value;
+
+  const haruRows = D.filter(r=>r.월>=s && r.월<=e);
+  const mkRows   = MK.filter(r=>r.월>=s && r.월<=e);
+  const haA = totAgg(haruRows);
+  const mkA = totAgg(mkRows);
+
+  // KPI 카드
+  document.getElementById('tot-haru-pay').textContent  = totFWM(haA.pay);
+  document.getElementById('tot-mk-pay').textContent    = totFWM(mkA.pay);
+  document.getElementById('tot-haru-cnt').textContent  = haA.cnt.toLocaleString()+'건';
+  document.getElementById('tot-mk-cnt').textContent    = mkA.cnt.toLocaleString()+'건';
+  document.getElementById('tot-haru-paid').textContent = haA.paid.toLocaleString()+'건';
+  document.getElementById('tot-mk-paid').textContent   = mkA.paid.toLocaleString()+'건';
+  document.getElementById('tot-haru-free').textContent = haA.free.toLocaleString()+'건';
+  document.getElementById('tot-mk-free').textContent   = mkA.free.toLocaleString()+'건';
+
+  const months = [...new Set([...D,...MK].map(r=>r.월))].filter(m=>m>=s&&m<=e).sort();
+  document.getElementById('tot-range-label').textContent = totFmtYM(s)+' ~ '+totFmtYM(e);
+
+  // 월별 집계
+  const haruBm = {}, mkBm = {};
+  months.forEach(m=>{ haruBm[m]=[]; mkBm[m]=[]; });
+  D.filter(r=>r.월>=s&&r.월<=e).forEach(r=>{ if(haruBm[r.월]) haruBm[r.월].push(r); });
+  MK.filter(r=>r.월>=s&&r.월<=e).forEach(r=>{ if(mkBm[r.월]) mkBm[r.월].push(r); });
+
+  const labels     = months.map(m=>totFmtYM(m));
+  const haruPay    = months.map(m=>Math.round(totAgg(haruBm[m]||[]).pay/10000));
+  const mkPay      = months.map(m=>Math.round(totAgg(mkBm[m]||[]).pay/10000));
+  const sumPay     = months.map((m,i)=>haruPay[i]+mkPay[i]);
+  const haruCnt    = months.map(m=>totAgg(haruBm[m]||[]).cnt);
+  const mkCnt      = months.map(m=>totAgg(mkBm[m]||[]).cnt);
+
+  // 결제금액 차트
+  if(totPayChart) totPayChart.destroy();
+  totPayChart = new Chart(document.getElementById('totPayChart').getContext('2d'), {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'합계', data:sumPay, borderColor:'#e53e3e', backgroundColor:'transparent', borderWidth:2.5, pointRadius:4, tension:0.3, fill:false, borderDash:[5,3],
+        datalabels:{ display:true, anchor:'top', align:'top', font:{size:9,weight:'800'}, color:'#e53e3e', formatter:v=>v>0?v.toLocaleString()+'만':null } },
+      { label:'하루건식', data:haruPay, borderColor:'#16a34a', backgroundColor:'#16a34a22', borderWidth:2, pointRadius:3, tension:0.3, fill:true,
+        datalabels:{ display:false } },
+      { label:'메디콕', data:mkPay, borderColor:'#1d4ed8', backgroundColor:'#1d4ed822', borderWidth:2, pointRadius:3, tension:0.3, fill:true,
+        datalabels:{ display:false } },
+    ]},
+    options:{ responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{position:'bottom',labels:{font:{size:10},padding:10,boxWidth:12}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toLocaleString()+'만원'}} },
+      scales:{
+        x:{ticks:{font:{size:9},maxRotation:40,minRotation:30},grid:{color:'#f0f4f8'}},
+        y:{ticks:{font:{size:9},callback:v=>v.toLocaleString()+'만'},grid:{color:'#f0f4f8'}}
+      }, layout:{padding:{top:24,bottom:8}}
+    }
+  });
+
+  // 건수 차트 (유료/무료 누적 막대)
+  const haruFree = months.map(m=>totAgg(haruBm[m]||[]).free);
+  const haruPaid = months.map(m=>totAgg(haruBm[m]||[]).paid);
+  const mkFree   = months.map(m=>totAgg(mkBm[m]||[]).free);
+  const mkPaid   = months.map(m=>totAgg(mkBm[m]||[]).paid);
+
+  if(totCntChart) totCntChart.destroy();
+  totCntChart = new Chart(document.getElementById('totCntChart').getContext('2d'), {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'하루건식 유료', data:haruPaid, backgroundColor:'#16a34acc', borderColor:'#16a34a', borderWidth:1, borderRadius:2, stack:'haru',
+        datalabels:{display:false} },
+      { label:'하루건식 무료', data:haruFree, backgroundColor:'#86efaccc', borderColor:'#86efac', borderWidth:1, borderRadius:2, stack:'haru',
+        datalabels:{display:true, anchor:'end', align:'end', font:{size:9,weight:'800'}, color:'#16a34a', clip:false,
+          formatter:(v,ctx)=>{ const total=haruCnt[ctx.dataIndex]; return total>0?total.toLocaleString()+'건':null; }} },
+      { label:'메디콕 유료',   data:mkPaid,   backgroundColor:'#1d4ed8cc', borderColor:'#1d4ed8', borderWidth:1, borderRadius:2, stack:'mk',
+        datalabels:{display:false} },
+      { label:'메디콕 무료',   data:mkFree,   backgroundColor:'#93c5fdcc', borderColor:'#93c5fd', borderWidth:1, borderRadius:2, stack:'mk',
+        datalabels:{display:true, anchor:'end', align:'end', font:{size:9,weight:'800'}, color:'#1d4ed8', clip:false,
+          formatter:(v,ctx)=>{ const total=mkCnt[ctx.dataIndex]; return total>0?total.toLocaleString()+'건':null; }} },
+    ]},
+    options:{ responsive:true, maintainAspectRatio:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{position:'bottom',labels:{font:{size:10},padding:8,boxWidth:12}},
+        tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toLocaleString()+'건'}} },
+      scales:{
+        x:{ticks:{font:{size:9},maxRotation:40,minRotation:30},grid:{color:'#f0f4f8'}},
+        y:{ticks:{font:{size:9}},grid:{color:'#f0f4f8'}}
+      }, layout:{padding:{top:32,bottom:8}}
+    }
+  });
+
+  // 비교 도표
+  document.getElementById('tot-table-title').textContent = totFmtYM(s)+' ~ '+totFmtYM(e)+' 실적 현황';
+  document.getElementById('tot-table-cnt').textContent = months.length+'개월';
+
+  const totRow = `<tr class="total-row">
+    <td class="l" style="border-right:2px solid #b0bec5;">합 계</td>
+    <td style="font-weight:800;">${totFWM(haA.pay+mkA.pay)}</td>
+    <td><span class="bfree">${(haA.free+mkA.free).toLocaleString()}</span></td>
+    <td><span class="bpaid">${(haA.paid+mkA.paid).toLocaleString()}</span></td>
+    <td style="border-right:2px solid #b0bec5;"><span class="bcnt">${(haA.cnt+mkA.cnt).toLocaleString()}</span></td>
+    <td>${totFWM(haA.pay)}</td>
+    <td><span class="bfree">${haA.free}</span></td>
+    <td><span class="bpaid">${haA.paid}</span></td>
+    <td style="border-right:2px solid #b0bec5;"><span class="bcnt">${haA.cnt.toLocaleString()}</span></td>
+    <td>${totFWM(mkA.pay)}</td>
+    <td><span class="bfree">${mkA.free}</span></td>
+    <td><span class="bpaid">${mkA.paid}</span></td>
+    <td><span class="bcnt">${mkA.cnt.toLocaleString()}</span></td>
+  </tr>`;
+
+  const rowsHtml = [...months].reverse().map(m=>{
+    const ha = totAgg(haruBm[m]||[]);
+    const mk = totAgg(mkBm[m]||[]);
+    const sumPay = ha.pay+mk.pay;
+    const sumFree = ha.free+mk.free;
+    const sumPaid = ha.paid+mk.paid;
+    const sumCnt = ha.cnt+mk.cnt;
+    return `<tr>
+      <td class="l" style="font-weight:600;border-right:2px solid #b0bec5;">${totFmtYM(m)}</td>
+      <td style="font-weight:700;">${sumPay>0?totFWM(sumPay):'-'}</td>
+      <td>${sumFree>0?`<span class="bfree">${sumFree.toLocaleString()}</span>`:'-'}</td>
+      <td>${sumPaid>0?`<span class="bpaid">${sumPaid.toLocaleString()}</span>`:'-'}</td>
+      <td style="border-right:2px solid #b0bec5;">${sumCnt>0?`<span class="bcnt">${sumCnt.toLocaleString()}</span>`:'-'}</td>
+      <td>${ha.pay>0?totFWM(ha.pay):'-'}</td>
+      <td>${ha.free>0?`<span class="bfree">${ha.free}</span>`:'-'}</td>
+      <td>${ha.paid>0?`<span class="bpaid">${ha.paid}</span>`:'-'}</td>
+      <td style="border-right:2px solid #b0bec5;">${ha.cnt>0?`<span class="bcnt">${ha.cnt.toLocaleString()}</span>`:'-'}</td>
+      <td>${mk.pay>0?totFWM(mk.pay):'-'}</td>
+      <td>${mk.free>0?`<span class="bfree">${mk.free}</span>`:'-'}</td>
+      <td>${mk.paid>0?`<span class="bpaid">${mk.paid}</span>`:'-'}</td>
+      <td>${mk.cnt>0?`<span class="bcnt">${mk.cnt.toLocaleString()}</span>`:'-'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('totTableBody').innerHTML = totRow + rowsHtml;
+  updateRangeBadge('tab-total');
+}
+
+function totalReset() {
+  const months = totGetMonths();
+  document.getElementById('totalStart').value = months[0];
+  document.getElementById('totalEnd').value = months[months.length-1];
+  totalRender();
+}
+
+loadSheetData();
+</script>
+</body>
+</html>
