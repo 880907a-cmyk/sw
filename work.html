@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>천성민의 일정</title>
+<link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'&gt;&lt;rect x='4' y='12' width='56' height='48' rx='6' fill='%234F6BF6'/&gt;&lt;rect x='4' y='12' width='56' height='14' rx='6' fill='%233B56E0'/&gt;&lt;rect x='10' y='32' width='10' height='8' rx='2' fill='%23fff' opacity='.9'/&gt;&lt;rect x='27' y='32' width='10' height='8' rx='2' fill='%23fff' opacity='.9'/&gt;&lt;rect x='44' y='32' width='10' height='8' rx='2' fill='%23fff' opacity='.9'/&gt;&lt;rect x='10' y='46' width='10' height='8' rx='2' fill='%23fff' opacity='.6'/&gt;&lt;rect x='27' y='46' width='10' height='8' rx='2' fill='%23fff' opacity='.6'/&gt;&lt;rect x='44' y='46' width='10' height='8' rx='2' fill='%23fff' opacity='.6'/&gt;&lt;rect x='16' y='4' width='4' height='14' rx='2' fill='%23E5E7EB'/&gt;&lt;rect x='44' y='4' width='4' height='14' rx='2' fill='%23E5E7EB'/&gt;&lt;/svg&gt;" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8F9FC,#EEF1F8);min-height:100vh;padding:20px;color:#1F2937}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:10px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes barGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes completeAnim{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{opacity:0;transform:scale(.95) translateX(20px)}}
+
+.header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:#fff;border-radius:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);flex-wrap:wrap;gap:12px}
+.header-left{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.logo{font-size:22px;font-weight:700;color:#1F2937;letter-spacing:-.5px;cursor:pointer;transition:all .15s;border-bottom:2px solid transparent;padding-bottom:2px}
+.logo:hover{border-bottom-color:#4F6BF6}
+.logo-icon{color:#4F6BF6;margin-right:4px}
+.logo-edit{font-size:20px;font-weight:700;color:#1F2937;letter-spacing:-.5px;border:2px solid #4F6BF6;border-radius:8px;padding:4px 10px;outline:none;font-family:'Noto Sans KR',sans-serif;background:#F0F3FF;min-width:120px}
+.header-sub{font-size:13px;color:#9CA3AF;font-weight:400}
+.category-legend{display:flex;gap:14px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#6B7280}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+.weather-widget{display:inline-flex;align-items:center;gap:0;background:linear-gradient(135deg,#EEF4FF,#F0F3FF);border-radius:14px;border:1px solid #DCE3F0;font-size:13px;cursor:default;transition:all .2s;flex-shrink:0;position:relative}
+.weather-widget:hover{box-shadow:0 2px 10px rgba(79,107,246,.12)}
+.weather-now{display:flex;align-items:center;gap:8px;padding:8px 14px;border-right:1px solid #DCE3F0}
+.weather-now-icon{font-size:24px;line-height:1}
+.weather-now-info{display:flex;flex-direction:column}
+.weather-now-temp{font-weight:700;color:#1F2937;font-family:'JetBrains Mono',monospace;font-size:15px;line-height:1.2}
+.weather-now-desc{color:#6B7280;font-size:10px;font-weight:500}
+.weather-now-meta{font-size:9px;color:#9CA3AF;font-family:'JetBrains Mono',monospace;margin-top:1px}
+.weather-forecast{display:flex;gap:0}
+.weather-hour{display:flex;flex-direction:column;align-items:center;padding:6px 10px;gap:2px;border-right:1px solid #E8EBF0}
+.weather-hour:last-child{border-right:none}
+.weather-hour-time{font-size:9px;color:#9CA3AF;font-family:'JetBrains Mono',monospace;font-weight:600}
+.weather-hour-icon{font-size:16px;line-height:1}
+.weather-hour-temp{font-size:11px;font-weight:700;color:#374151;font-family:'JetBrains Mono',monospace}
+.weather-location{font-size:9px;color:#9CA3AF;padding:0 12px 0 0;font-weight:500;white-space:nowrap;cursor:pointer;transition:color .15s}
+.weather-location:hover{color:#4F6BF6}
+.weather-set{display:none;position:fixed;background:#fff;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.15);border:1px solid #E5E7EB;padding:14px;width:280px;z-index:1001;animation:scaleIn .2s ease}
+.weather-set.show{display:block}
+.weather-set-title{font-size:12px;font-weight:600;color:#1F2937;margin-bottom:8px}
+.weather-set-input{width:100%;padding:8px 10px;border:2px solid #E5E7EB;border-radius:8px;font-size:13px;outline:none;font-family:'Noto Sans KR',sans-serif;color:#1F2937;margin-bottom:6px}
+.weather-set-input:focus{border-color:#4F6BF6}
+.weather-set-results{max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.weather-set-item{padding:7px 10px;border-radius:6px;font-size:12px;cursor:pointer;color:#374151;transition:background .1s}
+.weather-set-item:hover{background:#EEF0FE;color:#4F6BF6}
+.weather-set-hint{font-size:10px;color:#9CA3AF;text-align:center;padding:8px}
+
+.body{display:flex;gap:16px;align-items:flex-start}
+
+.calendar-section{flex:1;background:#fff;border-radius:16px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);min-width:0}
+.month-nav{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.nav-btn{width:36px;height:36px;border:1px solid #E5E7EB;border-radius:10px;background:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#374151;transition:all .15s}
+.nav-btn:hover{background:#F3F4F6}
+.month-title{display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px 12px;border-radius:10px;transition:all .15s;position:relative}
+.month-title:hover{background:#F3F4F6}
+.month-title-text{font-size:20px;font-weight:700;color:#1F2937;letter-spacing:-.5px}
+.month-title-icon{font-size:12px;color:#9CA3AF;transition:transform .2s}
+.month-title-icon.open{transform:rotate(180deg)}
+.today-btn{margin-left:auto;padding:7px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:500;cursor:pointer;color:#4F6BF6;transition:all .15s;font-family:'Noto Sans KR',sans-serif}
+.today-btn:hover{background:#EEF0FE}
+
+.date-picker-dropdown{position:absolute;top:100%;left:0;margin-top:8px;background:#fff;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.12);border:1px solid #E5E7EB;z-index:100;padding:16px;width:280px;animation:scaleIn .2s ease}
+.dp-row{display:flex;gap:8px;margin-bottom:12px}
+.dp-label{font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.5px;margin-bottom:4px}
+.dp-select{flex:1;padding:8px 10px;border:2px solid #E5E7EB;border-radius:8px;font-size:14px;font-family:'Noto Sans KR',sans-serif;color:#1F2937;outline:none;cursor:pointer;background:#fff;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.dp-select:focus{border-color:#4F6BF6}
+.dp-go-btn{width:100%;padding:9px;background:#4F6BF6;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:background .15s}
+.dp-go-btn:hover{background:#3B56E0}
+
+.day-headers{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.day-header{text-align:center;font-size:12px;font-weight:600;padding:8px 0;letter-spacing:.5px;color:#6B7280}
+.day-header.sun{color:#E8573A}.day-header.sat{color:#4F6BF6}
+
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;position:relative}
+.cell{min-height:90px;border-radius:10px;padding:6px;display:flex;flex-direction:column;transition:all .15s;cursor:pointer;border:1px solid #F0F1F3;background:#fff}
+.cell:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.cell.other-month{opacity:.35}.cell.today{background:#FFFBEB;border:2px solid #F59E0B}.cell.selected{background:#F0F3FF;border:2px solid #4F6BF6}
+.cell.drag-over{background:#EEF0FE!important}
+.cell-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.cell-day{font-size:13px;line-height:1;font-weight:500}.cell-day.sun{color:#E8573A}.cell-day.sat{color:#4F6BF6}
+.today-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#F59E0B;color:#fff;font-size:12px;font-weight:700}
+.note-dot{font-size:10px;color:#9CA3AF}
+.cell-events{display:flex;flex-direction:column;gap:2px;flex:1;overflow:hidden;margin-top:0}
+.event-pill{padding:2px 5px;border-radius:4px;font-size:10px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:grab;transition:all .15s;font-weight:500}
+.multiday-bar{padding:1px 5px;border-radius:3px;font-size:9px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;color:#fff;margin-bottom:1px}
+.more-count{font-size:10px;color:#9CA3AF;padding-left:4px;font-weight:500}
+
+/* Continuous multi-day event overlay */
+.calendar-wrapper{position:relative}
+.multiday-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:1}
+.multiday-cont-bar{position:absolute;height:16px;border-radius:4px;display:flex;align-items:center;padding:0 6px;font-size:9px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:auto;cursor:pointer;transition:box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.multiday-cont-bar:hover{box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:5}
+.multiday-cont-bar.left-cap{border-radius:4px 0 0 4px}
+.multiday-cont-bar.right-cap{border-radius:0 4px 4px 0}
+.multiday-cont-bar.both-cap{border-radius:4px}
+.multiday-cont-bar.mid{border-radius:0}
+.multiday-spacer{height:18px;flex-shrink:0}
+
+.side-panel{width:320px;flex-shrink:0;background:#fff;border-radius:16px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);max-height:calc(100vh - 120px);overflow-y:auto;position:sticky;top:20px}
+.side-date-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #F0F1F3}
+.side-date-big{font-size:36px;font-weight:700;color:#1F2937;line-height:1}
+.side-date-sub{font-size:13px;color:#9CA3AF;margin-top:4px}
+.side-btn-group{display:flex;gap:8px;align-items:center}
+.side-icon-btn{width:34px;height:34px;border-radius:8px;border:none;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#F3F4F6;color:#6B7280}
+.side-icon-btn.active{background:#4F6BF6;color:#fff}
+.add-btn{padding:8px 14px;background:#4F6BF6;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'Noto Sans KR',sans-serif}
+.add-btn:hover{background:#3B56E0}
+
+.note-area{margin-bottom:16px;padding:12px;background:#FFFBEB;border-radius:10px;border:1px solid #FDE68A;animation:scaleIn .2s ease}
+.note-label{font-size:12px;font-weight:600;color:#92400E;margin-bottom:8px}
+.note-textarea{width:100%;border:none;background:transparent;font-size:13px;color:#78350F;resize:vertical;outline:none;font-family:'Noto Sans KR',sans-serif;line-height:1.6}
+
+.event-list{display:flex;flex-direction:column;gap:8px}
+.event-card{display:flex;border-radius:10px;overflow:hidden;border:1px solid #F0F1F3;transition:all .15s;animation:slideUp .3s ease}
+.event-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.event-card-bar{width:4px;flex-shrink:0}
+.event-card-body{padding:10px 12px;flex:1;min-width:0}
+.event-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.event-cat-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;letter-spacing:.3px}
+.event-time{font-size:11px;color:#9CA3AF;font-family:'JetBrains Mono',monospace;font-weight:500}
+.event-title-text{font-size:14px;font-weight:500;color:#1F2937;line-height:1.4}
+.event-card-actions{display:flex;gap:8px;margin-top:8px;align-items:center}
+.event-action-btn{background:none;border:none;font-size:12px;color:#6B7280;cursor:pointer;padding:2px 0;font-weight:500;transition:all .15s;font-family:'Noto Sans KR',sans-serif}
+.event-action-btn:hover{color:#1F2937}
+.event-action-btn.delete:hover{color:#E8573A}
+.event-action-btn.complete{color:#10A37F}.event-action-btn.complete:hover{color:#0D8A6A}
+.completed-badge{font-size:10px;color:#10A37F;font-weight:600;background:#E8F8F3;padding:2px 6px;border-radius:4px;margin-left:auto}
+.event-action-btn.complete-undo{color:#F59E0B;margin-left:auto}.event-action-btn.complete-undo:hover{color:#D97706}
+
+.empty-state{text-align:center;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.empty-icon{font-size:36px;opacity:.6}
+.empty-text{font-size:14px;font-weight:500;color:#6B7280}
+.empty-hint{font-size:12px;color:#9CA3AF}
+
+/* ====== GANTT ====== */
+.gantt-section{background:#fff;border-radius:16px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-top:16px;animation:fadeIn .4s ease}
+.gantt-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #F0F1F3;flex-wrap:wrap;gap:8px}
+.gantt-title{font-size:16px;font-weight:700;color:#1F2937;display:flex;align-items:center;gap:8px}
+.gantt-title-icon{color:#4F6BF6;font-size:18px}
+.gantt-subtitle{font-size:12px;color:#9CA3AF;font-weight:400}
+.gantt-stats{display:flex;gap:16px}
+.gantt-stat{text-align:center}
+.gantt-stat-num{font-size:20px;font-weight:700;line-height:1}
+.gantt-stat-label{font-size:10px;color:#9CA3AF;margin-top:2px}
+
+.gantt-list{display:flex;flex-direction:column;gap:6px}
+.gantt-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid #F0F1F3;transition:all .15s;animation:fadeIn .3s ease}
+.gantt-item:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.gantt-item.urgent{border-color:#FCA5A5;background:#FFF5F5}
+.gantt-item.warning{border-color:#FDE68A;background:#FFFDF5}
+.gantt-item-color{width:4px;align-self:stretch;border-radius:2px;flex-shrink:0}
+.gantt-item-info{flex:1;min-width:0}
+.gantt-item-title{font-size:13px;font-weight:600;color:#1F2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gantt-item-cat{font-size:10px;margin-top:1px}
+.gantt-item-period{font-size:10px;color:#9CA3AF;font-family:'JetBrains Mono',monospace;margin-top:2px}
+.gantt-item-middle{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;min-width:110px}
+.gantt-item-dday{font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.gantt-item-dday.overdue{color:#E8573A}
+.gantt-item-dday.urgent-text{color:#F59E0B}
+.gantt-item-dday.safe{color:#10A37F}
+.gantt-progress-wrap{width:100px;height:6px;background:#F0F1F3;border-radius:3px;overflow:hidden}
+.gantt-progress-bar{height:100%;border-radius:3px;transition:width .5s ease}
+.gantt-item-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.gantt-action-btn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Noto Sans KR',sans-serif;white-space:nowrap;border:none;display:flex;align-items:center;gap:4px}
+.gantt-complete-btn{background:#E8F8F3;color:#10A37F}
+.gantt-complete-btn:hover{background:#C6F0E0;color:#0D8A6A}
+.gantt-edit-btn{background:#EEF0FE;color:#4F6BF6}
+.gantt-edit-btn:hover{background:#DCE0FD;color:#3B56E0}
+
+.gantt-empty{text-align:center;padding:30px;color:#9CA3AF;font-size:13px;line-height:1.8}
+.gantt-empty-icon{font-size:28px;margin-bottom:8px;opacity:.5;display:block}
+
+/* Inline edit popover for gantt */
+.gantt-edit-popover{position:fixed;z-index:1001;background:#fff;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.15);border:1px solid #E5E7EB;padding:16px;width:300px;animation:scaleIn .2s ease}
+.gantt-edit-popover .field-label{margin-top:10px}
+.gantt-edit-popover .field-label:first-child{margin-top:0}
+.gantt-edit-popover .input{font-size:13px;padding:8px 12px}
+.gantt-edit-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:460px;box-shadow:0 20px 60px rgba(0,0,0,.15);overflow:hidden;animation:scaleIn .25s ease;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid #F0F1F3}
+.modal-title{font-size:16px;font-weight:700;color:#1F2937}
+.modal-close{width:30px;height:30px;border:none;background:#F3F4F6;border-radius:8px;font-size:14px;cursor:pointer;color:#6B7280;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:#E5E7EB}
+.modal-body{padding:20px 24px}
+.field-label{display:block;font-size:12px;font-weight:600;color:#6B7280;margin-bottom:6px;margin-top:14px;letter-spacing:.3px}
+.field-label:first-child{margin-top:0}
+.input{width:100%;padding:10px 14px;border:2px solid #E5E7EB;border-radius:10px;font-size:14px;outline:none;transition:border-color .15s;font-family:'Noto Sans KR',sans-serif;color:#1F2937}
+.input:focus{border-color:#4F6BF6}
+.time-row{display:flex;gap:10px;align-items:center}
+.time-row .input{flex:1}
+.time-sep{color:#9CA3AF;font-weight:600;font-size:18px}
+.period-toggle{display:flex;gap:8px;margin-top:6px}
+.period-btn{flex:1;padding:8px;border:2px solid #E5E7EB;border-radius:8px;background:#F9FAFB;font-size:13px;cursor:pointer;text-align:center;transition:all .15s;font-family:'Noto Sans KR',sans-serif;color:#6B7280}
+.period-btn.active{border-color:#4F6BF6;background:#EEF0FE;color:#4F6BF6;font-weight:600}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cat-option{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .15s;border:2px solid #E5E7EB;background:#F9FAFB;color:#6B7280;font-family:'Noto Sans KR',sans-serif}
+.cat-option.active{font-weight:600}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid #F0F1F3}
+.cancel-btn{padding:9px 18px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:500;cursor:pointer;color:#6B7280;font-family:'Noto Sans KR',sans-serif}
+.cancel-btn:hover{background:#F3F4F6}
+.save-btn{padding:9px 18px;background:#4F6BF6;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif}
+.save-btn:hover{background:#3B56E0}
+.error-msg{font-size:11px;color:#E8573A;margin-top:4px;display:none}
+.error-msg.show{display:block}
+
+@media(max-width:900px){.body{flex-direction:column}.side-panel{width:100%;position:static;max-height:none}}
+
+.header-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.data-btns{display:flex;gap:6px}
+.data-btn{padding:5px 12px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:11px;font-weight:500;cursor:pointer;color:#6B7280;transition:all .15s;font-family:'Noto Sans KR',sans-serif;white-space:nowrap}
+.data-btn:hover{background:#F3F4F6;color:#1F2937;border-color:#D1D5DB}
+
+/* Auto-save toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1F2937;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:2000;opacity:0;transition:all .3s ease;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1 class="logo" id="logoTitle" onclick="startEditTitle()" title="클릭하여 제목 수정"><span class="logo-icon">◈</span> <span id="logoText">천성민의 일정</span></h1>
+    <span class="header-sub" id="headerYear">2026년 업무 일정 관리</span>
+    <div class="weather-widget" id="weatherWidget" style="display: inline-flex; position: relative;">
+      <div class="weather-now">
+        <span class="weather-now-icon" id="wNowIcon">☀️</span>
+        <div class="weather-now-info">
+          <span class="weather-now-temp" id="wNowTemp">9°C</span>
+          <span class="weather-now-desc" id="wNowDesc">맑음</span>
+          <span class="weather-now-meta" id="wNowMeta">15:30 기준</span>
+        </div>
+      </div>
+      <div class="weather-forecast" id="wForecast"><div class="weather-hour"><span class="weather-hour-time">16시</span><span class="weather-hour-icon">☀️</span><span class="weather-hour-temp">9°</span></div><div class="weather-hour"><span class="weather-hour-time">17시</span><span class="weather-hour-icon">☀️</span><span class="weather-hour-temp">7°</span></div><div class="weather-hour"><span class="weather-hour-time">18시</span><span class="weather-hour-icon">☀️</span><span class="weather-hour-temp">6°</span></div></div>
+      <span class="weather-location" id="wLocation" onclick="toggleWeatherSet()" title="클릭하여 지역 변경">📍인천광역시 인천광역시, 대한민국 ▾</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="category-legend" id="legend"><span class="legend-item"><span class="legend-dot" style="background:#4F6BF6"></span>회의</span><span class="legend-item"><span class="legend-dot" style="background:#E8573A"></span>업무</span><span class="legend-item"><span class="legend-dot" style="background:#D946A8"></span>마감</span><span class="legend-item"><span class="legend-dot" style="background:#10A37F"></span>개인</span><span class="legend-item"><span class="legend-dot" style="background:#8B8FA3"></span>기타</span></div>
+    <div class="data-btns">
+      <button class="data-btn" id="autoSaveBtn" onclick="enableAutoSave()" title="파일에 자동 저장 연결">🔗 자동저장</button>
+      <button class="data-btn" onclick="exportJSON()" title="일정 내보내기">💾 백업</button>
+      <button class="data-btn" onclick="document.getElementById('importFile').click()" title="일정 불러오기">📂 복원</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+    </div>
+  </div>
+</div>
+
+<div class="body">
+  <div class="calendar-section">
+    <div class="month-nav">
+      <button class="nav-btn" onclick="prevMonth()">‹</button>
+      <div class="month-title" id="monthTitleWrap" onclick="toggleDatePicker()" style="position:relative">
+        <span class="month-title-text" id="monthTitleText">2026년 3월</span>
+        <span class="month-title-icon" id="monthTitleIcon">▾</span>
+        <div class="date-picker-dropdown" id="datePicker" style="display:none" onclick="event.stopPropagation()">
+          <div class="dp-label">년도</div>
+          <div class="dp-row"><select class="dp-select" id="dpYear"></select></div>
+          <div class="dp-label">월</div>
+          <div class="dp-row"><select class="dp-select" id="dpMonth"></select></div>
+          <div class="dp-label">일 (선택)</div>
+          <div class="dp-row"><select class="dp-select" id="dpDay"><option value="">전체</option></select></div>
+          <button class="dp-go-btn" onclick="goToPickedDate()">이동</button>
+        </div>
+      </div>
+      <button class="nav-btn" onclick="nextMonth()">›</button>
+      <button class="today-btn" onclick="goToday()">오늘</button>
+    </div>
+    <div class="day-headers" id="dayHeaders"><div class="day-header sun ">일</div><div class="day-header  ">월</div><div class="day-header  ">화</div><div class="day-header  ">수</div><div class="day-header  ">목</div><div class="day-header  ">금</div><div class="day-header  sat">토</div></div>
+    <div class="calendar-wrapper" id="calendarWrapper">
+      <div class="calendar-grid" id="calendarGrid"><div class="cell" onclick="selectDate('2026-03-01')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-01')" style="animation:fadeIn .3s ease 0s both"><div class="cell-top"><span class="cell-day sun">1</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-02')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-02')" style="animation:fadeIn .3s ease 0.01s both"><div class="cell-top"><span class="cell-day">2</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-03')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-03')" style="animation:fadeIn .3s ease 0.02s both"><div class="cell-top"><span class="cell-day">3</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-04')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-04')" style="animation:fadeIn .3s ease 0.03s both"><div class="cell-top"><span class="cell-day">4</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-05')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-05')" style="animation:fadeIn .3s ease 0.04s both"><div class="cell-top"><span class="cell-day">5</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-06')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-06')" style="animation:fadeIn .3s ease 0.05s both"><div class="cell-top"><span class="cell-day">6</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-07')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-07')" style="animation:fadeIn .3s ease 0.06s both"><div class="cell-top"><span class="cell-day sat">7</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-08')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-08')" style="animation:fadeIn .3s ease 0.07s both"><div class="cell-top"><span class="cell-day sun">8</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-09')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-09')" style="animation:fadeIn .3s ease 0.08s both"><div class="cell-top"><span class="cell-day">9</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-10')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-10')" style="animation:fadeIn .3s ease 0.09s both"><div class="cell-top"><span class="cell-day">10</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-11')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-11')" style="animation:fadeIn .3s ease 0.1s both"><div class="cell-top"><span class="cell-day">11</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-12')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-12')" style="animation:fadeIn .3s ease 0.11s both"><div class="cell-top"><span class="cell-day">12</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-13')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-13')" style="animation:fadeIn .3s ease 0.12s both"><div class="cell-top"><span class="cell-day">13</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-14')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-14')" style="animation:fadeIn .3s ease 0.13s both"><div class="cell-top"><span class="cell-day sat">14</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-15')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-15')" style="animation:fadeIn .3s ease 0.14s both"><div class="cell-top"><span class="cell-day sun">15</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-16')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-16')" style="animation:fadeIn .3s ease 0.15s both"><div class="cell-top"><span class="cell-day">16</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-17')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-17')" style="animation:fadeIn .3s ease 0.16s both"><div class="cell-top"><span class="cell-day">17</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-18')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-18')" style="animation:fadeIn .3s ease 0.17s both"><div class="cell-top"><span class="cell-day">18</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-19')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-19')" style="animation:fadeIn .3s ease 0.18s both"><div class="cell-top"><span class="cell-day">19</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-20')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-20')" style="animation:fadeIn .3s ease 0.19s both"><div class="cell-top"><span class="cell-day">20</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-21')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-21')" style="animation:fadeIn .3s ease 0.2s both"><div class="cell-top"><span class="cell-day sat">21</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-22')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-22')" style="animation:fadeIn .3s ease 0.21s both"><div class="cell-top"><span class="cell-day sun">22</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-23')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-23')" style="animation:fadeIn .3s ease 0.22s both"><div class="cell-top"><span class="cell-day">23</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-24')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-24')" style="animation:fadeIn .3s ease 0.23s both"><div class="cell-top"><span class="cell-day">24</span></div><div class="cell-events"></div></div><div class="cell today" onclick="selectDate('2026-03-25')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-25')" style="animation:fadeIn .3s ease 0.24s both"><div class="cell-top"><span class="cell-day"><span class="today-badge">25</span></span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-26')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-26')" style="animation:fadeIn .3s ease 0.25s both"><div class="cell-top"><span class="cell-day">26</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-27')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-27')" style="animation:fadeIn .3s ease 0.26s both"><div class="cell-top"><span class="cell-day">27</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-28')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-28')" style="animation:fadeIn .3s ease 0.27s both"><div class="cell-top"><span class="cell-day sat">28</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-29')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-29')" style="animation:fadeIn .3s ease 0.28s both"><div class="cell-top"><span class="cell-day sun">29</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-30')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-30')" style="animation:fadeIn .3s ease 0.29s both"><div class="cell-top"><span class="cell-day">30</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-31')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-31')" style="animation:fadeIn .3s ease 0.3s both"><div class="cell-top"><span class="cell-day">31</span></div><div class="cell-events"></div></div><div class="cell other-month" onclick="selectDate('2026-04-01')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-04-01')" style="animation:fadeIn .3s ease 0.31s both"><div class="cell-top"><span class="cell-day">1</span></div><div class="cell-events"></div></div><div class="cell other-month" onclick="selectDate('2026-04-02')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-04-02')" style="animation:fadeIn .3s ease 0.32s both"><div class="cell-top"><span class="cell-day">2</span></div><div class="cell-events"></div></div><div class="cell other-month" onclick="selectDate('2026-04-03')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-04-03')" style="animation:fadeIn .3s ease 0.33s both"><div class="cell-top"><span class="cell-day">3</span></div><div class="cell-events"></div></div><div class="cell other-month" onclick="selectDate('2026-04-04')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-04-04')" style="animation:fadeIn .3s ease 0.34s both"><div class="cell-top"><span class="cell-day sat">4</span></div><div class="cell-events"></div></div></div>
+      <div class="multiday-overlay" id="multidayOverlay"></div>
+    </div>
+  </div>
+  <div class="side-panel" id="sidePanel"><div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">날짜를 선택해주세요</div><div class="empty-hint">캘린더의 날짜를 클릭하면 일정을 확인할 수 있습니다</div></div></div>
+</div>
+
+<div class="gantt-section" id="ganttSection"><div class="gantt-header"><div class="gantt-title"><span class="gantt-title-icon">▐</span>미완료 업무 현황</div></div><div class="gantt-empty"><span class="gantt-empty-icon">🎉</span>미완료 업무가 없습니다!<br>모든 업무를 완료했거나 등록된 업무가 없습니다.</div></div>
+
+<!-- Gantt inline edit popover -->
+<div class="gantt-edit-popover" id="ganttEditPop" style="display:none">
+  <label class="field-label">일정 제목</label>
+  <input class="input" id="geTitle">
+  <label class="field-label">시작일</label>
+  <input class="input" id="geStart" type="date">
+  <label class="field-label">종료일</label>
+  <input class="input" id="geEnd" type="date">
+  <div class="error-msg" id="geDateError">종료일은 시작일 이후여야 합니다</div>
+  <div class="gantt-edit-footer">
+    <button class="cancel-btn" onclick="closeGanttEdit()">취소</button>
+    <button class="save-btn" onclick="saveGanttEdit()">저장</button>
+  </div>
+</div>
+
+<!-- Main Modal -->
+<div class="overlay" id="modalOverlay" style="display:none" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">새 일정 추가</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="field-label">일정 제목</label>
+      <input class="input" id="evTitle" placeholder="일정을 입력하세요">
+      <label class="field-label">일정 유형</label>
+      <div class="period-toggle">
+        <button class="period-btn active" id="typeDay" onclick="setEventType('day')">하루 일정</button>
+        <button class="period-btn" id="typePeriod" onclick="setEventType('period')">기간 일정</button>
+      </div>
+      <div id="dayFields">
+        <label class="field-label">시간</label>
+        <div class="time-row">
+          <input class="input" id="evStart" type="time" value="09:00" step="300" onchange="validateTime()">
+          <span class="time-sep">→</span>
+          <input class="input" id="evEnd" type="time" value="10:00" step="300" onchange="validateTime()">
+        </div>
+        <div class="error-msg" id="timeError">종료 시간은 시작 시간 이후여야 합니다</div>
+      </div>
+      <div id="periodFields" style="display:none">
+        <label class="field-label">시작일</label>
+        <input class="input" id="evStartDate" type="date">
+        <label class="field-label">종료일</label>
+        <input class="input" id="evEndDate" type="date" onchange="validateDate()">
+        <div class="error-msg" id="dateError">종료일은 시작일 이후여야 합니다</div>
+      </div>
+      <label class="field-label">카테고리</label>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" onclick="closeModal()">취소</button>
+      <button class="save-btn" onclick="saveEvent()" id="saveBtn">추가하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CAT=[
+  {id:"meeting",label:"회의",color:"#4F6BF6",bg:"#EEF0FE"},
+  {id:"task",label:"업무",color:"#E8573A",bg:"#FEF0ED"},
+  {id:"deadline",label:"마감",color:"#D946A8",bg:"#FDECF8"},
+  {id:"personal",label:"개인",color:"#10A37F",bg:"#E8F8F3"},
+  {id:"other",label:"기타",color:"#8B8FA3",bg:"#F2F3F5"}
+];
+const DAYS=["일","월","화","수","목","금","토"];
+const MON=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
+
+const now=new Date();
+let cY=now.getFullYear(),cM=now.getMonth(),selDate=null,showNote=false,editId=null,selCat="meeting",eventType="day";
+let dragEv=null,dragSrc=null,dpOpen=false;
+let ganttEditTarget=null; // {key, id}
+
+let events={},notes={};
+try{const a=localStorage.getItem('wc5_ev'),b=localStorage.getItem('wc5_no');if(a)events=JSON.parse(a);if(b)notes=JSON.parse(b);}catch(e){}
+function save(){try{localStorage.setItem('wc5_ev',JSON.stringify(events));localStorage.setItem('wc5_no',JSON.stringify(notes));}catch(e){}}
+
+function uid(){return Math.random().toString(36).slice(2,10)}
+function dk(y,m,d){return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+function dim(y,m){return new Date(y,m+1,0).getDate()}
+function fdom(y,m){return new Date(y,m,1).getDay()}
+const todayKey=dk(now.getFullYear(),now.getMonth(),now.getDate());
+
+function parseDk(s){const p=s.split('-');return{y:+p[0],m:+p[1]-1,d:+p[2]}}
+function dkToDate(s){const p=parseDk(s);return new Date(p.y,p.m,p.d)}
+function dateToDk(d){return dk(d.getFullYear(),d.getMonth(),d.getDate())}
+function diffDays(a,b){return Math.round((dkToDate(b)-dkToDate(a))/864e5)}
+
+function getEventsForDate(dateKey){
+  let r=[];
+  Object.keys(events).forEach(k=>{
+    (events[k]||[]).forEach(ev=>{
+      if(ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate){
+        if(dateKey>=ev.startDate&&dateKey<=ev.endDate) r.push({...ev,_dk:k});
+      } else if(k===dateKey) r.push({...ev,_dk:k});
+    });
+  });
+  return r;
+}
+
+function allEvents(){
+  let a=[];Object.keys(events).forEach(k=>{(events[k]||[]).forEach(ev=>a.push({...ev,_dk:k}));});return a;
+}
+
+function findStorageKey(eid){for(const k in events){if((events[k]||[]).find(e=>e.id===eid))return k;}return selDate;}
+
+function initLegend(){document.getElementById('legend').innerHTML=CAT.map(c=>`<span class="legend-item"><span class="legend-dot" style="background:${c.color}"></span>${c.label}</span>`).join('');}
+function initDayHeaders(){document.getElementById('dayHeaders').innerHTML=DAYS.map((d,i)=>`<div class="day-header ${i===0?'sun':''} ${i===6?'sat':''}">${d}</div>`).join('');}
+
+/* Date Picker */
+function toggleDatePicker(){dpOpen=!dpOpen;const dp=document.getElementById('datePicker'),ic=document.getElementById('monthTitleIcon');if(dpOpen){dp.style.display='block';ic.classList.add('open');populateDatePicker();}else{dp.style.display='none';ic.classList.remove('open');}}
+function closeDatePicker(){dpOpen=false;document.getElementById('datePicker').style.display='none';document.getElementById('monthTitleIcon').classList.remove('open');}
+function populateDatePicker(){
+  const yS=document.getElementById('dpYear'),mS=document.getElementById('dpMonth');
+  yS.innerHTML='';for(let y=2020;y<=2035;y++){const o=document.createElement('option');o.value=y;o.textContent=y+'년';if(y===cY)o.selected=true;yS.appendChild(o);}
+  mS.innerHTML='';for(let m=0;m<12;m++){const o=document.createElement('option');o.value=m;o.textContent=MON[m];if(m===cM)o.selected=true;mS.appendChild(o);}
+  yS.onchange=mS.onchange=updateDayOpts;updateDayOpts();
+}
+function updateDayOpts(){
+  const y=+document.getElementById('dpYear').value,m=+document.getElementById('dpMonth').value,dS=document.getElementById('dpDay'),d=dim(y,m),prev=dS.value;
+  dS.innerHTML='<option value="">전체</option>';for(let i=1;i<=d;i++){const o=document.createElement('option');o.value=i;o.textContent=i+'일';dS.appendChild(o);}if(prev&&+prev<=d)dS.value=prev;
+}
+function goToPickedDate(){cY=+document.getElementById('dpYear').value;cM=+document.getElementById('dpMonth').value;const d=document.getElementById('dpDay').value;if(d)selDate=dk(cY,cM,+d);else selDate=null;showNote=false;closeDatePicker();render();}
+document.addEventListener('click',e=>{if(dpOpen&&!document.getElementById('monthTitleWrap').contains(e.target))closeDatePicker();if(ganttEditTarget){const pop=document.getElementById('ganttEditPop');if(pop&&!pop.contains(e.target)&&!e.target.classList.contains('gantt-edit-btn'))closeGanttEdit();}});
+
+function prevMonth(){if(cM===0){cY--;cM=11;}else cM--;selDate=null;showNote=false;render();}
+function nextMonth(){if(cM===11){cY++;cM=0;}else cM++;selDate=null;showNote=false;render();}
+function goToday(){cY=now.getFullYear();cM=now.getMonth();selDate=todayKey;showNote=false;render();}
+function selectDate(d){selDate=d;showNote=false;render();}
+
+function render(){
+  document.getElementById('headerYear').textContent=`${cY}년 업무 일정 관리`;
+  document.getElementById('monthTitleText').textContent=`${cY}년 ${MON[cM]}`;
+  renderCalendar();renderSidePanel();renderGantt();
+}
+
+function renderCalendar(){
+  const grid=document.getElementById('calendarGrid'),d=dim(cY,cM),fd=fdom(cY,cM),pd=dim(cY,cM===0?11:cM-1);
+  let cells=[];
+  for(let i=fd-1;i>=0;i--){const dd=pd-i,mm=cM===0?11:cM-1,yy=cM===0?cY-1:cY;cells.push({day:dd,dateKey:dk(yy,mm,dd),cur:false});}
+  for(let i=1;i<=d;i++)cells.push({day:i,dateKey:dk(cY,cM,i),cur:true});
+  const r=7-(cells.length%7);if(r<7)for(let i=1;i<=r;i++){const mm=cM===11?0:cM+1,yy=cM===11?cY+1:cY;cells.push({day:i,dateKey:dk(yy,mm,i),cur:false});}
+
+  // Collect multi-day events that appear in this month's cells
+  const cellKeys=cells.map(c=>c.dateKey);
+  const allEvs=allEvents();
+  const multiEvs=allEvs.filter(ev=>ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate);
+  
+  // For each cell, determine how many multi-day bar slots are needed
+  // Assign each multi-day event a "lane" (row index) to avoid overlapping
+  const lanes={}; // eventId -> lane number
+  const cellLaneCount={}; // cellIndex -> max lanes used
+  
+  // Sort multi-day events by start date, then by duration (longer first)
+  const relevantMulti=multiEvs.filter(ev=>{
+    return cellKeys.some(k=>k>=ev.startDate&&k<=ev.endDate);
+  }).sort((a,b)=>{
+    if(a.startDate!==b.startDate)return a.startDate<b.startDate?-1:1;
+    const durA=diffDays(a.startDate,a.endDate),durB=diffDays(b.startDate,b.endDate);
+    return durB-durA;
+  });
+
+  // Assign lanes
+  const laneOccupancy=[]; // array of arrays: laneOccupancy[lane] = [{start,end}]
+  relevantMulti.forEach(ev=>{
+    let lane=0;
+    while(true){
+      if(!laneOccupancy[lane])laneOccupancy[lane]=[];
+      const conflict=laneOccupancy[lane].some(o=>!(ev.endDate<o.start||ev.startDate>o.end));
+      if(!conflict){
+        laneOccupancy[lane].push({start:ev.startDate,end:ev.endDate});
+        lanes[ev.id]=lane;
+        break;
+      }
+      lane++;
+    }
+  });
+  const maxLanes=laneOccupancy.length;
+
+  // Count multi-day spacers needed per cell
+  cells.forEach((c,idx)=>{
+    let count=0;
+    relevantMulti.forEach(ev=>{
+      if(c.dateKey>=ev.startDate&&c.dateKey<=ev.endDate)count=Math.max(count,lanes[ev.id]+1);
+    });
+    cellLaneCount[idx]=count;
+  });
+
+  // Render cells - add spacers for multi-day events
+  grid.innerHTML=cells.map((c,idx)=>{
+    const isT=c.dateKey===todayKey,isS=c.dateKey===selDate,dow=idx%7,hn=!!notes[c.dateKey];
+    const ce=getEventsForDate(c.dateKey);
+    // Only show single-day events as pills
+    const singleEvs=ce.filter(ev=>!(ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate));
+    let cls='cell';if(!c.cur)cls+=' other-month';if(isT)cls+=' today';if(isS)cls+=' selected';
+    let dc='cell-day';if(dow===0)dc+=' sun';if(dow===6)dc+=' sat';
+    const dH=isT?`<span class="today-badge">${c.day}</span>`:c.day;
+    
+    // Spacers for multi-day bar lanes
+    const spacerCount=cellLaneCount[idx]||0;
+    let spacerHTML='';
+    for(let s=0;s<spacerCount;s++)spacerHTML+=`<div class="multiday-spacer"></div>`;
+
+    const eH=singleEvs.slice(0,3-spacerCount).map(ev=>{
+      const cat=CAT.find(x=>x.id===ev.category)||CAT[4];
+      return`<div class="event-pill" draggable="true" ondragstart="onDragStart(event,'${c.dateKey}','${ev.id}')" style="background:${cat.bg};border-left:3px solid ${cat.color};color:${cat.color};${ev.completed?'opacity:.4;text-decoration:line-through':''}" title="${ev.startTime||''}-${ev.endTime||''} ${ev.title}">${ev.title}</div>`;
+    }).join('');
+    const totalVisible=spacerCount+singleEvs.length;
+    const mH=totalVisible>3?`<span class="more-count">+${totalVisible-3}</span>`:'';
+    return`<div class="${cls}" onclick="selectDate('${c.dateKey}')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('${c.dateKey}')" style="animation:fadeIn .3s ease ${idx*.01}s both"><div class="cell-top"><span class="${dc}">${dH}</span>${hn?'<span class="note-dot">✎</span>':''}</div><div class="cell-events">${spacerHTML}${eH}${mH}</div></div>`;
+  }).join('');
+
+  // Render multi-day continuous bars as overlay
+  requestAnimationFrame(()=>{renderMultidayBars(cells,relevantMulti,lanes);});
+}
+
+function renderMultidayBars(cells,multiEvs,lanes){
+  const overlay=document.getElementById('multidayOverlay');
+  const grid=document.getElementById('calendarGrid');
+  const cellEls=grid.querySelectorAll('.cell');
+  if(!cellEls.length){overlay.innerHTML='';return;}
+
+  const gridRect=grid.getBoundingClientRect();
+  const cellRects=Array.from(cellEls).map(el=>el.getBoundingClientRect());
+  const gap=4;
+
+  let barsHTML='';
+  multiEvs.forEach(ev=>{
+    const cat=CAT.find(x=>x.id===ev.category)||CAT[4];
+    const lane=lanes[ev.id]||0;
+    const barTop=26+lane*18; // offset from cell top
+
+    // Find which cells this event spans
+    const startIdx=cells.findIndex(c=>c.dateKey===ev.startDate);
+    const endIdx=cells.findIndex(c=>c.dateKey===ev.endDate);
+    
+    // Clamp to visible range
+    const visStart=Math.max(startIdx,0);
+    const visEnd=Math.min(endIdx,cells.length-1);
+    if(visStart>cells.length-1||visEnd<0)return;
+
+    // Split by week rows
+    let segStart=visStart;
+    while(segStart<=visEnd){
+      const rowEnd=segStart+6-(segStart%7); // last cell in this row
+      const segEnd=Math.min(rowEnd,visEnd);
+
+      const isRealStart=segStart===startIdx;
+      const isRealEnd=segEnd===endIdx;
+
+      const leftRect=cellRects[segStart];
+      const rightRect=cellRects[segEnd];
+      if(!leftRect||!rightRect){segStart=segEnd+1;continue;}
+
+      const left=leftRect.left-gridRect.left+(isRealStart?2:0);
+      const right=rightRect.right-gridRect.left-(isRealEnd?2:0);
+      const top=leftRect.top-gridRect.top+barTop;
+      const width=right-left;
+
+      let capClass='both-cap';
+      if(isRealStart&&!isRealEnd)capClass='left-cap';
+      else if(!isRealStart&&isRealEnd)capClass='right-cap';
+      else if(!isRealStart&&!isRealEnd)capClass='mid';
+
+      const opacity=ev.completed?0.4:1;
+      const label=isRealStart?ev.title:'';
+
+      barsHTML+=`<div class="multiday-cont-bar ${capClass}" onclick="selectDate('${ev.startDate}')" title="${ev.title} (${ev.startDate} ~ ${ev.endDate})" style="left:${left}px;top:${top}px;width:${width}px;background:${cat.color};opacity:${opacity}">${label}</div>`;
+
+      segStart=segEnd+1;
+    }
+  });
+  overlay.innerHTML=barsHTML;
+}
+
+function renderSidePanel(){
+  const panel=document.getElementById('sidePanel');
+  if(!selDate){panel.innerHTML=`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">날짜를 선택해주세요</div><div class="empty-hint">캘린더의 날짜를 클릭하면 일정을 확인할 수 있습니다</div></div>`;return;}
+  const p=parseDk(selDate),dow=new Date(selDate).getDay(),de=getEventsForDate(selDate),note=notes[selDate]||'';
+  let nH='';if(showNote)nH=`<div class="note-area"><div class="note-label">📝 메모</div><textarea class="note-textarea" rows="4" placeholder="이 날의 메모를 입력하세요..." oninput="updateNote(this.value)">${note}</textarea></div>`;
+  let eH='';
+  if(de.length===0)eH=`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">등록된 일정이 없습니다</div><div class="empty-hint">+ 버튼으로 일정을 추가해보세요</div></div>`;
+  else eH=de.map(ev=>{
+    const cat=CAT.find(c=>c.id===ev.category)||CAT[4];
+    let ts='';if(ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate)ts=`${ev.startDate} ~ ${ev.endDate}`;else if(ev.startTime&&ev.endTime)ts=`${ev.startTime} - ${ev.endTime}`;
+    const done=ev.completed;
+    const sk=findStorageKey(ev.id);
+    const compBtn=done?`<button class="event-action-btn complete-undo" onclick="toggleComplete('${sk}','${ev.id}')" title="완료 취소">↩ 완료취소</button>`:`<button class="event-action-btn complete" onclick="toggleComplete('${sk}','${ev.id}')">✓ 완료</button>`;
+    return`<div class="event-card" style="${done?'opacity:.5':''}"><div class="event-card-bar" style="background:${cat.color}"></div><div class="event-card-body"><div class="event-card-top"><span class="event-cat-badge" style="background:${cat.bg};color:${cat.color}">${cat.label}</span>${ts?`<span class="event-time">${ts}</span>`:''}</div><div class="event-title-text" style="${done?'text-decoration:line-through':''}">${ev.title}</div><div class="event-card-actions"><button class="event-action-btn" onclick="openEditModal('${sk}','${ev.id}')">수정</button><button class="event-action-btn delete" onclick="removeEvent('${sk}','${ev.id}')">삭제</button>${compBtn}</div></div></div>`;
+  }).join('');
+  panel.innerHTML=`<div style="animation:slideUp .3s ease"><div class="side-date-header"><div><div class="side-date-big">${p.d}</div><div class="side-date-sub">${MON[p.m]} · ${DAYS[dow]}요일</div></div><div class="side-btn-group"><button class="side-icon-btn ${showNote?'active':''}" onclick="toggleNote()" title="메모">✎</button><button class="add-btn" onclick="openAddModal()">+ 일정 추가</button></div></div>${nH}<div class="event-list">${eH}</div></div>`;
+}
+
+function toggleComplete(sk,eid){const arr=events[sk]||[];const ev=arr.find(e=>e.id===eid);if(ev){ev.completed=!ev.completed;save();render();}}
+
+/* ====== GANTT: Incomplete tasks ====== */
+function renderGantt(){
+  const section=document.getElementById('ganttSection');
+  const all=allEvents();
+  const incomplete=all.filter(ev=>!ev.completed&&getDeadline(ev));
+  if(incomplete.length===0){
+    section.innerHTML=`<div class="gantt-header"><div class="gantt-title"><span class="gantt-title-icon">▐</span>미완료 업무 현황</div></div><div class="gantt-empty"><span class="gantt-empty-icon">🎉</span>미완료 업무가 없습니다!<br>모든 업무를 완료했거나 등록된 업무가 없습니다.</div>`;
+    return;
+  }
+  const todayD=dkToDate(todayKey);
+  incomplete.sort((a,b)=>dkToDate(getDeadline(a))-dkToDate(getDeadline(b)));
+  const overdue=incomplete.filter(ev=>dkToDate(getDeadline(ev))<todayD).length;
+  const urgentCnt=incomplete.filter(ev=>{const d=diffDays(todayKey,getDeadline(ev));return d>=0&&d<=3;}).length;
+
+  let stats=`<div class="gantt-stats">
+    <div class="gantt-stat"><div class="gantt-stat-num" style="color:#1F2937">${incomplete.length}</div><div class="gantt-stat-label">전체</div></div>
+    ${overdue?`<div class="gantt-stat"><div class="gantt-stat-num" style="color:#E8573A">${overdue}</div><div class="gantt-stat-label">기한초과</div></div>`:''}
+    ${urgentCnt?`<div class="gantt-stat"><div class="gantt-stat-num" style="color:#F59E0B">${urgentCnt}</div><div class="gantt-stat-label">임박</div></div>`:''}
+  </div>`;
+
+  const list=incomplete.map((ev,i)=>{
+    const cat=CAT.find(c=>c.id===ev.category)||CAT[4];
+    const deadline=getDeadline(ev),startDate=getStartDate(ev);
+    const daysLeft=diffDays(todayKey,deadline);
+    const totalDur=Math.max(diffDays(startDate,deadline),1);
+    const elapsed=Math.max(diffDays(startDate,todayKey),0);
+    const progress=Math.min(Math.round((elapsed/totalDur)*100),100);
+    let ddayText='',ddayClass='safe',rowClass='';
+    if(daysLeft<0){ddayText=`D+${Math.abs(daysLeft)}`;ddayClass='overdue';rowClass='urgent';}
+    else if(daysLeft===0){ddayText='D-Day';ddayClass='urgent-text';rowClass='warning';}
+    else if(daysLeft<=3){ddayText=`D-${daysLeft}`;ddayClass='urgent-text';rowClass='warning';}
+    else{ddayText=`D-${daysLeft}`;ddayClass='safe';}
+    let progressColor=cat.color;if(daysLeft<0)progressColor='#E8573A';else if(daysLeft<=3)progressColor='#F59E0B';
+    const periodText=startDate===deadline?deadline:`${startDate} → ${deadline}`;
+    const sk=findStorageKey(ev.id);
+
+    return`<div class="gantt-item ${rowClass}" style="animation:fadeIn .3s ease ${i*.04}s both">
+      <div class="gantt-item-color" style="background:${cat.color}"></div>
+      <div class="gantt-item-info">
+        <div class="gantt-item-title">${ev.title}</div>
+        <div class="gantt-item-cat" style="color:${cat.color}">${cat.label}</div>
+        <div class="gantt-item-period">${periodText}</div>
+      </div>
+      <div class="gantt-item-middle">
+        <div class="gantt-item-dday ${ddayClass}">${ddayText}</div>
+        <div class="gantt-progress-wrap"><div class="gantt-progress-bar" style="width:${progress}%;background:${progressColor}"></div></div>
+      </div>
+      <div class="gantt-item-actions">
+        <button class="gantt-action-btn gantt-complete-btn" onclick="ganttComplete('${sk}','${ev.id}',this)">✓ 완료</button>
+        <button class="gantt-action-btn gantt-edit-btn" onclick="event.stopPropagation();openGanttEdit('${sk}','${ev.id}',this)">✎ 수정</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  section.innerHTML=`<div class="gantt-header"><div><div class="gantt-title"><span class="gantt-title-icon">▐</span>미완료 업무 현황</div><div class="gantt-subtitle">종료 기한까지 남은 일수와 진행률</div></div>${stats}</div><div class="gantt-list">${list}</div>`;
+}
+
+function getDeadline(ev){return ev.endDate||ev._dk||null;}
+function getStartDate(ev){return ev.startDate||ev._dk||todayKey;}
+
+/* Gantt complete with animation */
+function ganttComplete(sk,eid,btn){
+  const row=btn.closest('.gantt-item');
+  row.style.animation='completeAnim .4s ease forwards';
+  setTimeout(()=>{toggleComplete(sk,eid);},400);
+}
+
+/* Gantt inline edit */
+function openGanttEdit(sk,eid,btn){
+  const ev=(events[sk]||[]).find(e=>e.id===eid);if(!ev)return;
+  ganttEditTarget={key:sk,id:eid};
+  const pop=document.getElementById('ganttEditPop');
+  document.getElementById('geTitle').value=ev.title;
+  document.getElementById('geStart').value=ev.startDate||sk;
+  document.getElementById('geEnd').value=ev.endDate||sk;
+  document.getElementById('geDateError').classList.remove('show');
+
+  // Position near button
+  const rect=btn.getBoundingClientRect();
+  let top=rect.bottom+8,left=rect.left-200;
+  if(left<20)left=20;
+  if(top+300>window.innerHeight)top=rect.top-310;
+  pop.style.top=top+'px';pop.style.left=left+'px';pop.style.display='block';
+}
+function closeGanttEdit(){ganttEditTarget=null;document.getElementById('ganttEditPop').style.display='none';}
+function saveGanttEdit(){
+  if(!ganttEditTarget)return;
+  const title=document.getElementById('geTitle').value.trim();
+  const sd=document.getElementById('geStart').value;
+  const ed=document.getElementById('geEnd').value;
+  if(!title||!sd||!ed)return;
+  if(ed<sd){document.getElementById('geDateError').classList.add('show');return;}
+  const{key,id}=ganttEditTarget;
+  const arr=events[key]||[];
+  const idx=arr.findIndex(e=>e.id===id);
+  if(idx<0)return;
+  const ev=arr[idx];
+  // Remove from old key
+  arr.splice(idx,1);if(arr.length===0)delete events[key];else events[key]=arr;
+  // Update and store on new startDate
+  ev.title=title;ev.startDate=sd;ev.endDate=ed;
+  if(!events[sd])events[sd]=[];
+  events[sd].push(ev);
+  save();closeGanttEdit();render();
+}
+
+function toggleNote(){showNote=!showNote;renderSidePanel();}
+function updateNote(v){if(!selDate)return;if(v.trim())notes[selDate]=v;else delete notes[selDate];save();}
+
+function onDragStart(e,d,eid){dragSrc=d;dragEv=(events[d]||[]).find(x=>x.id===eid);e.dataTransfer.effectAllowed='move';}
+function onDrop(tdk){
+  if(!dragEv||!dragSrc||dragSrc===tdk){dragEv=null;dragSrc=null;return;}
+  events[dragSrc]=(events[dragSrc]||[]).filter(e=>e.id!==dragEv.id);
+  if(events[dragSrc].length===0)delete events[dragSrc];
+  if(!events[tdk])events[tdk]=[];events[tdk].push({...dragEv,id:uid()});
+  dragEv=null;dragSrc=null;save();render();
+}
+
+/* Main Modal */
+function setEventType(t){eventType=t;document.getElementById('typeDay').classList.toggle('active',t==='day');document.getElementById('typePeriod').classList.toggle('active',t==='period');document.getElementById('dayFields').style.display=t==='day'?'':'none';document.getElementById('periodFields').style.display=t==='period'?'':'none';}
+function validateTime(){const s=document.getElementById('evStart').value,e=document.getElementById('evEnd').value,err=document.getElementById('timeError');if(s&&e&&e<=s){err.classList.add('show');return false;}err.classList.remove('show');return true;}
+function validateDate(){const s=document.getElementById('evStartDate').value,e=document.getElementById('evEndDate').value,err=document.getElementById('dateError');if(s&&e&&e<s){err.classList.add('show');return false;}err.classList.remove('show');return true;}
+
+function openAddModal(){
+  editId=null;selCat="meeting";eventType="day";
+  document.getElementById('modalTitle').textContent='새 일정 추가';
+  document.getElementById('saveBtn').textContent='추가하기';
+  document.getElementById('evTitle').value='';
+  document.getElementById('evStart').value='09:00';document.getElementById('evEnd').value='10:00';
+  document.getElementById('evStartDate').value=selDate||todayKey;document.getElementById('evEndDate').value=selDate||todayKey;
+  document.getElementById('timeError').classList.remove('show');document.getElementById('dateError').classList.remove('show');
+  setEventType('day');renderCatGrid();
+  document.getElementById('modalOverlay').style.display='flex';
+  setTimeout(()=>document.getElementById('evTitle').focus(),100);
+}
+function openEditModal(sk,eid){
+  const ev=(events[sk]||[]).find(e=>e.id===eid);if(!ev)return;
+  editId={key:sk,id:eid};selCat=ev.category;
+  document.getElementById('modalTitle').textContent='일정 수정';
+  document.getElementById('saveBtn').textContent='수정 완료';
+  document.getElementById('evTitle').value=ev.title;
+  document.getElementById('evStart').value=ev.startTime||'09:00';document.getElementById('evEnd').value=ev.endTime||'10:00';
+  document.getElementById('evStartDate').value=ev.startDate||sk;document.getElementById('evEndDate').value=ev.endDate||sk;
+  document.getElementById('timeError').classList.remove('show');document.getElementById('dateError').classList.remove('show');
+  if(ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate)setEventType('period');else setEventType('day');
+  renderCatGrid();document.getElementById('modalOverlay').style.display='flex';
+  setTimeout(()=>document.getElementById('evTitle').focus(),100);
+}
+function closeModal(){document.getElementById('modalOverlay').style.display='none';editId=null;}
+function renderCatGrid(){document.getElementById('catGrid').innerHTML=CAT.map(c=>{const a=selCat===c.id;return`<button class="cat-option ${a?'active':''}" onclick="selectCat('${c.id}')" style="background:${a?c.bg:'#F9FAFB'};border-color:${a?c.color:'#E5E7EB'};color:${a?c.color:'#6B7280'}"><span class="cat-dot" style="background:${c.color}"></span>${c.label}</button>`;}).join('');}
+function selectCat(id){selCat=id;renderCatGrid();}
+
+function saveEvent(){
+  const title=document.getElementById('evTitle').value.trim();if(!title)return;
+  let evData={id:uid(),title,category:selCat,completed:false};
+  let storageKey=selDate||todayKey;
+  if(eventType==='day'){
+    if(!validateTime())return;
+    evData.startTime=document.getElementById('evStart').value;evData.endTime=document.getElementById('evEnd').value;
+    evData.startDate=storageKey;evData.endDate=storageKey;
+  }else{
+    if(!validateDate())return;
+    const sd=document.getElementById('evStartDate').value,ed=document.getElementById('evEndDate').value;if(!sd||!ed)return;
+    evData.startDate=sd;evData.endDate=ed;storageKey=sd;
+  }
+  if(editId){
+    const arr=events[editId.key]||[];const old=arr.find(e=>e.id===editId.id);
+    events[editId.key]=arr.filter(e=>e.id!==editId.id);
+    if(events[editId.key].length===0)delete events[editId.key];
+    if(old)evData.completed=old.completed;evData.id=editId.id;
+  }
+  if(!events[storageKey])events[storageKey]=[];events[storageKey].push(evData);
+  save();closeModal();render();
+}
+function removeEvent(sk,eid){
+  const ev=(events[sk]||[]).find(e=>e.id===eid);
+  const name=ev?ev.title:'이 일정';
+  if(!confirm(`"${name}" 일정을 삭제하시겠습니까?\n\n삭제된 일정은 복구할 수 없습니다.`))return;
+  events[sk]=(events[sk]||[]).filter(e=>e.id!==eid);if(events[sk].length===0)delete events[sk];save();render();
+}
+
+let calTitle='업무 달력';
+try{const t=localStorage.getItem('wc5_title');if(t)calTitle=t;}catch(e){}
+
+function saveTitle(t){calTitle=t;try{localStorage.setItem('wc5_title',t);}catch(e){}}
+function startEditTitle(){
+  const el=document.getElementById('logoTitle');
+  const text=document.getElementById('logoText').textContent;
+  el.onclick=null;
+  el.innerHTML=`<span class="logo-icon">◈</span> <input class="logo-edit" id="logoInput" value="${text}" maxlength="30">`;
+  const inp=document.getElementById('logoInput');
+  inp.focus();inp.select();
+  inp.addEventListener('blur',finishEditTitle);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){inp.value=calTitle;inp.blur();}});
+}
+function finishEditTitle(){
+  const inp=document.getElementById('logoInput');
+  const val=inp.value.trim()||'업무 달력';
+  saveTitle(val);
+  const el=document.getElementById('logoTitle');
+  el.innerHTML=`<span class="logo-icon">◈</span> <span id="logoText">${val}</span>`;
+  el.onclick=startEditTitle;
+  document.title=val;
+}
+function initTitle(){document.getElementById('logoText').textContent=calTitle;document.title=calTitle;}
+
+/* Weather via Open-Meteo (free, no API key) */
+const WMO_ICONS={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',56:'🌧️',57:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',66:'🌧️',67:'🌧️',71:'🌨️',73:'🌨️',75:'❄️',77:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',85:'🌨️',86:'❄️',95:'⛈️',96:'⛈️',99:'⛈️'};
+const WMO_DESC={0:'맑음',1:'대체로 맑음',2:'구름 조금',3:'흐림',45:'안개',48:'안개',51:'이슬비',53:'이슬비',55:'이슬비',56:'얼어붙는 비',57:'얼어붙는 비',61:'비',63:'비',65:'폭우',66:'얼어붙는 비',67:'얼어붙는 비',71:'눈',73:'눈',75:'폭설',77:'싸락눈',80:'소나기',81:'소나기',82:'폭우',85:'눈',86:'폭설',95:'뇌우',96:'뇌우',99:'뇌우'};
+
+function fetchWeather(){
+  let loc=null;
+  try{loc=JSON.parse(localStorage.getItem('wc5_loc'));}catch(e){}
+  if(!loc)loc={lat:'37.5665',lon:'126.9780',name:'서울'};
+  if(!loc.name)loc.name='';
+  loadWeather(loc.lat,loc.lon,loc.name);
+}
+
+function loadWeather(latR,lonR,locName){
+  fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latR}&longitude=${lonR}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&timezone=auto&forecast_days=1`)
+    .then(r=>r.json()).then(data=>{
+      if(!data.current)return;
+      const code=data.current.weather_code;
+      const temp=Math.round(data.current.temperature_2m);
+      const nowH=new Date().getHours(),nowM=new Date().getMinutes();
+      document.getElementById('wNowIcon').textContent=WMO_ICONS[code]||'🌡️';
+      document.getElementById('wNowTemp').textContent=temp+'°C';
+      document.getElementById('wNowDesc').textContent=WMO_DESC[code]||'';
+      document.getElementById('wNowMeta').textContent=`${String(nowH).padStart(2,'0')}:${String(nowM).padStart(2,'0')} 기준`;
+      if(data.hourly&&data.hourly.time){
+        let fHTML='';
+        for(let o=1;o<=3;o++){
+          const tH=nowH+o;if(tH>=24)continue;
+          if(tH<data.hourly.time.length){
+            const hC=data.hourly.weather_code[tH],hT=Math.round(data.hourly.temperature_2m[tH]);
+            fHTML+=`<div class="weather-hour"><span class="weather-hour-time">${String(tH).padStart(2,'0')}시</span><span class="weather-hour-icon">${WMO_ICONS[hC]||'🌡️'}</span><span class="weather-hour-temp">${hT}°</span></div>`;
+          }
+        }
+        document.getElementById('wForecast').innerHTML=fHTML;
+      }
+      // Show location name
+      if(locName){
+        document.getElementById('wLocation').textContent='📍'+locName+' ▾';
+      } else {
+        // No name saved - reverse geocode to find it
+        document.getElementById('wLocation').textContent='📍 지역 설정 ▾';
+        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latR}&lon=${lonR}&format=json&zoom=10&accept-language=ko`)
+          .then(r=>r.json()).then(geo=>{
+            let name='';
+            if(geo&&geo.address){
+              const a=geo.address;
+              name=a.city||a.town||a.county||a.state||a.country||'';
+            }
+            if(name){
+              document.getElementById('wLocation').textContent='📍'+name+' ▾';
+              try{localStorage.setItem('wc5_loc',JSON.stringify({lat:latR,lon:lonR,name:name}));}catch(e){}
+            }
+          }).catch(()=>{});
+      }
+      document.getElementById('weatherWidget').style.display='inline-flex';
+    }).catch(()=>{});
+}
+
+/* City search & selection */
+let weatherSetOpen=false;
+let citySearchTimer=null;
+
+function toggleWeatherSet(){
+  weatherSetOpen=!weatherSetOpen;
+  const el=document.getElementById('weatherSet');
+  if(weatherSetOpen){
+    el.classList.add('show');
+    // Position near location text
+    const loc=document.getElementById('wLocation');
+    const rect=loc.getBoundingClientRect();
+    let top=rect.bottom+6, left=rect.left;
+    if(left+280>window.innerWidth)left=window.innerWidth-290;
+    if(left<10)left=10;
+    el.style.top=top+'px';
+    el.style.left=left+'px';
+    document.getElementById('weatherCityInput').value='';
+    document.getElementById('weatherCityResults').innerHTML='<div class="weather-set-hint">도시명을 입력하면 검색됩니다</div>';
+    setTimeout(()=>document.getElementById('weatherCityInput').focus(),100);
+  } else {
+    el.classList.remove('show');
+  }
+}
+function closeWeatherSet(){weatherSetOpen=false;document.getElementById('weatherSet').classList.remove('show');}
+
+document.addEventListener('click',e=>{
+  if(weatherSetOpen){
+    const widget=document.getElementById('weatherWidget');
+    if(widget&&!widget.contains(e.target))closeWeatherSet();
+  }
+},true);
+
+function searchCity(q){
+  clearTimeout(citySearchTimer);
+  const results=document.getElementById('weatherCityResults');
+  if(q.trim().length<1){results.innerHTML='<div class="weather-set-hint">도시명을 입력하면 검색됩니다</div>';return;}
+  results.innerHTML='<div class="weather-set-hint">검색 중...</div>';
+  citySearchTimer=setTimeout(()=>{
+    fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=ko`)
+      .then(r=>r.json()).then(data=>{
+        if(!data.results||data.results.length===0){results.innerHTML='<div class="weather-set-hint">검색 결과가 없습니다</div>';return;}
+        results.innerHTML=data.results.map(r=>{
+          const name=r.name+(r.admin1?' '+r.admin1:'')+(r.country?', '+r.country:'');
+          return`<div class="weather-set-item" onclick="selectCity(${r.latitude},${r.longitude},'${name.replace(/'/g,"\\'")}')">📍 ${name}</div>`;
+        }).join('');
+      }).catch(()=>{results.innerHTML='<div class="weather-set-hint">검색 실패</div>';});
+  },400);
+}
+
+function selectCity(lat,lon,name){
+  const latR=lat.toFixed(4),lonR=lon.toFixed(4);
+  try{localStorage.setItem('wc5_loc',JSON.stringify({lat:latR,lon:lonR,name:name}));}catch(e){}
+  closeWeatherSet();
+  loadWeather(latR,lonR,name);
+  showToast(`날씨 지역이 ${name}(으)로 변경되었습니다`,'📍');
+}
+
+initLegend();initDayHeaders();initTitle();render();fetchWeather();
+window.addEventListener('resize',()=>{requestAnimationFrame(()=>render());});
+
+/* ====== Toast notification ====== */
+function showToast(msg,icon='✅'){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
+  t.innerHTML=`<span>${icon}</span>${msg}`;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+/* ====== Export / Import JSON ====== */
+function exportJSON(){
+  const data={
+    title:calTitle,
+    events:events,
+    notes:notes,
+    exportDate:new Date().toISOString()
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const dateStr=new Date().toISOString().slice(0,10);
+  a.href=url;a.download=`업무달력_백업_${dateStr}.json`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('백업 파일이 다운로드되었습니다','💾');
+}
+
+function importJSON(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(!data.events){alert('올바른 백업 파일이 아닙니다.');return;}
+      if(!confirm(`이 백업 파일을 불러오시겠습니까?\n\n📅 내보낸 날짜: ${data.exportDate?data.exportDate.slice(0,10):'알 수 없음'}\n📝 일정 수: ${Object.values(data.events).flat().length}건\n\n⚠️ 현재 데이터에 병합됩니다.`))return;
+      // Merge events
+      Object.keys(data.events).forEach(k=>{
+        if(!events[k])events[k]=[];
+        const existIds=new Set(events[k].map(e=>e.id));
+        data.events[k].forEach(ev=>{
+          if(!existIds.has(ev.id))events[k].push(ev);
+        });
+      });
+      // Merge notes (imported overwrites)
+      if(data.notes)Object.keys(data.notes).forEach(k=>{if(data.notes[k])notes[k]=data.notes[k];});
+      // Title
+      if(data.title){calTitle=data.title;saveTitle(data.title);document.getElementById('logoText').textContent=data.title;document.title=data.title;}
+      save();render();
+      showToast('백업 데이터를 불러왔습니다','📂');
+    }catch(err){alert('파일을 읽을 수 없습니다: '+err.message);}
+  };
+  reader.readAsText(file);
+  e.target.value=''; // reset so same file can be selected again
+}
+
+/* ====== Auto-save: embed data into HTML file itself ====== */
+// Uses File System Access API (Chrome/Edge 86+)
+let fileHandle=null;
+
+async function autoSaveToFile(){
+  if(!fileHandle)return; // only if file was opened via "복원" or first save
+  try{
+    const writable=await fileHandle.createWritable();
+    // Read current HTML and update embedded data
+    const html=await generateSelfContainedHTML();
+    await writable.write(html);
+    await writable.close();
+    showToast('파일에 자동 저장됨','💫');
+  }catch(e){
+    // If permission denied, clear handle
+    fileHandle=null;
+  }
+}
+
+function generateSelfContainedHTML(){
+  // Get current page HTML and inject current data
+  const fullHTML=document.documentElement.outerHTML;
+  // Replace the data initialization block
+  const dataBlock=`/*__SAVED_DATA_START__*/
+try{events={};notes={};calTitle="천성민의 일정";}catch(e){}
+/*__SAVED_DATA_END__*/`;
+  
+  // Check if saved data block exists
+  if(fullHTML.includes('/*__SAVED_DATA_START__*/')){
+    const replaced=fullHTML.replace(/\/\*__SAVED_DATA_START__\*\/[\s\S]*?\/\*__SAVED_DATA_END__\*\//,dataBlock);
+    return '<!DOCTYPE html>\n<html lang="ko">'+replaced.slice(replaced.indexOf('<head>'));}
+  else{
+    // Insert before initLegend
+    const marker='initLegend();initDayHeaders();initTitle();';
+    const replaced=fullHTML.replace(marker,dataBlock+'\n'+marker);
+    return '<!DOCTYPE html>\n<html lang="ko">'+replaced.slice(replaced.indexOf('<head>'));}
+}
+
+// Override save() to also trigger auto-save
+const _origSave=save;
+save=function(){
+  _origSave();
+  if(fileHandle)autoSaveToFile();
+};
+
+// Button to enable auto-save (File System Access API)
+async function enableAutoSave(){
+  if(!window.showSaveFilePicker){
+    alert('이 브라우저는 파일 자동 저장을 지원하지 않습니다.\n크롬 또는 엣지 브라우저를 사용해주세요.\n\n대신 💾 백업 버튼으로 수동 저장할 수 있습니다.');
+    return;
+  }
+  try{
+    fileHandle=await window.showSaveFilePicker({
+      suggestedName:'업무달력.html',
+      types:[{description:'HTML 파일',accept:{'text/html':['.html']}}]
+    });
+    await autoSaveToFile();
+    showToast('자동 저장이 활성화되었습니다','🔗');
+    // Update button
+    const btn=document.getElementById('autoSaveBtn');
+    if(btn){btn.textContent='🔗 자동저장 ON';btn.style.color='#10A37F';btn.style.borderColor='#10A37F';}
+  }catch(e){/* user cancelled */}
+}
+</script>
+<div class="weather-set" id="weatherSet" style="top: 80.5px; left: 592.875px;">
+  <div class="weather-set-title">📍 지역 설정</div>
+  <input class="weather-set-input" id="weatherCityInput" placeholder="도시명 입력 (예: 서울, 인천, 부산)" oninput="searchCity(this.value)">
+  <div class="weather-set-results" id="weatherCityResults"><div class="weather-set-item" onclick="selectCity(37.45646,126.70515,'인천광역시 인천광역시, 대한민국')">📍 인천광역시 인천광역시, 대한민국</div></div>
+</div>
+
+
+<div id="toast" class="toast"><span>📍</span>날씨 지역이 인천광역시 인천광역시, 대한민국(으)로 변경되었습니다</div></body></html>
