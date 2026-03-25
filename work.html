@@ -362,34 +362,70 @@ let ganttEditTarget=null; // {key, id}
 
 let events={},notes={};
 
-// ═══ Firebase 연동 ═══
-const firebaseConfig={
-  apiKey:"AIzaSyBR18y_yBWnmnoMVKfxxGWRYi_OUYfSY9I",
-  authDomain:"finance-5c42b.firebaseapp.com",
-  databaseURL:"https://finance-5c42b-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"finance-5c42b",
-  storageBucket:"finance-5c42b.firebasestorage.app",
-  messagingSenderId:"1053825336065",
-  appId:"1:1053825336065:web:7a6aee2155de9459d8d100"
-};
-firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
-const evRef=db.ref('events');
-const noRef=db.ref('notes');
+// ═══ Firebase 연동 (실패 시 localStorage 폴백) ═══
+let db=null,evRef=null,noRef=null,useFirebase=false;
 
-// 실시간 동기화: 다른 사람이 수정하면 자동 반영
-evRef.on('value',snap=>{
-  events=snap.val()||{};
-  if(typeof render==='function')try{render();}catch(e){}
-});
-noRef.on('value',snap=>{
-  notes=snap.val()||{};
-  if(typeof render==='function')try{render();}catch(e){}
-});
+try{
+  const firebaseConfig={
+    apiKey:"AIzaSyBR18y_yBWnmnoMVKfxxGWRYi_OUYfSY9I",
+    authDomain:"finance-5c42b.firebaseapp.com",
+    databaseURL:"https://finance-5c42b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId:"finance-5c42b",
+    storageBucket:"finance-5c42b.firebasestorage.app",
+    messagingSenderId:"1053825336065",
+    appId:"1:1053825336065:web:7a6aee2155de9459d8d100"
+  };
+  if(typeof firebase!=='undefined'&&firebase.initializeApp){
+    firebase.initializeApp(firebaseConfig);
+    db=firebase.database();
+    evRef=db.ref('events');
+    noRef=db.ref('notes');
+    useFirebase=true;
+  }
+}catch(e){console.warn('Firebase init failed, using localStorage',e);}
+
+// Firebase → 배열 복원 (Firebase는 배열을 {0:{},1:{}} 객체로 저장)
+function fixArrays(obj){
+  if(!obj||typeof obj!=='object')return{};
+  const result={};
+  Object.keys(obj).forEach(function(dateKey){
+    const val=obj[dateKey];
+    if(Array.isArray(val)){result[dateKey]=val;}
+    else if(typeof val==='object'&&val!==null){
+      const arr=[];Object.keys(val).forEach(function(k){if(val[k])arr.push(val[k]);});
+      result[dateKey]=arr;
+    }
+  });
+  return result;
+}
+
+let _fbReady=false,_saving=false;
+
+if(useFirebase){
+  evRef.on('value',function(snap){
+    if(_saving)return;
+    events=fixArrays(snap.val()||{});
+    _fbReady=true;
+    if(typeof render==='function')try{render();}catch(e){}
+  });
+  noRef.on('value',function(snap){
+    if(_saving)return;
+    notes=snap.val()||{};
+    if(typeof render==='function')try{render();}catch(e){}
+  });
+}else{
+  // localStorage 폴백
+  try{var a=localStorage.getItem('wc5_ev'),b=localStorage.getItem('wc5_no');if(a)events=JSON.parse(a);if(b)notes=JSON.parse(b);}catch(e){}
+}
 
 function save(){
-  evRef.set(events);
-  noRef.set(notes);
+  if(useFirebase){
+    _saving=true;
+    evRef.set(events).then(function(){_saving=false;}).catch(function(){_saving=false;});
+    noRef.set(notes);
+  }else{
+    try{localStorage.setItem('wc5_ev',JSON.stringify(events));localStorage.setItem('wc5_no',JSON.stringify(notes));}catch(e){}
+  }
 }
 
 function uid(){return Math.random().toString(36).slice(2,10)}
@@ -792,9 +828,13 @@ function removeEvent(sk,eid){
 }
 
 let calTitle='업무 달력';
-db.ref('calTitle').on('value',snap=>{if(snap.val()){calTitle=snap.val();if(typeof initTitle==='function')try{initTitle();}catch(e){}}});
+if(useFirebase){
+  db.ref('calTitle').on('value',function(snap){if(snap.val()){calTitle=snap.val();if(typeof initTitle==='function')try{initTitle();}catch(e){}}});
+}else{
+  try{var t=localStorage.getItem('wc5_title');if(t)calTitle=t;}catch(e){}
+}
 
-function saveTitle(t){calTitle=t;db.ref('calTitle').set(t);}
+function saveTitle(t){calTitle=t;if(useFirebase){db.ref('calTitle').set(t);}else{try{localStorage.setItem('wc5_title',t);}catch(e){}}}
 function startEditTitle(){
   const el=document.getElementById('logoTitle');
   const text=document.getElementById('logoText').textContent;
@@ -821,14 +861,22 @@ const WMO_ICONS={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫
 const WMO_DESC={0:'맑음',1:'대체로 맑음',2:'구름 조금',3:'흐림',45:'안개',48:'안개',51:'이슬비',53:'이슬비',55:'이슬비',56:'얼어붙는 비',57:'얼어붙는 비',61:'비',63:'비',65:'폭우',66:'얼어붙는 비',67:'얼어붙는 비',71:'눈',73:'눈',75:'폭설',77:'싸락눈',80:'소나기',81:'소나기',82:'폭우',85:'눈',86:'폭설',95:'뇌우',96:'뇌우',99:'뇌우'};
 
 function fetchWeather(){
-  db.ref('weatherLoc').once('value').then(snap=>{
-    let loc=snap.val();
+  if(useFirebase){
+    db.ref('weatherLoc').once('value').then(function(snap){
+      var loc=snap.val();
+      if(!loc)loc={lat:'37.5665',lon:'126.9780',name:'서울'};
+      if(!loc.name)loc.name='';
+      loadWeather(loc.lat,loc.lon,loc.name);
+    }).catch(function(){
+      loadWeather('37.5665','126.9780','서울');
+    });
+  }else{
+    var loc=null;
+    try{loc=JSON.parse(localStorage.getItem('wc5_loc'));}catch(e){}
     if(!loc)loc={lat:'37.5665',lon:'126.9780',name:'서울'};
     if(!loc.name)loc.name='';
     loadWeather(loc.lat,loc.lon,loc.name);
-  }).catch(()=>{
-    loadWeather('37.5665','126.9780','서울');
-  });
+  }
 }
 
 function loadWeather(latR,lonR,locName){
@@ -868,7 +916,9 @@ function loadWeather(latR,lonR,locName){
             }
             if(name){
               document.getElementById('wLocation').textContent='📍'+name+' ▾';
-              try{db.ref('weatherLoc').set({lat:latR,lon:lonR,name:name});}catch(e){}
+              try{if(useFirebase)db.ref('weatherLoc').set({lat:latR,lon:lonR,name:name});else localStorage.setItem('wc5_loc',JSON.stringify({lat:latR,lon:lonR,name:name}));}catch(e){}
+            }
+          }).catch(()=>{});
       }
       document.getElementById('weatherWidget').style.display='inline-flex';
     }).catch(()=>{});
@@ -926,7 +976,7 @@ function searchCity(q){
 
 function selectCity(lat,lon,name){
   const latR=lat.toFixed(4),lonR=lon.toFixed(4);
-  try{db.ref('weatherLoc').set({lat:latR,lon:lonR,name:name});}catch(e){}
+  try{if(useFirebase)db.ref('weatherLoc').set({lat:latR,lon:lonR,name:name});else localStorage.setItem('wc5_loc',JSON.stringify({lat:latR,lon:lonR,name:name}));}catch(e){}
   closeWeatherSet();
   loadWeather(latR,lonR,name);
   showToast(`날씨 지역이 ${name}(으)로 변경되었습니다`,'📍');
