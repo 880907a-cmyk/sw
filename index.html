@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SW Healthcare Portal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%231d6fe8'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='28' fill='white'>SW</text></svg>" type="image/svg+xml">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -743,7 +744,7 @@
     welcome.classList.add('hidden');
     loader.classList.remove('hidden');
     frame.style.display = 'block';
-    frame.src = page;
+    frame.src = page + '?v=' + Date.now();
   }
 
   function navigateByPage(page) {
