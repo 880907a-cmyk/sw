@@ -5,6 +5,8 @@
 <title>천성민의 일정</title>
 <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'&gt;&lt;rect x='4' y='12' width='56' height='48' rx='6' fill='%234F6BF6'/&gt;&lt;rect x='4' y='12' width='56' height='14' rx='6' fill='%233B56E0'/&gt;&lt;rect x='10' y='32' width='10' height='8' rx='2' fill='%23fff' opacity='.9'/&gt;&lt;rect x='27' y='32' width='10' height='8' rx='2' fill='%23fff' opacity='.9'/&gt;&lt;rect x='44' y='32' width='10' height='8' rx='2' fill='%23fff' opacity='.9'/&gt;&lt;rect x='10' y='46' width='10' height='8' rx='2' fill='%23fff' opacity='.6'/&gt;&lt;rect x='27' y='46' width='10' height='8' rx='2' fill='%23fff' opacity='.6'/&gt;&lt;rect x='44' y='46' width='10' height='8' rx='2' fill='%23fff' opacity='.6'/&gt;&lt;rect x='16' y='4' width='4' height='14' rx='2' fill='%23E5E7EB'/&gt;&lt;rect x='44' y='4' width='4' height='14' rx='2' fill='%23E5E7EB'/&gt;&lt;/svg&gt;" type="image/svg+xml">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8F9FC,#EEF1F8);min-height:100vh;padding:20px;color:#1F2937}
@@ -248,7 +250,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8
   <div class="header-right">
     <div class="category-legend" id="legend"><span class="legend-item"><span class="legend-dot" style="background:#8B8FA3"></span>경영지원실</span><span class="legend-item"><span class="legend-dot" style="background:#4F6BF6"></span>임현진</span><span class="legend-item"><span class="legend-dot" style="background:#E8573A"></span>천성민</span><span class="legend-item"><span class="legend-dot" style="background:#D946A8"></span>신다예나</span><span class="legend-item"><span class="legend-dot" style="background:#10A37F"></span>황아람</span></div>
     <div class="data-btns">
-      <button class="data-btn" id="autoSaveBtn" onclick="enableAutoSave()" title="파일에 자동 저장 연결">🔗 자동저장</button>
       <button class="data-btn" onclick="exportJSON()" title="일정 내보내기">💾 백업</button>
       <button class="data-btn" onclick="document.getElementById('importFile').click()" title="일정 불러오기">📂 복원</button>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
@@ -360,8 +361,36 @@ let dragEv=null,dragSrc=null,dpOpen=false;
 let ganttEditTarget=null; // {key, id}
 
 let events={},notes={};
-try{const a=localStorage.getItem('wc5_ev'),b=localStorage.getItem('wc5_no');if(a)events=JSON.parse(a);if(b)notes=JSON.parse(b);}catch(e){}
-function save(){try{localStorage.setItem('wc5_ev',JSON.stringify(events));localStorage.setItem('wc5_no',JSON.stringify(notes));}catch(e){}}
+
+// ═══ Firebase 연동 ═══
+const firebaseConfig={
+  apiKey:"AIzaSyBR18y_yBWnmnoMVKfxxGWRYi_OUYfSY9I",
+  authDomain:"finance-5c42b.firebaseapp.com",
+  databaseURL:"https://finance-5c42b-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"finance-5c42b",
+  storageBucket:"finance-5c42b.firebasestorage.app",
+  messagingSenderId:"1053825336065",
+  appId:"1:1053825336065:web:7a6aee2155de9459d8d100"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+const evRef=db.ref('events');
+const noRef=db.ref('notes');
+
+// 실시간 동기화: 다른 사람이 수정하면 자동 반영
+evRef.on('value',snap=>{
+  events=snap.val()||{};
+  if(typeof render==='function')try{render();}catch(e){}
+});
+noRef.on('value',snap=>{
+  notes=snap.val()||{};
+  if(typeof render==='function')try{render();}catch(e){}
+});
+
+function save(){
+  evRef.set(events);
+  noRef.set(notes);
+}
 
 function uid(){return Math.random().toString(36).slice(2,10)}
 function dk(y,m,d){return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
@@ -763,9 +792,9 @@ function removeEvent(sk,eid){
 }
 
 let calTitle='업무 달력';
-try{const t=localStorage.getItem('wc5_title');if(t)calTitle=t;}catch(e){}
+db.ref('calTitle').on('value',snap=>{if(snap.val()){calTitle=snap.val();if(typeof initTitle==='function')try{initTitle();}catch(e){}}});
 
-function saveTitle(t){calTitle=t;try{localStorage.setItem('wc5_title',t);}catch(e){}}
+function saveTitle(t){calTitle=t;db.ref('calTitle').set(t);}
 function startEditTitle(){
   const el=document.getElementById('logoTitle');
   const text=document.getElementById('logoText').textContent;
@@ -792,11 +821,14 @@ const WMO_ICONS={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫
 const WMO_DESC={0:'맑음',1:'대체로 맑음',2:'구름 조금',3:'흐림',45:'안개',48:'안개',51:'이슬비',53:'이슬비',55:'이슬비',56:'얼어붙는 비',57:'얼어붙는 비',61:'비',63:'비',65:'폭우',66:'얼어붙는 비',67:'얼어붙는 비',71:'눈',73:'눈',75:'폭설',77:'싸락눈',80:'소나기',81:'소나기',82:'폭우',85:'눈',86:'폭설',95:'뇌우',96:'뇌우',99:'뇌우'};
 
 function fetchWeather(){
-  let loc=null;
-  try{loc=JSON.parse(localStorage.getItem('wc5_loc'));}catch(e){}
-  if(!loc)loc={lat:'37.5665',lon:'126.9780',name:'서울'};
-  if(!loc.name)loc.name='';
-  loadWeather(loc.lat,loc.lon,loc.name);
+  db.ref('weatherLoc').once('value').then(snap=>{
+    let loc=snap.val();
+    if(!loc)loc={lat:'37.5665',lon:'126.9780',name:'서울'};
+    if(!loc.name)loc.name='';
+    loadWeather(loc.lat,loc.lon,loc.name);
+  }).catch(()=>{
+    loadWeather('37.5665','126.9780','서울');
+  });
 }
 
 function loadWeather(latR,lonR,locName){
@@ -836,9 +868,7 @@ function loadWeather(latR,lonR,locName){
             }
             if(name){
               document.getElementById('wLocation').textContent='📍'+name+' ▾';
-              try{localStorage.setItem('wc5_loc',JSON.stringify({lat:latR,lon:lonR,name:name}));}catch(e){}
-            }
-          }).catch(()=>{});
+              try{db.ref('weatherLoc').set({lat:latR,lon:lonR,name:name});}catch(e){}
       }
       document.getElementById('weatherWidget').style.display='inline-flex';
     }).catch(()=>{});
@@ -896,7 +926,7 @@ function searchCity(q){
 
 function selectCity(lat,lon,name){
   const latR=lat.toFixed(4),lonR=lon.toFixed(4);
-  try{localStorage.setItem('wc5_loc',JSON.stringify({lat:latR,lon:lonR,name:name}));}catch(e){}
+  try{db.ref('weatherLoc').set({lat:latR,lon:lonR,name:name});}catch(e){}
   closeWeatherSet();
   loadWeather(latR,lonR,name);
   showToast(`날씨 지역이 ${name}(으)로 변경되었습니다`,'📍');
@@ -960,69 +990,7 @@ function importJSON(e){
   e.target.value=''; // reset so same file can be selected again
 }
 
-/* ====== Auto-save: embed data into HTML file itself ====== */
-// Uses File System Access API (Chrome/Edge 86+)
-let fileHandle=null;
 
-async function autoSaveToFile(){
-  if(!fileHandle)return; // only if file was opened via "복원" or first save
-  try{
-    const writable=await fileHandle.createWritable();
-    // Read current HTML and update embedded data
-    const html=await generateSelfContainedHTML();
-    await writable.write(html);
-    await writable.close();
-    showToast('파일에 자동 저장됨','💫');
-  }catch(e){
-    // If permission denied, clear handle
-    fileHandle=null;
-  }
-}
-
-function generateSelfContainedHTML(){
-  // Get current page HTML and inject current data
-  const fullHTML=document.documentElement.outerHTML;
-  // Replace the data initialization block
-  const dataBlock=`/*__SAVED_DATA_START__*/
-try{events={};notes={};calTitle="천성민의 일정";}catch(e){}
-/*__SAVED_DATA_END__*/`;
-  
-  // Check if saved data block exists
-  if(fullHTML.includes('/*__SAVED_DATA_START__*/')){
-    const replaced=fullHTML.replace(/\/\*__SAVED_DATA_START__\*\/[\s\S]*?\/\*__SAVED_DATA_END__\*\//,dataBlock);
-    return '<!DOCTYPE html>\n<html lang="ko">'+replaced.slice(replaced.indexOf('<head>'));}
-  else{
-    // Insert before initLegend
-    const marker='initLegend();initDayHeaders();initTitle();';
-    const replaced=fullHTML.replace(marker,dataBlock+'\n'+marker);
-    return '<!DOCTYPE html>\n<html lang="ko">'+replaced.slice(replaced.indexOf('<head>'));}
-}
-
-// Override save() to also trigger auto-save
-const _origSave=save;
-save=function(){
-  _origSave();
-  if(fileHandle)autoSaveToFile();
-};
-
-// Button to enable auto-save (File System Access API)
-async function enableAutoSave(){
-  if(!window.showSaveFilePicker){
-    alert('이 브라우저는 파일 자동 저장을 지원하지 않습니다.\n크롬 또는 엣지 브라우저를 사용해주세요.\n\n대신 💾 백업 버튼으로 수동 저장할 수 있습니다.');
-    return;
-  }
-  try{
-    fileHandle=await window.showSaveFilePicker({
-      suggestedName:'업무달력.html',
-      types:[{description:'HTML 파일',accept:{'text/html':['.html']}}]
-    });
-    await autoSaveToFile();
-    showToast('자동 저장이 활성화되었습니다','🔗');
-    // Update button
-    const btn=document.getElementById('autoSaveBtn');
-    if(btn){btn.textContent='🔗 자동저장 ON';btn.style.color='#10A37F';btn.style.borderColor='#10A37F';}
-  }catch(e){/* user cancelled */}
-}
 </script>
 <div class="weather-set" id="weatherSet" style="top: 80.5px; left: 592.875px;">
   <div class="weather-set-title">📍 지역 설정</div>
