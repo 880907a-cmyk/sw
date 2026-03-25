@@ -201,6 +201,27 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8
 .time-row{display:flex;gap:10px;align-items:center}
 .time-row .input{flex:1}
 .time-sep{color:#9CA3AF;font-weight:600;font-size:18px}
+/* ── Custom Time Picker ── */
+.tp-wrap{flex:1;position:relative}
+.tp-display{width:100%;padding:10px 14px;border:2px solid #E5E7EB;border-radius:10px;background:#fff;font-size:14px;font-family:'Noto Sans KR',sans-serif;color:#1F2937;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s}
+.tp-display:hover{border-color:#B8C4D0}
+.tp-display:focus,.tp-wrap.open .tp-display{border-color:#4F6BF6;outline:none}
+.tp-value{font-weight:600;letter-spacing:.5px}
+.tp-icon{font-size:10px;color:#9CA3AF;transition:transform .2s}
+.tp-wrap.open .tp-icon{transform:rotate(180deg)}
+.tp-dropdown{display:none;position:fixed;background:#fff;border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.15);padding:10px;z-index:9999;width:260px}
+.tp-wrap.open .tp-dropdown{display:block;animation:tpFadeIn .15s ease}
+@keyframes tpFadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.tp-header-row{display:flex;gap:4px;margin-bottom:10px}
+.tp-ampm{flex:1;padding:7px;border:2px solid #E5E7EB;border-radius:8px;background:#F9FAFB;font-size:13px;font-weight:500;cursor:pointer;text-align:center;font-family:'Noto Sans KR',sans-serif;color:#6B7280;transition:all .15s}
+.tp-ampm.active{border-color:#4F6BF6;background:#EEF0FE;color:#4F6BF6;font-weight:700}
+.tp-section-label{font-size:10px;font-weight:600;color:#9CA3AF;margin:6px 0 4px 2px;letter-spacing:.5px;text-transform:uppercase}
+.tp-grid{display:grid;gap:4px}
+.tp-hours{grid-template-columns:repeat(6,1fr)}
+.tp-mins{grid-template-columns:repeat(6,1fr)}
+.tp-cell{padding:6px 0;border-radius:6px;font-size:13px;font-weight:500;text-align:center;cursor:pointer;color:#4B5563;background:#F9FAFB;border:1.5px solid transparent;transition:all .12s;font-family:'JetBrains Mono',monospace}
+.tp-cell:hover{background:#EEF0FE;color:#4F6BF6}
+.tp-cell.active{background:#4F6BF6;color:#fff;border-color:#4F6BF6;font-weight:700}
 .period-toggle{display:flex;gap:8px;margin-top:6px}
 .period-btn{flex:1;padding:8px;border:2px solid #E5E7EB;border-radius:8px;background:#F9FAFB;font-size:13px;cursor:pointer;text-align:center;transition:all .15s;font-family:'Noto Sans KR',sans-serif;color:#6B7280}
 .period-btn.active{border-color:#4F6BF6;background:#EEF0FE;color:#4F6BF6;font-weight:600}
@@ -319,11 +340,48 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8
         <button class="period-btn" id="typePeriod" onclick="setEventType('period')">기간 일정</button>
       </div>
       <div id="dayFields">
-        <label class="field-label">시간</label>
-        <div class="time-row">
-          <input class="input" id="evStart" type="time" value="09:00" step="300" onchange="validateTime()">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px">
+          <label class="field-label" style="margin:0">시간</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#6B7280;cursor:pointer;user-select:none">
+            <input type="checkbox" id="evAllDay" onchange="toggleAllDay()" style="accent-color:#4F6BF6;width:15px;height:15px;cursor:pointer"> 하루종일
+          </label>
+        </div>
+        <div class="time-row" id="timeRow">
+          <div class="tp-wrap" id="tpStartWrap">
+            <button type="button" class="tp-display" id="tpStartBtn" onclick="openTimePicker('start')">
+              <span class="tp-value" id="tpStartVal">09:00</span>
+              <span class="tp-icon">▾</span>
+            </button>
+            <div class="tp-dropdown" id="tpStartDrop">
+              <div class="tp-header-row">
+                <button type="button" class="tp-ampm active" data-target="start" data-v="am" onclick="setAmPm(this)">오전</button>
+                <button type="button" class="tp-ampm" data-target="start" data-v="pm" onclick="setAmPm(this)">오후</button>
+              </div>
+              <div class="tp-section-label">시</div>
+              <div class="tp-grid tp-hours" id="tpStartHours"></div>
+              <div class="tp-section-label">분</div>
+              <div class="tp-grid tp-mins" id="tpStartMins"></div>
+            </div>
+          </div>
           <span class="time-sep">→</span>
-          <input class="input" id="evEnd" type="time" value="10:00" step="300" onchange="validateTime()">
+          <div class="tp-wrap" id="tpEndWrap">
+            <button type="button" class="tp-display" id="tpEndBtn" onclick="openTimePicker('end')">
+              <span class="tp-value" id="tpEndVal">10:00</span>
+              <span class="tp-icon">▾</span>
+            </button>
+            <div class="tp-dropdown" id="tpEndDrop">
+              <div class="tp-header-row">
+                <button type="button" class="tp-ampm active" data-target="end" data-v="am" onclick="setAmPm(this)">오전</button>
+                <button type="button" class="tp-ampm" data-target="end" data-v="pm" onclick="setAmPm(this)">오후</button>
+              </div>
+              <div class="tp-section-label">시</div>
+              <div class="tp-grid tp-hours" id="tpEndHours"></div>
+              <div class="tp-section-label">분</div>
+              <div class="tp-grid tp-mins" id="tpEndMins"></div>
+            </div>
+          </div>
+          <input type="hidden" id="evStart" value="09:00">
+          <input type="hidden" id="evEnd" value="10:00">
         </div>
         <div class="error-msg" id="timeError">종료 시간은 시작 시간 이후여야 합니다</div>
       </div>
@@ -635,7 +693,7 @@ function renderSidePanel(){
   if(de.length===0)eH=`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">등록된 일정이 없습니다</div><div class="empty-hint">+ 버튼으로 일정을 추가해보세요</div></div>`;
   else eH=de.map(ev=>{
     const cat=CAT.find(c=>c.id===ev.category)||CAT[4];
-    let ts='';if(ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate)ts=`${ev.startDate} ~ ${ev.endDate}`;else if(ev.startTime&&ev.endTime)ts=`${ev.startTime} - ${ev.endTime}`;
+    let ts='';if(ev.allDay)ts='하루종일';else if(ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate)ts=`${ev.startDate} ~ ${ev.endDate}`;else if(ev.startTime&&ev.endTime)ts=`${ev.startTime} - ${ev.endTime}`;
     const done=ev.completed;
     const sk=findStorageKey(ev.id);
     const compBtn=done?`<button class="event-action-btn complete-undo" onclick="toggleComplete('${sk}','${ev.id}')" title="완료 취소">↩ 완료취소</button>`:`<button class="event-action-btn complete" onclick="toggleComplete('${sk}','${ev.id}')">✓ 완료</button>`;
@@ -769,12 +827,96 @@ function setEventType(t){eventType=t;document.getElementById('typeDay').classLis
 function validateTime(){const s=document.getElementById('evStart').value,e=document.getElementById('evEnd').value,err=document.getElementById('timeError');if(s&&e&&e<=s){err.classList.add('show');return false;}err.classList.remove('show');return true;}
 function validateDate(){const s=document.getElementById('evStartDate').value,e=document.getElementById('evEndDate').value,err=document.getElementById('dateError');if(s&&e&&e<s){err.classList.add('show');return false;}err.classList.remove('show');return true;}
 
+// ── Custom Time Picker ──
+var tpState={start:{h:9,m:0,ampm:'am'},end:{h:10,m:0,ampm:'am'}};
+var tpOpen=null;
+
+function pad2(n){return String(n).padStart(2,'0');}
+function tpTo24(h,ampm){if(ampm==='am')return h===12?0:h;return h===12?12:h+12;}
+function tpFrom24(h24){if(h24===0)return{h:12,ampm:'am'};if(h24<12)return{h:h24,ampm:'am'};if(h24===12)return{h:12,ampm:'pm'};return{h:h24-12,ampm:'pm'};}
+function tpFormatVal(target){var s=tpState[target];return pad2(tpTo24(s.h,s.ampm))+':'+pad2(s.m);}
+function tpFormatDisplay(target){var s=tpState[target];return (s.ampm==='am'?'오전':'오후')+' '+s.h+':'+pad2(s.m);}
+
+function tpBuildGrid(target){
+  var hGrid=document.getElementById('tp'+cap(target)+'Hours');
+  var mGrid=document.getElementById('tp'+cap(target)+'Mins');
+  var s=tpState[target];
+  var hHTML='';
+  for(var i=1;i<=12;i++){
+    hHTML+='<div class="tp-cell'+(s.h===i?' active':'')+'" onclick="tpPickHour(\''+target+'\','+i+')">'+i+'</div>';
+  }
+  hGrid.innerHTML=hHTML;
+  var mHTML='';
+  for(var i=0;i<60;i+=5){
+    mHTML+='<div class="tp-cell'+(s.m===i?' active':'')+'" onclick="tpPickMin(\''+target+'\','+i+')">'+pad2(i)+'</div>';
+  }
+  mGrid.innerHTML=mHTML;
+  // ampm buttons
+  var btns=document.querySelectorAll('.tp-ampm[data-target="'+target+'"]');
+  btns.forEach(function(b){b.classList.toggle('active',b.dataset.v===s.ampm);});
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+function tpSync(target){
+  document.getElementById('tp'+cap(target)+'Val').textContent=tpFormatDisplay(target);
+  document.getElementById('ev'+cap(target)).value=tpFormatVal(target);
+  validateTime();
+}
+function tpPickHour(target,h){tpState[target].h=h;tpBuildGrid(target);tpSync(target);}
+function tpPickMin(target,m){tpState[target].m=m;tpBuildGrid(target);tpSync(target);closeTimePicker();}
+function setAmPm(btn){var target=btn.dataset.target;tpState[target].ampm=btn.dataset.v;tpBuildGrid(target);tpSync(target);}
+
+function openTimePicker(target){
+  if(tpOpen===target){closeTimePicker();return;}
+  closeTimePicker();
+  tpOpen=target;
+  var wrap=document.getElementById('tp'+cap(target)+'Wrap');
+  var drop=document.getElementById('tp'+cap(target)+'Drop');
+  wrap.classList.add('open');
+  tpBuildGrid(target);
+  // Position fixed dropdown below the button
+  var btn=document.getElementById('tp'+cap(target)+'Btn');
+  var rect=btn.getBoundingClientRect();
+  drop.style.top=(rect.bottom+4)+'px';
+  drop.style.left=rect.left+'px';
+  // Keep within viewport
+  requestAnimationFrame(function(){
+    var dr=drop.getBoundingClientRect();
+    if(dr.bottom>window.innerHeight){drop.style.top=(rect.top-dr.height-4)+'px';}
+    if(dr.right>window.innerWidth){drop.style.left=(window.innerWidth-dr.width-10)+'px';}
+  });
+}
+function closeTimePicker(){
+  if(tpOpen){document.getElementById('tp'+cap(tpOpen)+'Wrap').classList.remove('open');tpOpen=null;}
+}
+document.addEventListener('click',function(e){
+  if(tpOpen&&!e.target.closest('.tp-wrap')){closeTimePicker();}
+},{capture:true});
+
+function tpSetFromValue(target,val){
+  if(!val)return;
+  var parts=val.split(':');
+  var h24=parseInt(parts[0]),m=parseInt(parts[1]);
+  m=Math.round(m/5)*5;if(m>=60)m=55;
+  var r=tpFrom24(h24);
+  tpState[target]={h:r.h,m:m,ampm:r.ampm};
+  tpSync(target);
+}
+
+function toggleAllDay(){
+  var checked=document.getElementById('evAllDay').checked;
+  document.getElementById('timeRow').style.display=checked?'none':'flex';
+  document.getElementById('timeError').classList.remove('show');
+}
+
 function openAddModal(){
-  editId=null;selCat="meeting";eventType="day";
+  editId=null;selCat="mgmt";eventType="day";
   document.getElementById('modalTitle').textContent='새 일정 추가';
   document.getElementById('saveBtn').textContent='추가하기';
   document.getElementById('evTitle').value='';
-  document.getElementById('evStart').value='09:00';document.getElementById('evEnd').value='10:00';
+  tpSetFromValue('start','09:00');tpSetFromValue('end','10:00');
+  document.getElementById('evAllDay').checked=false;
+  document.getElementById('timeRow').style.display='flex';
   document.getElementById('evStartDate').value=selDate||todayKey;document.getElementById('evEndDate').value=selDate||todayKey;
   document.getElementById('timeError').classList.remove('show');document.getElementById('dateError').classList.remove('show');
   setEventType('day');renderCatGrid();
@@ -787,7 +929,10 @@ function openEditModal(sk,eid){
   document.getElementById('modalTitle').textContent='일정 수정';
   document.getElementById('saveBtn').textContent='수정 완료';
   document.getElementById('evTitle').value=ev.title;
-  document.getElementById('evStart').value=ev.startTime||'09:00';document.getElementById('evEnd').value=ev.endTime||'10:00';
+  tpSetFromValue('start',ev.startTime||'09:00');tpSetFromValue('end',ev.endTime||'10:00');
+  var isAllDay=ev.allDay||false;
+  document.getElementById('evAllDay').checked=isAllDay;
+  document.getElementById('timeRow').style.display=isAllDay?'none':'flex';
   document.getElementById('evStartDate').value=ev.startDate||sk;document.getElementById('evEndDate').value=ev.endDate||sk;
   document.getElementById('timeError').classList.remove('show');document.getElementById('dateError').classList.remove('show');
   if(ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate)setEventType('period');else setEventType('day');
@@ -802,9 +947,14 @@ function saveEvent(){
   const title=document.getElementById('evTitle').value.trim();if(!title)return;
   let evData={id:uid(),title,category:selCat,completed:false};
   let storageKey=selDate||todayKey;
+  var isAllDay=document.getElementById('evAllDay').checked;
   if(eventType==='day'){
-    if(!validateTime())return;
-    evData.startTime=document.getElementById('evStart').value;evData.endTime=document.getElementById('evEnd').value;
+    if(isAllDay){
+      evData.allDay=true;evData.startTime='';evData.endTime='';
+    }else{
+      if(!validateTime())return;
+      evData.startTime=document.getElementById('evStart').value;evData.endTime=document.getElementById('evEnd').value;
+    }
     evData.startDate=storageKey;evData.endDate=storageKey;
   }else{
     if(!validateDate())return;
