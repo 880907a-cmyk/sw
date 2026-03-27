@@ -676,7 +676,7 @@ function renderGantt(){
       </div>
       <div class="gantt-item-actions">
         <button class="gantt-action-btn gantt-complete-btn" onclick="ganttComplete('${sk}','${ev.id}',this)">✓ 완료</button>
-        <button class="gantt-action-btn gantt-edit-btn" onclick="event.stopPropagation();openGanttEdit('${sk}','${ev.id}',this)">✎ 수정</button>
+        <button class="gantt-action-btn gantt-edit-btn" onclick="event.stopPropagation();openEditModal('${sk}','${ev.id}')">✎ 수정</button>
       </div>
     </div>`;
   }).join('');
