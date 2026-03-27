@@ -18,11 +18,13 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8
 @keyframes completeAnim{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{opacity:0;transform:scale(.95) translateX(20px)}}
 
 .header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:#fff;border-radius:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04);flex-wrap:wrap;gap:12px}
-.header-left{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.header-left{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .logo{font-size:22px;font-weight:700;color:#1F2937;letter-spacing:-.5px;cursor:pointer;transition:all .15s;border-bottom:2px solid transparent;padding-bottom:2px}
 .logo:hover{border-bottom-color:#4F6BF6}
 .logo-icon{color:#4F6BF6;margin-right:4px}
 .logo-edit{font-size:20px;font-weight:700;color:#1F2937;letter-spacing:-.5px;border:2px solid #4F6BF6;border-radius:8px;padding:4px 10px;outline:none;font-family:'Noto Sans KR',sans-serif;background:#F0F3FF;min-width:120px}
+.header-today{font-size:13px;color:#9CA3AF;font-weight:400;border-left:1px solid #E5E7EB;padding-left:14px}
+.header-today-date{font-weight:500;color:#6B7280}
 .header-sub{font-size:13px;color:#9CA3AF;font-weight:400}
 .category-legend{display:flex;gap:14px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#6B7280}
@@ -80,30 +82,28 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8
 .day-header{text-align:center;font-size:12px;font-weight:600;padding:8px 0;letter-spacing:.5px;color:#6B7280}
 .day-header.sun{color:#E8573A}.day-header.sat{color:#4F6BF6}
 
-.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;position:relative}
-.cell{min-height:90px;border-radius:10px;padding:6px;display:flex;flex-direction:column;transition:all .15s;cursor:pointer;border:1px solid #F0F1F3;background:#fff}
-.cell:hover{box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.cell.other-month{opacity:.35}.cell.today{background:#FFFBEB;border:2px solid #F59E0B}.cell.selected{background:#F0F3FF;border:2px solid #4F6BF6}
-.cell.drag-over{background:#EEF0FE!important}
-.cell-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
-.cell-day{font-size:13px;line-height:1;font-weight:500}.cell-day.sun{color:#E8573A}.cell-day.sat{color:#4F6BF6}
-.today-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#F59E0B;color:#fff;font-size:12px;font-weight:700}
-.note-dot{font-size:10px;color:#9CA3AF}
-.cell-events{display:flex;flex-direction:column;gap:2px;flex:1;overflow:hidden;margin-top:0}
-.event-pill{padding:2px 5px;border-radius:4px;font-size:10px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:grab;transition:all .15s;font-weight:500}
-.multiday-bar{padding:1px 5px;border-radius:3px;font-size:9px;line-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;color:#fff;margin-bottom:1px}
-.more-count{font-size:10px;color:#9CA3AF;padding-left:4px;font-weight:500}
-
-/* Continuous multi-day event overlay */
-.calendar-wrapper{position:relative}
-.multiday-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:1}
-.multiday-cont-bar{position:absolute;height:16px;border-radius:4px;display:flex;align-items:center;padding:0 6px;font-size:9px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:auto;cursor:pointer;transition:box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.multiday-cont-bar:hover{box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:5}
-.multiday-cont-bar.left-cap{border-radius:4px 0 0 4px}
-.multiday-cont-bar.right-cap{border-radius:0 4px 4px 0}
-.multiday-cont-bar.both-cap{border-radius:4px}
-.multiday-cont-bar.mid{border-radius:0}
-.multiday-spacer{height:18px;flex-shrink:0}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0}
+.cell{min-height:100px;padding:4px;display:flex;flex-direction:column;border:1px solid #F0F1F3;background:#fff;cursor:pointer;transition:background .1s;overflow:hidden}
+.cell:hover{background:#FAFBFF}
+.cell.other-month .cell-day{opacity:.35}
+.cell.other-month .event-pill{opacity:.35}
+.cell.today{background:#FFFBEB}
+.cell.selected{background:#F0F3FF;box-shadow:inset 0 0 0 2px #4F6BF6}
+.cell-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1px}
+.cell-day{font-size:12px;font-weight:500;padding:1px 4px;height:20px;line-height:20px}.cell-day.sun{color:#E8573A}.cell-day.sat{color:#4F6BF6}
+.today-badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#F59E0B;color:#fff;font-size:11px;font-weight:700}
+.note-dot{font-size:9px;color:#9CA3AF;line-height:20px}
+.cell-events{display:flex;flex-direction:column;gap:1px;flex:1}
+.event-pill{padding:1px 4px;border-radius:3px;font-size:10px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;cursor:pointer}
+.ev-multi{height:18px;line-height:18px;padding:0 4px;font-size:9px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;position:relative;z-index:1}
+.ev-multi.ml{margin-left:-5px;padding-left:0;border-radius:0}
+.ev-multi.mr{margin-right:-5px;border-radius:0}
+.ev-multi.start{border-radius:4px 0 0 4px;margin-left:0;padding-left:5px}
+.ev-multi.end{border-radius:0 4px 4px 0;margin-right:0}
+.ev-multi.single{border-radius:4px;margin:0;padding-left:5px}
+.ev-multi.start.end{border-radius:4px;margin:0;padding-left:5px}
+.ev-spacer{height:18px;flex-shrink:0}
+.more-count{font-size:9px;color:#9CA3AF;padding-left:4px;font-weight:500}
 
 .side-panel{width:320px;flex-shrink:0;background:#fff;border-radius:16px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04);max-height:calc(100vh - 120px);overflow-y:auto;position:sticky;top:20px}
 .side-date-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #F0F1F3}
@@ -254,18 +254,18 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8
 <div class="header">
   <div class="header-left">
     <h1 class="logo" id="logoTitle" onclick="startEditTitle()" title="클릭하여 제목 수정"><span class="logo-icon">◈</span> <span id="logoText">천성민의 일정</span></h1>
-    <span class="header-sub" id="headerYear">2026년 업무 일정 관리</span>
-    <div class="weather-widget" id="weatherWidget" style="display: inline-flex; position: relative;">
+    <div class="header-today" id="headerToday"></div>
+    <div class="weather-widget" id="weatherWidget" style="display:none;position:relative">
       <div class="weather-now">
-        <span class="weather-now-icon" id="wNowIcon">☀️</span>
+        <span class="weather-now-icon" id="wNowIcon"></span>
         <div class="weather-now-info">
-          <span class="weather-now-temp" id="wNowTemp">9°C</span>
-          <span class="weather-now-desc" id="wNowDesc">맑음</span>
-          <span class="weather-now-meta" id="wNowMeta">15:30 기준</span>
+          <span class="weather-now-temp" id="wNowTemp"></span>
+          <span class="weather-now-desc" id="wNowDesc"></span>
+          <span class="weather-now-meta" id="wNowMeta"></span>
         </div>
       </div>
-      <div class="weather-forecast" id="wForecast"><div class="weather-hour"><span class="weather-hour-time">16시</span><span class="weather-hour-icon">☀️</span><span class="weather-hour-temp">9°</span></div><div class="weather-hour"><span class="weather-hour-time">17시</span><span class="weather-hour-icon">☀️</span><span class="weather-hour-temp">7°</span></div><div class="weather-hour"><span class="weather-hour-time">18시</span><span class="weather-hour-icon">☀️</span><span class="weather-hour-temp">6°</span></div></div>
-      <span class="weather-location" id="wLocation" onclick="toggleWeatherSet()" title="클릭하여 지역 변경">📍인천광역시 인천광역시, 대한민국 ▾</span>
+      <div class="weather-forecast" id="wForecast"></div>
+      <span class="weather-location" id="wLocation" onclick="toggleWeatherSet()" title="클릭하여 지역 변경"></span>
     </div>
   </div>
   <div class="header-right">
@@ -299,10 +299,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:linear-gradient(145deg,#F8
       <button class="today-btn" onclick="goToday()">오늘</button>
     </div>
     <div class="day-headers" id="dayHeaders"><div class="day-header sun ">일</div><div class="day-header  ">월</div><div class="day-header  ">화</div><div class="day-header  ">수</div><div class="day-header  ">목</div><div class="day-header  ">금</div><div class="day-header  sat">토</div></div>
-    <div class="calendar-wrapper" id="calendarWrapper">
-      <div class="calendar-grid" id="calendarGrid"><div class="cell" onclick="selectDate('2026-03-01')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-01')" style="animation:fadeIn .3s ease 0s both"><div class="cell-top"><span class="cell-day sun">1</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-02')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-02')" style="animation:fadeIn .3s ease 0.01s both"><div class="cell-top"><span class="cell-day">2</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-03')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-03')" style="animation:fadeIn .3s ease 0.02s both"><div class="cell-top"><span class="cell-day">3</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-04')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-04')" style="animation:fadeIn .3s ease 0.03s both"><div class="cell-top"><span class="cell-day">4</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-05')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-05')" style="animation:fadeIn .3s ease 0.04s both"><div class="cell-top"><span class="cell-day">5</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-06')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-06')" style="animation:fadeIn .3s ease 0.05s both"><div class="cell-top"><span class="cell-day">6</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-07')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-07')" style="animation:fadeIn .3s ease 0.06s both"><div class="cell-top"><span class="cell-day sat">7</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-08')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-08')" style="animation:fadeIn .3s ease 0.07s both"><div class="cell-top"><span class="cell-day sun">8</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-09')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-09')" style="animation:fadeIn .3s ease 0.08s both"><div class="cell-top"><span class="cell-day">9</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-10')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-10')" style="animation:fadeIn .3s ease 0.09s both"><div class="cell-top"><span class="cell-day">10</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-11')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-11')" style="animation:fadeIn .3s ease 0.1s both"><div class="cell-top"><span class="cell-day">11</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-12')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-12')" style="animation:fadeIn .3s ease 0.11s both"><div class="cell-top"><span class="cell-day">12</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-13')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-13')" style="animation:fadeIn .3s ease 0.12s both"><div class="cell-top"><span class="cell-day">13</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-14')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-14')" style="animation:fadeIn .3s ease 0.13s both"><div class="cell-top"><span class="cell-day sat">14</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-15')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-15')" style="animation:fadeIn .3s ease 0.14s both"><div class="cell-top"><span class="cell-day sun">15</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-16')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-16')" style="animation:fadeIn .3s ease 0.15s both"><div class="cell-top"><span class="cell-day">16</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-17')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-17')" style="animation:fadeIn .3s ease 0.16s both"><div class="cell-top"><span class="cell-day">17</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-18')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-18')" style="animation:fadeIn .3s ease 0.17s both"><div class="cell-top"><span class="cell-day">18</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-19')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-19')" style="animation:fadeIn .3s ease 0.18s both"><div class="cell-top"><span class="cell-day">19</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-20')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-20')" style="animation:fadeIn .3s ease 0.19s both"><div class="cell-top"><span class="cell-day">20</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-21')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-21')" style="animation:fadeIn .3s ease 0.2s both"><div class="cell-top"><span class="cell-day sat">21</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-22')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-22')" style="animation:fadeIn .3s ease 0.21s both"><div class="cell-top"><span class="cell-day sun">22</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-23')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-23')" style="animation:fadeIn .3s ease 0.22s both"><div class="cell-top"><span class="cell-day">23</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-24')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-24')" style="animation:fadeIn .3s ease 0.23s both"><div class="cell-top"><span class="cell-day">24</span></div><div class="cell-events"></div></div><div class="cell today" onclick="selectDate('2026-03-25')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-25')" style="animation:fadeIn .3s ease 0.24s both"><div class="cell-top"><span class="cell-day"><span class="today-badge">25</span></span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-26')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-26')" style="animation:fadeIn .3s ease 0.25s both"><div class="cell-top"><span class="cell-day">26</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-27')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-27')" style="animation:fadeIn .3s ease 0.26s both"><div class="cell-top"><span class="cell-day">27</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-28')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-28')" style="animation:fadeIn .3s ease 0.27s both"><div class="cell-top"><span class="cell-day sat">28</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-29')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-29')" style="animation:fadeIn .3s ease 0.28s both"><div class="cell-top"><span class="cell-day sun">29</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-30')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-30')" style="animation:fadeIn .3s ease 0.29s both"><div class="cell-top"><span class="cell-day">30</span></div><div class="cell-events"></div></div><div class="cell" onclick="selectDate('2026-03-31')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-03-31')" style="animation:fadeIn .3s ease 0.3s both"><div class="cell-top"><span class="cell-day">31</span></div><div class="cell-events"></div></div><div class="cell other-month" onclick="selectDate('2026-04-01')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-04-01')" style="animation:fadeIn .3s ease 0.31s both"><div class="cell-top"><span class="cell-day">1</span></div><div class="cell-events"></div></div><div class="cell other-month" onclick="selectDate('2026-04-02')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-04-02')" style="animation:fadeIn .3s ease 0.32s both"><div class="cell-top"><span class="cell-day">2</span></div><div class="cell-events"></div></div><div class="cell other-month" onclick="selectDate('2026-04-03')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-04-03')" style="animation:fadeIn .3s ease 0.33s both"><div class="cell-top"><span class="cell-day">3</span></div><div class="cell-events"></div></div><div class="cell other-month" onclick="selectDate('2026-04-04')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('2026-04-04')" style="animation:fadeIn .3s ease 0.34s both"><div class="cell-top"><span class="cell-day sat">4</span></div><div class="cell-events"></div></div></div>
-      <div class="multiday-overlay" id="multidayOverlay"></div>
-    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
   </div>
   <div class="side-panel" id="sidePanel"><div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">날짜를 선택해주세요</div><div class="empty-hint">캘린더의 날짜를 클릭하면 일정을 확인할 수 있습니다</div></div></div>
 </div>
@@ -540,8 +537,10 @@ function goToday(){cY=now.getFullYear();cM=now.getMonth();selDate=todayKey;showN
 function selectDate(d){selDate=d;showNote=false;render();}
 
 function render(){
-  document.getElementById('headerYear').textContent=`${cY}년 업무 일정 관리`;
   document.getElementById('monthTitleText').textContent=`${cY}년 ${MON[cM]}`;
+  const t=new Date();
+  const tY=t.getFullYear(),tM=t.getMonth(),tD=t.getDate(),tDow=DAYS[t.getDay()];
+  document.getElementById('headerToday').innerHTML=`<span class="header-today-date">${tY}년 ${tM+1}월 ${tD}일 ${tDow}요일</span>`;
   renderCalendar();renderSidePanel();renderGantt();
 }
 
@@ -552,136 +551,60 @@ function renderCalendar(){
   for(let i=1;i<=d;i++)cells.push({day:i,dateKey:dk(cY,cM,i),cur:true});
   const r=7-(cells.length%7);if(r<7)for(let i=1;i<=r;i++){const mm=cM===11?0:cM+1,yy=cM===11?cY+1:cY;cells.push({day:i,dateKey:dk(yy,mm,i),cur:false});}
 
-  // Collect multi-day events that appear in this month's cells
   const cellKeys=cells.map(c=>c.dateKey);
   const allEvs=allEvents();
-  const multiEvs=allEvs.filter(ev=>ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate);
-  
-  // For each cell, determine how many multi-day bar slots are needed
-  // Assign each multi-day event a "lane" (row index) to avoid overlapping
-  const lanes={}; // eventId -> lane number
-  const cellLaneCount={}; // cellIndex -> max lanes used
-  
-  // Sort multi-day events by start date, then by duration (longer first)
-  const relevantMulti=multiEvs.filter(ev=>{
-    return cellKeys.some(k=>k>=ev.startDate&&k<=ev.endDate);
-  }).sort((a,b)=>{
-    if(a.startDate!==b.startDate)return a.startDate<b.startDate?-1:1;
-    const durA=diffDays(a.startDate,a.endDate),durB=diffDays(b.startDate,b.endDate);
-    return durB-durA;
-  });
+  const multiEvs=allEvs.filter(ev=>ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate&&cellKeys.some(k=>k>=ev.startDate&&k<=ev.endDate))
+    .sort((a,b)=>a.startDate!==b.startDate?a.startDate<b.startDate?-1:1:diffDays(b.startDate,b.endDate)-diffDays(a.startDate,a.endDate));
 
-  // Assign lanes
-  const laneOccupancy=[]; // array of arrays: laneOccupancy[lane] = [{start,end}]
-  relevantMulti.forEach(ev=>{
-    let lane=0;
-    while(true){
-      if(!laneOccupancy[lane])laneOccupancy[lane]=[];
-      const conflict=laneOccupancy[lane].some(o=>!(ev.endDate<o.start||ev.startDate>o.end));
-      if(!conflict){
-        laneOccupancy[lane].push({start:ev.startDate,end:ev.endDate});
-        lanes[ev.id]=lane;
-        break;
-      }
-      lane++;
-    }
-  });
-  const maxLanes=laneOccupancy.length;
+  const laneOcc=[],lanes={};
+  multiEvs.forEach(ev=>{let lane=0;while(true){if(!laneOcc[lane])laneOcc[lane]=[];if(!laneOcc[lane].some(o=>!(ev.endDate<o.s||ev.startDate>o.e))){laneOcc[lane].push({s:ev.startDate,e:ev.endDate});lanes[ev.id]=lane;break;}lane++;}});
 
-  // Count multi-day spacers needed per cell
-  cells.forEach((c,idx)=>{
-    let count=0;
-    relevantMulti.forEach(ev=>{
-      if(c.dateKey>=ev.startDate&&c.dateKey<=ev.endDate)count=Math.max(count,lanes[ev.id]+1);
-    });
-    cellLaneCount[idx]=count;
-  });
-
-  // Render cells - add spacers for multi-day events
   grid.innerHTML=cells.map((c,idx)=>{
     const isT=c.dateKey===todayKey,isS=c.dateKey===selDate,dow=idx%7,hn=!!notes[c.dateKey];
     const ce=getEventsForDate(c.dateKey);
-    // Only show single-day events as pills
     const singleEvs=ce.filter(ev=>!(ev.startDate&&ev.endDate&&ev.startDate!==ev.endDate));
     let cls='cell';if(!c.cur)cls+=' other-month';if(isT)cls+=' today';if(isS)cls+=' selected';
     let dc='cell-day';if(dow===0)dc+=' sun';if(dow===6)dc+=' sat';
     const dH=isT?`<span class="today-badge">${c.day}</span>`:c.day;
-    
-    // Spacers for multi-day bar lanes
-    const spacerCount=cellLaneCount[idx]||0;
-    let spacerHTML='';
-    for(let s=0;s<spacerCount;s++)spacerHTML+=`<div class="multiday-spacer"></div>`;
 
-    const eH=singleEvs.slice(0,3-spacerCount).map(ev=>{
+    // Multi-day slots
+    const rowStart=idx-dow,rowEnd=rowStart+6;
+    let maxLane=-1;
+    for(let ci=rowStart;ci<=rowEnd&&ci<cells.length;ci++){
+      multiEvs.forEach(ev=>{if(cells[ci].dateKey>=ev.startDate&&cells[ci].dateKey<=ev.endDate)maxLane=Math.max(maxLane,lanes[ev.id]);});
+    }
+
+    let multiHTML='';
+    for(let lane=0;lane<=maxLane;lane++){
+      const ev=multiEvs.find(e=>(lanes[e.id]===lane)&&c.dateKey>=e.startDate&&c.dateKey<=e.endDate);
+      if(ev){
+        const cat=CAT.find(x=>x.id===ev.category)||CAT[4];
+        const isStart=c.dateKey===ev.startDate;
+        const isEnd=c.dateKey===ev.endDate;
+        let barCls='ev-multi';
+        if(isStart&&isEnd)barCls+=' single';
+        else if(isStart)barCls+=' start mr';
+        else if(isEnd)barCls+=' end ml';
+        else barCls+=' ml mr';
+        const opacity=ev.completed?0.4:1;
+        const deco=ev.completed?'text-decoration:line-through':'';
+        const showTitle=isStart||(dow===0);
+        multiHTML+=`<div class="${barCls}" style="background:${cat.color};opacity:${opacity};${deco}" onclick="event.stopPropagation();selectDate('${ev.startDate}')" title="${ev.title} (${ev.startDate} ~ ${ev.endDate})">${showTitle?ev.title:''}</div>`;
+      } else {
+        multiHTML+=`<div class="ev-spacer"></div>`;
+      }
+    }
+
+    const eH=singleEvs.slice(0,Math.max(3-(maxLane+1),1)).map(ev=>{
       const cat=CAT.find(x=>x.id===ev.category)||CAT[4];
       return`<div class="event-pill" draggable="true" ondragstart="onDragStart(event,'${c.dateKey}','${ev.id}')" style="background:${cat.bg};border-left:3px solid ${cat.color};color:${cat.color};${ev.completed?'opacity:.4;text-decoration:line-through':''}" title="${ev.startTime||''}-${ev.endTime||''} ${ev.title}">${ev.title}</div>`;
     }).join('');
-    const totalVisible=spacerCount+singleEvs.length;
-    const mH=totalVisible>3?`<span class="more-count">+${totalVisible-3}</span>`:'';
-    return`<div class="${cls}" onclick="selectDate('${c.dateKey}')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('${c.dateKey}')" style="animation:fadeIn .3s ease ${idx*.01}s both"><div class="cell-top"><span class="${dc}">${dH}</span>${hn?'<span class="note-dot">✎</span>':''}</div><div class="cell-events">${spacerHTML}${eH}${mH}</div></div>`;
+    const shown=Math.max(3-(maxLane+1),1);
+    const rem=singleEvs.length-shown;
+    const mH=rem>0?`<span class="more-count">+${rem}</span>`:'';
+
+    return`<div class="${cls}" onclick="selectDate('${c.dateKey}')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');onDrop('${c.dateKey}')"><div class="cell-top"><span class="${dc}">${dH}</span>${hn?'<span class="note-dot">✎</span>':''}</div><div class="cell-events">${multiHTML}${eH}${mH}</div></div>`;
   }).join('');
-
-  // Render multi-day continuous bars as overlay
-  requestAnimationFrame(()=>{renderMultidayBars(cells,relevantMulti,lanes);});
-}
-
-function renderMultidayBars(cells,multiEvs,lanes){
-  const overlay=document.getElementById('multidayOverlay');
-  const grid=document.getElementById('calendarGrid');
-  const cellEls=grid.querySelectorAll('.cell');
-  if(!cellEls.length){overlay.innerHTML='';return;}
-
-  const gridRect=grid.getBoundingClientRect();
-  const cellRects=Array.from(cellEls).map(el=>el.getBoundingClientRect());
-  const gap=4;
-
-  let barsHTML='';
-  multiEvs.forEach(ev=>{
-    const cat=CAT.find(x=>x.id===ev.category)||CAT[4];
-    const lane=lanes[ev.id]||0;
-    const barTop=26+lane*18; // offset from cell top
-
-    // Find which cells this event spans
-    const startIdx=cells.findIndex(c=>c.dateKey===ev.startDate);
-    const endIdx=cells.findIndex(c=>c.dateKey===ev.endDate);
-    
-    // Clamp to visible range
-    const visStart=Math.max(startIdx,0);
-    const visEnd=Math.min(endIdx,cells.length-1);
-    if(visStart>cells.length-1||visEnd<0)return;
-
-    // Split by week rows
-    let segStart=visStart;
-    while(segStart<=visEnd){
-      const rowEnd=segStart+6-(segStart%7); // last cell in this row
-      const segEnd=Math.min(rowEnd,visEnd);
-
-      const isRealStart=segStart===startIdx;
-      const isRealEnd=segEnd===endIdx;
-
-      const leftRect=cellRects[segStart];
-      const rightRect=cellRects[segEnd];
-      if(!leftRect||!rightRect){segStart=segEnd+1;continue;}
-
-      const left=leftRect.left-gridRect.left+(isRealStart?2:0);
-      const right=rightRect.right-gridRect.left-(isRealEnd?2:0);
-      const top=leftRect.top-gridRect.top+barTop;
-      const width=right-left;
-
-      let capClass='both-cap';
-      if(isRealStart&&!isRealEnd)capClass='left-cap';
-      else if(!isRealStart&&isRealEnd)capClass='right-cap';
-      else if(!isRealStart&&!isRealEnd)capClass='mid';
-
-      const opacity=ev.completed?0.4:1;
-      const label=isRealStart?ev.title:'';
-
-      barsHTML+=`<div class="multiday-cont-bar ${capClass}" onclick="selectDate('${ev.startDate}')" title="${ev.title} (${ev.startDate} ~ ${ev.endDate})" style="left:${left}px;top:${top}px;width:${width}px;background:${cat.color};opacity:${opacity}">${label}</div>`;
-
-      segStart=segEnd+1;
-    }
-  });
-  overlay.innerHTML=barsHTML;
 }
 
 function renderSidePanel(){
@@ -1133,7 +1056,6 @@ function selectCity(lat,lon,name){
 }
 
 initLegend();initDayHeaders();initTitle();render();fetchWeather();
-window.addEventListener('resize',()=>{requestAnimationFrame(()=>render());});
 
 /* ====== Toast notification ====== */
 function showToast(msg,icon='✅'){
@@ -1192,11 +1114,4 @@ function importJSON(e){
 
 
 </script>
-<div class="weather-set" id="weatherSet" style="top: 80.5px; left: 592.875px;">
-  <div class="weather-set-title">📍 지역 설정</div>
-  <input class="weather-set-input" id="weatherCityInput" placeholder="도시명 입력 (예: 서울, 인천, 부산)" oninput="searchCity(this.value)">
-  <div class="weather-set-results" id="weatherCityResults"><div class="weather-set-item" onclick="selectCity(37.45646,126.70515,'인천광역시 인천광역시, 대한민국')">📍 인천광역시 인천광역시, 대한민국</div></div>
-</div>
-
-
-<div id="toast" class="toast"><span>📍</span>날씨 지역이 인천광역시 인천광역시, 대한민국(으)로 변경되었습니다</div></body></html>
+</body></html>
