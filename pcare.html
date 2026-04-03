@@ -7,113 +7,202 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
+  /* ════════════════════════════════════════════
+     라이트 대시보드 테마 — SW Healthcare Portal
+  ════════════════════════════════════════════ */
+  :root{
+    --bg:#f0f4f8;
+    --bg2:#ffffff;
+    --bg3:#f7fafc;
+    --bg4:#edf2f7;
+    --border:#e2e8f0;
+    --border2:#cbd5e0;
+    --text:#1a202c;
+    --text2:#718096;
+    --text3:#a0aec0;
+    --accent:#2563eb;
+    --accent2:#1d4ed8;
+    --green:#16a34a;
+    --red:#dc2626;
+    --orange:#d97706;
+    --purple:#7c3aed;
+    --teal:#0d9488;
+  }
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Malgun Gothic','맑은 고딕',sans-serif;background:#f0f4f8;color:#1a202c;min-width:1200px;font-size:13px;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-width:0;overflow-x:hidden;}
 
-  .header{background:linear-gradient(135deg,#1e3a5f 0%,#2d6a9f 100%);color:white;padding:18px 30px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
-  .header h1{font-size:20px;font-weight:700;}
-  .header .sub{font-size:11px;opacity:.75;margin-top:3px;}
-  .badge-range{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:20px;font-size:11px;}
+  /* ── HEADER ── */
+  .header{background:#fff;border-bottom:1px solid var(--border);color:var(--text);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  .header-left{display:flex;align-items:center;gap:10px;}
+  .header-logo{width:32px;height:32px;background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .header-title-wrap{}
+  .header h1{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px;line-height:1.2;}
+  .header h1 span{color:var(--accent2);font-weight:800;}
+  .header .sub{font-size:10px;color:var(--text2);margin-top:2px;}
+  .header-right{text-align:right;font-size:11px;color:var(--text2);white-space:nowrap;}
+  .header-right .datetime{font-size:12px;font-weight:600;color:var(--text);letter-spacing:.2px;}
+  .badge-range{display:none;}
 
   /* ── TABS ── */
-  .tab-bar{background:white;border-bottom:2px solid #e2e8f0;display:flex;padding:0 24px;box-shadow:0 2px 6px rgba(0,0,0,.05);position:sticky;top:var(--tab-top,62px);z-index:99;}
-  .tab-btn{padding:14px 24px;font-size:13px;font-weight:700;color:#718096;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;}
-  .tab-btn:hover{color:#2d6a9f;}
-  .tab-btn.active{color:#2d6a9f;border-bottom-color:#2d6a9f;}
+  .tab-bar{background:var(--bg2);border-bottom:2px solid var(--border);display:flex;padding:0 16px;position:sticky;top:var(--tab-top,53px);z-index:99;overflow-x:auto;scrollbar-width:none;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  .tab-bar::-webkit-scrollbar{display:none;}
+  .tab-btn{padding:11px 18px;font-size:12px;font-weight:700;color:var(--text2);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .18s;white-space:nowrap;flex-shrink:0;}
+  .tab-btn:hover{color:var(--accent2);}
+  .tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent);}
   .tab-pane{display:none;}
   .tab-pane.active{display:block;}
 
   /* ── FILTERS ── */
-  .sticky-filters{position:sticky;top:var(--filter-top,109px);z-index:98;background:white;border-bottom:2px solid #e2e8f0;box-shadow:0 2px 6px rgba(0,0,0,.07);}
-  .filters{background:white;padding:12px 24px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;}
+  .sticky-filters{position:sticky;top:var(--filter-top,96px);z-index:98;background:var(--bg2);border-bottom:2px solid var(--border);box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .filters{padding:10px 16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
   .filters-hidden{display:none;}
   .fg{display:flex;flex-direction:column;gap:3px;}
-  .fg label{font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.5px;}
-  select{padding:7px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;color:#2d3748;background:#f7fafc;cursor:pointer;min-width:130px;}
-  select:focus{outline:none;border-color:#2d6a9f;background:white;}
-  .btn{padding:7px 16px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
-  .btn-reset{background:#e2e8f0;color:#4a5568;}
-  .btn-reset:hover{background:#cbd5e0;}
+  .fg label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+  select{padding:6px 10px;border:1px solid var(--border2);border-radius:6px;font-size:12px;color:var(--text);background:var(--bg3);cursor:pointer;min-width:120px;font-family:inherit;}
+  select:focus{outline:none;border-color:var(--accent);background:var(--bg4);}
+  .btn{padding:6px 14px;border:1px solid var(--border2);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;}
+  .btn-reset{background:var(--bg3);color:var(--text2);}
+  .btn-reset:hover{background:var(--bg4);color:var(--text);border-color:var(--text3);}
 
   /* ── KPI ── */
-  .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:14px 24px 10px;}
-  .kpi{background:white;border-radius:10px;padding:13px 15px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:4px solid #2d6a9f;}
-
-  .kpi.g{border-left-color:#38a169;} .kpi.o{border-left-color:#dd6b20;}
-  .kpi.p{border-left-color:#805ad5;} .kpi.t{border-left-color:#319795;}
-  .kpi.r{border-left-color:#e53e3e;}
-  .kpi-label{font-size:10px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;}
-  .kpi-val{font-size:17px;font-weight:700;color:#1a202c;line-height:1.2;}
-  .kpi-sub{font-size:10px;color:#a0aec0;margin-top:2px;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:12px 16px 8px;}
+  .kpi{background:var(--bg2);border-radius:8px;padding:12px 14px;border:1px solid var(--border);border-left:4px solid var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.06);}
+  .kpi.g{border-left-color:var(--green);}
+  .kpi.o{border-left-color:var(--orange);}
+  .kpi.p{border-left-color:var(--purple);}
+  .kpi.t{border-left-color:var(--teal);}
+  .kpi.r{border-left-color:var(--red);}
+  .kpi-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;}
+  .kpi-val{font-size:17px;font-weight:700;color:var(--text);line-height:1.2;}
+  .kpi-sub{font-size:10px;color:var(--text3);margin-top:3px;}
 
   /* ── CHART ── */
-  .chart-wrap{padding:14px 24px;}
-  .chart-card{background:white;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:16px 18px;}
-  .chart-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
-  .chart-title{font-size:13px;font-weight:700;color:#2d3748;}
-  .slicer-grp{display:flex;gap:6px;flex-wrap:wrap;}
-  .sl-btn{padding:4px 12px;border-radius:20px;border:1.5px solid #cbd5e0;background:white;font-size:11px;font-weight:700;cursor:pointer;color:#4a5568;transition:all .15s;user-select:none;}
+  .chart-wrap{padding:10px 16px;}
+  .chart-card{background:var(--bg2);border-radius:8px;border:1px solid var(--border);padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06);min-width:0;overflow:hidden;}
+  .chart-card canvas{max-width:100%;display:block;width:100% !important;}
+  #totPayChart,#totCntChart{height:220px !important;}
+  #trendChart,#mkTrendChart{height:200px !important;}
+  .chart-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+  .chart-title{font-size:13px;font-weight:700;color:var(--text);}
+  .slicer-grp{display:flex;gap:5px;flex-wrap:wrap;}
+  .sl-btn{padding:3px 10px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);font-size:11px;font-weight:700;cursor:pointer;color:var(--text2);transition:all .15s;user-select:none;}
   .sl-btn.on{color:white;border-color:transparent;}
-  .sl-btn[data-k="결제금액"].on{background:#2d6a9f;}
-  .sl-btn[data-k="배송비"].on{background:#dd6b20;}
-  .sl-btn[data-k="합계건수"].on{background:#e53e3e;}
-  .sl-btn[data-k="유료건수"].on{background:#38a169;}
-  .sl-btn[data-k="무료건수"].on{background:#805ad5;}
-  .sl-btn[data-mk="결제금액"].on{background:#2d6a9f;}
-  .sl-btn[data-mk="합계건수"].on{background:#e53e3e;}
-  .sl-btn[data-mk="유료건수"].on{background:#38a169;}
-  .sl-btn[data-mk="무료건수"].on{background:#805ad5;}
+  .sl-btn[data-k="결제금액"].on{background:var(--accent);}
+  .sl-btn[data-k="배송비"].on{background:var(--orange);}
+  .sl-btn[data-k="합계건수"].on{background:var(--red);}
+  .sl-btn[data-k="유료건수"].on{background:var(--green);}
+  .sl-btn[data-k="무료건수"].on{background:var(--purple);}
+  .sl-btn[data-mk="결제금액"].on{background:var(--accent);}
+  .sl-btn[data-mk="합계건수"].on{background:var(--red);}
+  .sl-btn[data-mk="유료건수"].on{background:var(--green);}
+  .sl-btn[data-mk="무료건수"].on{background:var(--purple);}
 
   /* ── TABLES ── */
-  .sec{padding:0 24px 14px;}
-  .sum-layout{display:flex;gap:16px;align-items:stretch;}
-  .sum-table-wrap{flex:0 0 60%;min-width:0;max-width:60%;max-height:600px;overflow-y:auto;border-radius:10px;}
-  .sum-chart-wrap{flex:0 0 40%;min-width:0;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.10);border:1.5px solid #b0bec5;padding:16px 18px;overflow:hidden;max-height:600px;display:flex;flex-direction:column;}
-  .sum-chart-title{font-size:12px;font-weight:700;color:#2d3748;margin-bottom:10px;}
+  .sec{padding:0 16px 12px;}
+  .sum-layout{display:flex;gap:12px;align-items:stretch;}
+  .sum-table-wrap{flex:0 0 60%;min-width:0;max-width:60%;max-height:600px;overflow-y:auto;border-radius:8px;}
+  .sum-chart-wrap{flex:0 0 40%;min-width:0;background:var(--bg2);border-radius:8px;border:1px solid var(--border);padding:14px 16px;overflow:hidden;max-height:600px;display:flex;flex-direction:column;}
+  .sum-chart-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;}
   #sumBarChart{flex:1 1 0;min-height:0;}
-  .sum-chart-slicer{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
-  .sc-btn{padding:3px 10px;border-radius:20px;border:1.5px solid #cbd5e0;background:white;font-size:11px;font-weight:600;cursor:pointer;color:#4a5568;transition:all .15s;}
+  .sum-chart-slicer{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
+  .sc-btn{padding:3px 10px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);font-size:11px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .15s;}
   .sc-btn.on{color:white;border-color:transparent;}
-  .sc-btn[data-m="tot"].on{background:#2d6a9f;}
-  .sc-btn[data-m="cnt"].on{background:#e53e3e;}
-  .sc-btn[data-m="paid"].on{background:#38a169;}
-  .sc-btn[data-m="free"].on{background:#805ad5;}
-  .sec-title{font-size:13px;font-weight:700;color:#2d3748;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
-  .tcard{background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.10);overflow:hidden;border:1.5px solid #b0bec5;outline:1.5px solid #b0bec5;outline-offset:-1px;}
-  .thead-row{padding:11px 16px;border-bottom:1.5px solid #cbd5e0;display:flex;justify-content:space-between;align-items:center;}
-  .thead-row h3{font-size:12px;font-weight:700;color:#2d3748;}
-  .rc{font-size:11px;color:#718096;}
-  .twrap{overflow-x:auto;}
-  .twrap-cmp{overflow-x:auto;width:100%;}
+  .sc-btn[data-m="tot"].on{background:var(--accent);}
+  .sc-btn[data-m="cnt"].on{background:var(--red);}
+  .sc-btn[data-m="paid"].on{background:var(--green);}
+  .sc-btn[data-m="free"].on{background:var(--purple);}
+  .sec-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .tcard{background:var(--bg2);border-radius:8px;border:1px solid var(--border2);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+  .thead-row{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--bg3);}
+  .thead-row h3{font-size:12px;font-weight:700;color:var(--text);}
+  .rc{font-size:11px;color:var(--text2);}
+  .twrap{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
+  .twrap-cmp{overflow-x:auto;width:100%;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
   table{width:100%;border-collapse:collapse;font-size:12px;}
-  thead th{padding:6px 8px;font-weight:700;color:#4a5568;font-size:11px;border-bottom:2px solid #cbd5e0;border-right:1px solid #e2e8f0;border-top:none;white-space:normal;word-break:keep-all;cursor:pointer;user-select:none;text-align:center;background:#f7fafc;min-width:60px;line-height:1.3;}
-  thead th:hover{background:#edf2f7;}
+  thead th{padding:7px 8px;font-weight:700;color:var(--text2);font-size:11px;border-bottom:1px solid var(--border2);border-right:1px solid var(--border);border-top:none;white-space:normal;word-break:keep-all;cursor:pointer;user-select:none;text-align:center;background:var(--bg3);min-width:60px;line-height:1.3;}
+  thead th:hover{background:var(--bg4);color:var(--text);}
   thead th.l{text-align:left;}
-  .gp{background:#ede9fe;border-bottom:2px solid #6b46c1 !important;border-right:1px solid #c4b5fd;color:#553c9a;white-space:normal;word-break:keep-all;text-align:center;}
-  .gc{background:#dbeafe;border-bottom:2px solid #2b6cb0 !important;border-right:1px solid #93c5fd;color:#1a4f72;white-space:normal;word-break:keep-all;text-align:center;}
-  .gd{background:#dcfce7;border-bottom:2px solid #276749 !important;border-right:1px solid #86efac;color:#1c4532;white-space:normal;word-break:keep-all;text-align:center;}
-  .cgh{text-align:center;font-size:11px;font-weight:700;padding:5px 0;border-bottom:1px solid #e2e8f0;border-top:1.5px solid #b0bec5;}
-  .cgh.p{background:#ede9fe;color:#553c9a;font-weight:800;border-left:2px solid #b0bec5;border-right:1px solid #ddd6fe;}.cgh.c{background:#dbeafe;color:#1a4f72;font-weight:800;border-left:2px solid #b0bec5;border-right:1px solid #bfdbfe;}.cgh.d{background:#dcfce7;color:#1c4532;font-weight:800;border-left:2px solid #b0bec5;}
-  tbody tr{border-bottom:1px solid #e8edf2;}
-  tbody tr:hover{background:#ebf4ff;}
-  tbody td{padding:7px 10px;text-align:right;border-right:1px solid #edf1f5;}
+  .gp{background:#ede9fe;border-bottom:2px solid var(--purple) !important;border-right:1px solid #c4b5fd;color:#5b21b6;white-space:normal;word-break:keep-all;text-align:center;}
+  .gc{background:#dbeafe;border-bottom:2px solid var(--accent) !important;border-right:1px solid #93c5fd;color:#1e40af;white-space:normal;word-break:keep-all;text-align:center;}
+  .gd{background:#dcfce7;border-bottom:2px solid var(--green) !important;border-right:1px solid #86efac;color:#166534;white-space:normal;word-break:keep-all;text-align:center;}
+  .cgh{text-align:center;font-size:11px;font-weight:700;padding:5px 0;border-bottom:1px solid var(--border);border-top:1px solid var(--border2);}
+  .cgh.p{background:#ede9fe;color:#5b21b6;font-weight:800;border-left:1px solid var(--border2);border-right:1px solid #ddd6fe;}
+  .cgh.c{background:#dbeafe;color:#1e40af;font-weight:800;border-left:1px solid var(--border2);border-right:1px solid #bfdbfe;}
+  .cgh.d{background:#dcfce7;color:#166534;font-weight:800;border-left:1px solid var(--border2);}
+  tbody tr{border-bottom:1px solid var(--border);}
+  tbody tr:hover{background:var(--bg3);}
+  tbody td{padding:7px 10px;text-align:right;border-right:1px solid var(--border);color:var(--text);}
   thead th:last-child{border-right:none !important;}
   tbody td:last-child{border-right:none !important;}
   .cgh:last-child{border-right:none !important;}
-  tbody td.l{text-align:left;font-weight:500;white-space:nowrap;}
-  .total-row td{background:#f0f4f8;font-weight:700;border-top:2px solid #cbd5e0;border-bottom:2px solid #cbd5e0;}
-  .dp{color:#276749;font-weight:700;} .dn{color:#c53030;font-weight:700;} .dz{color:#a0aec0;}
-  .bpaid{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;min-width:36px;text-align:center;background:#dbeafe;color:#1a4f72;border:1px solid #90cdf4;}
-  .bfree{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;min-width:36px;text-align:center;background:#ede9fe;color:#553c9a;border:1px solid #b794f4;}
-  .bcnt{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;min-width:36px;text-align:center;background:#f1f5f9;color:#334155;border:1px solid #94a3b8;}
-  .sep-prev{border-left:2px solid #b0bec5 !important;}
-  .sep-cur{border-left:2px solid #b0bec5 !important;}
-  .sep-diff{border-left:2px solid #b0bec5 !important;}
-  .sep-nm{border-right:2px solid #b0bec5 !important;}
+  tbody td.l{text-align:left;font-weight:500;white-space:nowrap;color:var(--text);}
+  .total-row td{background:var(--bg4) !important;font-weight:700;border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);}
+  .dp{color:var(--green);font-weight:700;} .dn{color:var(--red);font-weight:700;} .dz{color:var(--text3);}
+  .bpaid{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;min-width:36px;text-align:center;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;}
+  .bfree{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;min-width:36px;text-align:center;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;}
+  .bcnt{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;min-width:36px;text-align:center;background:#f1f5f9;color:#475569;border:1px solid #94a3b8;}
+  .sep-prev{border-left:1px solid var(--border2) !important;}
+  .sep-cur{border-left:1px solid var(--border2) !important;}
+  .sep-diff{border-left:1px solid var(--border2) !important;}
+  .sep-nm{border-right:1px solid var(--border2) !important;}
 
   /* ── PRINT ── */
-  .btn-print{background:#2d6a9f;color:white;padding:7px 16px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;}
-  .btn-print:hover{background:#1e3a5f;}
+  .btn-print{background:var(--accent);color:white;padding:6px 14px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;}
+  .btn-print:hover{background:var(--accent2);opacity:.9;}
+
+  /* ── TOT 탭 전용 그리드 ── */
+  .tot-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 16px 8px;}
+  .tot-chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 12px;}
+  .tot-chart-grid > *{min-width:0;overflow:hidden;}
+  .chart-wrap > .chart-card{min-width:0;}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:900px){
+    .tot-chart-grid{grid-template-columns:1fr;}
+  }
+  @media(max-width:768px){
+    body{font-size:12px;}
+    .header{padding:8px 12px;}
+    .header h1{font-size:13px;}
+    .header .sub{display:block;}
+    .header-logo{width:28px;height:28px;font-size:14px;}
+    .header-right{display:none;}
+
+    .tab-bar{padding:0 8px;}
+    .tab-btn{padding:9px 12px;font-size:11px;}
+
+    .sticky-filters{}
+    .filters{padding:8px 12px;gap:8px;}
+    select{min-width:100px;font-size:11px;padding:5px 8px;}
+
+    .kpi-grid{grid-template-columns:repeat(2,1fr);gap:6px;padding:10px 12px 6px;}
+    .kpi{padding:10px 12px;}
+    .kpi-val{font-size:15px;}
+
+    .chart-wrap{padding:8px 12px;}
+    .chart-card{padding:12px 12px;}
+    #totPayChart,#totCntChart{height:180px !important;}
+    #trendChart,#mkTrendChart{height:160px !important;}
+
+    .sec{padding:0 12px 10px;}
+    .sum-layout{flex-direction:column;}
+    .sum-table-wrap{flex:none;width:100%;max-width:100%;max-height:none;}
+    .sum-chart-wrap{flex:none;width:100%;max-height:300px;}
+
+    .kpi-grid[style*="repeat(7"]{grid-template-columns:repeat(2,1fr) !important;}
+    .kpi-grid[style*="repeat(5"]{grid-template-columns:repeat(2,1fr) !important;}
+    .kpi-grid[style*="repeat(4"]{grid-template-columns:repeat(2,1fr) !important;}
+
+    .tot-kpi-grid{grid-template-columns:repeat(2,1fr);padding:10px 12px 6px;}
+    .tot-chart-grid{grid-template-columns:1fr;padding:0 12px 10px;}
+  }
+  @media(max-width:480px){
+    .kpi-grid{grid-template-columns:1fr 1fr;}
+    .tab-btn{padding:8px 10px;font-size:10px;}
+    .tot-kpi-grid{grid-template-columns:1fr 1fr;}
+  }
+
   @media print{
     /* ── 페이지 설정: A4 가로, 여백 최소 ── */
     @page{size:A4 landscape;margin:5mm 6mm;}
@@ -124,9 +213,10 @@
 
     /* ── 전체 레이아웃 ── */
     html,body{
-      width:277mm!important;        /* A4 landscape 가로 - 여백 */
+      width:277mm!important;
       min-width:unset!important;
       background:white!important;
+      color:#1a202c!important;
       margin:0!important;padding:0!important;
       font-size:8px!important;
       -webkit-print-color-adjust:exact;
@@ -136,7 +226,7 @@
     /* ── 헤더 ── */
     .header{
       position:static!important;
-      background:linear-gradient(135deg,#1e3a5f 0%,#2d6a9f 100%)!important;
+      background:#1e3a5f!important;
       padding:6px 14px!important;
     }
     .header h1{font-size:13px!important;}
@@ -238,16 +328,16 @@
   /* ── LOADING ── */
   #loadingOverlay{
     position:fixed;top:0;left:0;width:100%;height:100%;
-    background:linear-gradient(135deg,#1e3a5f 0%,#2d6a9f 100%);
+    background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);
     z-index:9999;display:flex;align-items:center;justify-content:center;
     flex-direction:column;gap:16px;
   }
   .loading-spinner{
-    width:48px;height:48px;border:5px solid rgba(255,255,255,.3);
-    border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;
+    width:44px;height:44px;border:3px solid rgba(255,255,255,.25);
+    border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;
   }
-  .loading-text{color:white;font-size:15px;font-weight:600;}
-  .loading-sub{color:rgba(255,255,255,.7);font-size:12px;}
+  .loading-text{color:#fff;font-size:15px;font-weight:600;}
+  .loading-sub{color:rgba(255,255,255,.75);font-size:12px;}
   @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
@@ -259,10 +349,17 @@
 </div>
 
 <div class="header">
-  <div>
-    <h1>🏥 맞춤형 건강기능식품 통계 대시보드</h1>
+  <div class="header-left">
+    <div class="header-logo">💊</div>
+    <div class="header-title-wrap">
+      <h1>(주)에스더블유헬스케어 <span>맞춤형 건강기능식품 통계</span></h1>
+      <div class="sub" id="dataRange">• 데이터 로딩 중...</div>
+    </div>
   </div>
-  <div class="badge-range" id="dataRange">-</div>
+  <div class="header-right">
+    <div>최근 업데이트</div>
+    <div class="datetime" id="headerDatetime">-</div>
+  </div>
 </div>
 
 <!-- TAB BAR + 인쇄 버튼 -->
@@ -325,61 +422,61 @@
 <div id="tab-total" class="tab-pane active">
 
   <!-- KPI 비교 카드 -->
-  <div style="padding:14px 24px 10px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+  <div class="tot-kpi-grid">
     <!-- 결제금액 -->
     <div class="tcard" style="padding:14px 16px;">
-      <div style="font-size:11px;font-weight:700;color:#718096;margin-bottom:8px;">💰 결제금액 합계</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">💰 결제금액 합계</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-        <div><div style="font-size:10px;color:#16a34a;font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-haru-pay">-</div></div>
-        <div style="font-size:13px;font-weight:900;color:#94a3b8;letter-spacing:1px;padding:0 6px;">VS</div>
-        <div style="text-align:right;"><div style="font-size:10px;color:#1d4ed8;font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-mk-pay">-</div></div>
+        <div><div style="font-size:10px;color:var(--green);font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:var(--text);" id="tot-haru-pay">-</div></div>
+        <div style="font-size:12px;font-weight:900;color:var(--text3);letter-spacing:1px;padding:0 6px;">VS</div>
+        <div style="text-align:right;"><div style="font-size:10px;color:var(--accent2);font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:var(--text);" id="tot-mk-pay">-</div></div>
       </div>
     </div>
     <!-- 합계건수 -->
     <div class="tcard" style="padding:14px 16px;">
-      <div style="font-size:11px;font-weight:700;color:#718096;margin-bottom:8px;">📦 합계 건수</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">📦 합계 건수</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-        <div><div style="font-size:10px;color:#16a34a;font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-haru-cnt">-</div></div>
-        <div style="font-size:13px;font-weight:900;color:#94a3b8;letter-spacing:1px;padding:0 6px;">VS</div>
-        <div style="text-align:right;"><div style="font-size:10px;color:#1d4ed8;font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-mk-cnt">-</div></div>
+        <div><div style="font-size:10px;color:var(--green);font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:var(--text);" id="tot-haru-cnt">-</div></div>
+        <div style="font-size:12px;font-weight:900;color:var(--text3);letter-spacing:1px;padding:0 6px;">VS</div>
+        <div style="text-align:right;"><div style="font-size:10px;color:var(--accent2);font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:var(--text);" id="tot-mk-cnt">-</div></div>
       </div>
     </div>
     <!-- 유료건수 -->
     <div class="tcard" style="padding:14px 16px;">
-      <div style="font-size:11px;font-weight:700;color:#718096;margin-bottom:8px;">✅ 유료 건수</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">✅ 유료 건수</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-        <div><div style="font-size:10px;color:#16a34a;font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-haru-paid">-</div></div>
-        <div style="font-size:13px;font-weight:900;color:#94a3b8;letter-spacing:1px;padding:0 6px;">VS</div>
-        <div style="text-align:right;"><div style="font-size:10px;color:#1d4ed8;font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-mk-paid">-</div></div>
+        <div><div style="font-size:10px;color:var(--green);font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:var(--text);" id="tot-haru-paid">-</div></div>
+        <div style="font-size:12px;font-weight:900;color:var(--text3);letter-spacing:1px;padding:0 6px;">VS</div>
+        <div style="text-align:right;"><div style="font-size:10px;color:var(--accent2);font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:var(--text);" id="tot-mk-paid">-</div></div>
       </div>
     </div>
     <!-- 무료건수 -->
     <div class="tcard" style="padding:14px 16px;">
-      <div style="font-size:11px;font-weight:700;color:#718096;margin-bottom:8px;">🆓 무료 건수</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;">🆓 무료 건수</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-end;">
-        <div><div style="font-size:10px;color:#16a34a;font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-haru-free">-</div></div>
-        <div style="font-size:13px;font-weight:900;color:#94a3b8;letter-spacing:1px;padding:0 6px;">VS</div>
-        <div style="text-align:right;"><div style="font-size:10px;color:#1d4ed8;font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:#2d3748;" id="tot-mk-free">-</div></div>
+        <div><div style="font-size:10px;color:var(--green);font-weight:600;">하루건식</div><div style="font-size:18px;font-weight:800;color:var(--text);" id="tot-haru-free">-</div></div>
+        <div style="font-size:12px;font-weight:900;color:var(--text3);letter-spacing:1px;padding:0 6px;">VS</div>
+        <div style="text-align:right;"><div style="font-size:10px;color:var(--accent2);font-weight:600;">메디콕</div><div style="font-size:18px;font-weight:800;color:var(--text);" id="tot-mk-free">-</div></div>
       </div>
     </div>
   </div>
 
   <!-- 비교 그래프 2개 나란히 -->
-  <div style="padding:0 24px 14px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+  <div class="tot-chart-grid">
     <!-- 결제금액 추이 -->
     <div class="chart-card">
       <div class="chart-top">
         <div class="chart-title">💰 결제금액 월별 비교</div>
         <span id="tot-range-label" style="font-size:11px;color:#718096;"></span>
       </div>
-      <canvas id="totPayChart" height="120"></canvas>
+      <canvas id="totPayChart"></canvas>
     </div>
     <!-- 건수 추이 -->
     <div class="chart-card">
       <div class="chart-top">
         <div class="chart-title">📦 합계건수 월별 비교</div>
       </div>
-      <canvas id="totCntChart" height="120"></canvas>
+      <canvas id="totCntChart"></canvas>
     </div>
   </div>
 
@@ -435,7 +532,7 @@
         <div class="chart-title">📈 기간별 월별 추이</div>
         <span id="period-range-label" style="font-size:11px;color:#718096;"></span>
       </div>
-      <canvas id="trendChart" height="85"></canvas>
+      <canvas id="trendChart"></canvas>
     </div>
   </div>
 
@@ -489,7 +586,7 @@
         <div class="chart-title">📈 메디콕 월별 추이</div>
         <span id="mk-range-label" style="font-size:11px;color:#718096;"></span>
       </div>
-      <canvas id="mkTrendChart" height="85"></canvas>
+      <canvas id="mkTrendChart"></canvas>
     </div>
   </div>
 
@@ -657,6 +754,11 @@
 </div>
 
 <script>
+// ── Chart.js 전역 라이트 테마 설정 ──
+Chart.defaults.color = '#718096';
+Chart.defaults.borderColor = '#e2e8f0';
+Chart.defaults.backgroundColor = 'rgba(37,99,235,0.1)';
+
 // ── Google Apps Script 중계 URL (CORS 없이 작동) ──
 const APPS_URL = 'https://script.google.com/macros/s/AKfycbybqS6aV_s0lo4xxL67KKhsmG8B-bRXLb_LHSnmpk0ocS34KaL3wYykje6L26QskzL2/exec';
 
@@ -787,8 +889,28 @@ async function loadSheetData() {
     document.getElementById('loadingOverlay').style.display = 'none';
     document.getElementById('dataRange').textContent = (() => {
       const months = [...new Set(D.map(d=>d.월))].sort();
-      return fmtYM(months[0]) + ' ~ ' + fmtYM(months[months.length-1]);
+      return '• ' + fmtYM(months[0]) + ' ~ ' + fmtYM(months[months.length-1]) + ' 기준';
     })();
+
+    // 구글 시트 마지막 수정 시각 fetch
+    try {
+      const modResp = await fetch(APPS_URL + '?sheet=lastModified');
+      const modText = await modResp.text();
+      const modDate = new Date(modText.trim());
+      const el = document.getElementById('headerDatetime');
+      if (!isNaN(modDate.getTime())) {
+        const days = ['일','월','화','수','목','금','토'];
+        const pad = n => String(n).padStart(2,'0');
+        const modStr = `${modDate.getFullYear()}년 ${pad(modDate.getMonth()+1)}월 ${pad(modDate.getDate())}일 (${days[modDate.getDay()]}) ${pad(modDate.getHours())}:${pad(modDate.getMinutes())}:${pad(modDate.getSeconds())}`;
+        if (el) el.textContent = modStr;
+      } else {
+        if (el) el.textContent = '불러오기 실패';
+      }
+    } catch(e) {
+      document.getElementById('headerDatetime').textContent = '불러오기 실패';
+      console.warn('lastModified fetch 실패:', e.message);
+    }
+
     init();
   } catch(e) {
     document.getElementById('loadingOverlay').innerHTML = `<div style="text-align:center;color:white"><div style="font-size:18px;margin-bottom:10px">⚠️ 데이터 로드 실패</div><div style="font-size:13px;opacity:.8">${e.message}</div><button onclick="loadSheetData()" style="margin-top:16px;padding:8px 20px;background:white;color:#2d3748;border:none;border-radius:8px;font-weight:700;cursor:pointer">다시 시도</button></div>`;
@@ -881,7 +1003,7 @@ function init(){
   hosps.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;ch.appendChild(o);});
 
   const minM=months[0], maxM=months[months.length-1];
-  document.getElementById('dataRange').textContent=fmtYM(minM)+' ~ '+fmtYM(maxM);
+  document.getElementById('dataRange').textContent='• '+fmtYM(minM)+' ~ '+fmtYM(maxM)+' 기준';
   // 실제 높이로 sticky top 동적 계산
   requestAnimationFrame(()=>{ setStickyTops(); window.addEventListener('resize', setStickyTops); });
   applyFilters();
@@ -1106,7 +1228,7 @@ function renderChart(){
   tChart=new Chart(ctx,{
     type:'bar',data:{labels,datasets},
     options:{
-      responsive:true,maintainAspectRatio:true,
+      responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
         legend:{position:'bottom',labels:{font:{size:11},padding:14}},
@@ -1325,7 +1447,7 @@ function renderSumChart(){
       scales:{
         x:{
           ticks:{font:{size:9}, callback: v => sumChartMetric==='tot'?v.toLocaleString()+'만':v},
-          grid:{color:'#f0f4f8'}
+          grid:{color:'#e2e8f0'}
         },
         y:{ticks:{font:{size:10}, maxRotation:0}, grid:{display:false}}
       },
@@ -1491,15 +1613,15 @@ function mkRenderChart() {
       ]
     },
     options:{
-      responsive:true, maintainAspectRatio:true,
+      responsive:true, maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{ legend:{position:'bottom',labels:{font:{size:10},padding:10,boxWidth:12}},
         tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.dataset.yAxisID==='y1'?c.raw.toLocaleString()+'만원':c.raw.toLocaleString()+'건')}}
       },
       scales:{
-        x:{ticks:{font:{size:9},maxRotation:40,minRotation:30},grid:{color:'#f0f4f8'}},
-        y1:{display:mkSlicers.has('결제금액'),type:'linear',position:'left',ticks:{font:{size:9},callback:v=>v.toLocaleString()+'만'},title:{display:true,text:'금액(만원)',font:{size:9},color:'#2d6a9f'},grid:{color:'#f0f4f8'}},
-        y2:{display:mkSlicers.has('합계건수')||mkSlicers.has('유료건수')||mkSlicers.has('무료건수'),type:'linear',position:'right',ticks:{font:{size:9},callback:v=>v+'건'},title:{display:true,text:'건수',font:{size:9},color:'#e53e3e'},grid:{drawOnChartArea:false}}
+        x:{ticks:{font:{size:9},maxRotation:40,minRotation:30},grid:{color:'#e2e8f0'}},
+        y1:{display:mkSlicers.has('결제금액'),type:'linear',position:'left',ticks:{font:{size:9},callback:v=>v.toLocaleString()+'만'},title:{display:true,text:'금액(만원)',font:{size:9},color:'#388bfd'},grid:{color:'#e2e8f0'}},
+        y2:{display:mkSlicers.has('합계건수')||mkSlicers.has('유료건수')||mkSlicers.has('무료건수'),type:'linear',position:'right',ticks:{font:{size:9},callback:v=>v+'건'},title:{display:true,text:'건수',font:{size:9},color:'#f85149'},grid:{drawOnChartArea:false}}
       },
       layout:{padding:{top:20,right:10}}
     }
@@ -1673,13 +1795,13 @@ function totalRender() {
       { label:'메디콕', data:mkPay, borderColor:'#1d4ed8', backgroundColor:'#1d4ed822', borderWidth:2, pointRadius:3, tension:0.3, fill:true,
         datalabels:{ display:false } },
     ]},
-    options:{ responsive:true, maintainAspectRatio:true,
+    options:{ responsive:true, maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{ legend:{position:'bottom',labels:{font:{size:10},padding:10,boxWidth:12}},
         tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toLocaleString()+'만원'}} },
       scales:{
-        x:{ticks:{font:{size:9},maxRotation:40,minRotation:30},grid:{color:'#f0f4f8'}},
-        y:{ticks:{font:{size:9},callback:v=>v.toLocaleString()+'만'},grid:{color:'#f0f4f8'}}
+        x:{ticks:{font:{size:9},maxRotation:40,minRotation:30},grid:{color:'#e2e8f0'}},
+        y:{ticks:{font:{size:9},callback:v=>v.toLocaleString()+'만'},grid:{color:'#e2e8f0'}}
       }, layout:{padding:{top:24,bottom:8}}
     }
   });
@@ -1705,13 +1827,13 @@ function totalRender() {
         datalabels:{display:true, anchor:'end', align:'end', font:{size:9,weight:'800'}, color:'#1d4ed8', clip:false,
           formatter:(v,ctx)=>{ const total=mkCnt[ctx.dataIndex]; return total>0?total.toLocaleString()+'건':null; }} },
     ]},
-    options:{ responsive:true, maintainAspectRatio:true,
+    options:{ responsive:true, maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{ legend:{position:'bottom',labels:{font:{size:10},padding:8,boxWidth:12}},
         tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toLocaleString()+'건'}} },
       scales:{
-        x:{ticks:{font:{size:9},maxRotation:40,minRotation:30},grid:{color:'#f0f4f8'}},
-        y:{ticks:{font:{size:9}},grid:{color:'#f0f4f8'}}
+        x:{ticks:{font:{size:9},maxRotation:40,minRotation:30},grid:{color:'#e2e8f0'}},
+        y:{ticks:{font:{size:9}},grid:{color:'#e2e8f0'}}
       }, layout:{padding:{top:32,bottom:8}}
     }
   });
@@ -1771,6 +1893,10 @@ function totalReset() {
 }
 
 loadSheetData();
+
+// ── 실시간 시계 ──
+// 시트 수정 시각이 로드되기 전까지 "로딩 중..." 표시
+document.getElementById('headerDatetime').textContent = '로딩 중...';
 </script>
 </body>
 </html>
