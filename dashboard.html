@@ -1759,9 +1759,10 @@ function parseSheet(rows, sheetName){
       if(!accName)continue;
       // 매출원가: 상품매출원가·제품매출원가만 수집
       if(curSection==='cogs' && !COGS_SHOW_KEYS.includes(accName)) continue;
-      // 전사 합산값
-      const total=rowTotal(row);
-      subCollected[curSection][accName]=(subCollected[curSection][accName]||0)+total;
+      // 사업부별 8열 배열로 저장 (사업부 슬라이서 반영을 위해)
+      const unified=rowToUnified(row);
+      if(!subCollected[curSection][accName]) subCollected[curSection][accName]=new Array(8).fill(0);
+      unified.forEach((v,i)=>{ subCollected[curSection][accName][i]+=v; });
     }
   }
 
@@ -2193,19 +2194,50 @@ function setRptView(v){
 // ── 공통 값 계산 ──
 function calcVals(months){
   const v={};
-  RPT_KEYS.forEach(k=>{v[k]=rVs(months,k);});
 
-  // 동적 하위계정 합산 (revenue / cogs / sga / other_income / other_expense)
-  const prefixMap={revenue:'rev_sub_', cogs:'cogs_sub_', sga:'sga_sub_', other_income:'oi_sub_', other_expense:'oe_sub_'};
+  // 선택된 사업부의 unified 인덱스 목록 (MERGE_MAP 기반)
+  const selDeptNames=rD();
+  const deptIdxSet=new Set();
+  selDeptNames.forEach(d=>(MERGE_MAP[d]||[]).forEach(i=>deptIdxSet.add(i)));
+  const deptIdxs=[...deptIdxSet];
+  const useAll=deptIdxs.length===0;
+
+  // 8열 배열 → 사업부 필터 적용 단일값
+  function pickDept(arr8){
+    if(!Array.isArray(arr8)) return arr8||0;
+    if(useAll) return arr8.reduce((a,b)=>a+(b||0),0);
+    return deptIdxs.reduce((a,i)=>a+(arr8[i]||0),0);
+  }
+
+  // [1] 하위계정별 값 계산 + 섹션별 합 누적
+  const prefixMap={revenue:'rev_sub_',cogs:'cogs_sub_',sga:'sga_sub_',other_income:'oi_sub_',other_expense:'oe_sub_'};
+  const subSum={revenue:0,cogs:0,sga:0,other_income:0,other_expense:0};
   ['revenue','cogs','sga','other_income','other_expense'].forEach(sec=>{
     const prefix=prefixMap[sec];
     getSubKeys(sec).forEach(sk=>{
-      v[prefix+sk]=months.reduce((s,m)=>{
-        const d=getSubDetail(sec,m);
-        return s+(d&&d[sk]!=null?d[sk]:0);
+      const val=months.reduce((s,m)=>{
+        const detail=getSubDetail(sec,m);
+        if(!detail||detail[sk]==null) return s;
+        return s+pickDept(detail[sk]);
       },0);
+      v[prefix+sk]=val;
+      subSum[sec]+=val;
     });
   });
+
+  // [2] 대분류: 하위계정 합 우선, 없으면 원본값 fallback
+  function rawSum(key){return rVs(months,key);}
+  v.revenue       = subSum.revenue       || rawSum('revenue');
+  v.cogs          = subSum.cogs          || rawSum('cogs');
+  v.sga           = subSum.sga           || rawSum('sga');
+  v.other_income  = subSum.other_income  || rawSum('other_income');
+  v.other_expense = subSum.other_expense || rawSum('other_expense');
+
+  // [3] 파생 항목 공식 재계산 — 항상 1+1=2
+  v.gross      = v.revenue - v.cogs;
+  v.op_income  = v.gross - v.sga;
+  v.net_income = v.op_income + v.other_income - v.other_expense;
+
   return v;
 }
 
@@ -2317,7 +2349,9 @@ function renderCompareTable(theadId, subheadId, tbodyId, prevLabel, curLabel, di
   }
 
   document.getElementById(tbodyId).innerHTML=RPT_ROWS.map(row=>{
-    const pv=prevV[row.k], cv=curV[row.k];
+    const pv=prevV[row.k]||0, cv=curV[row.k]||0;
+    // 하위계정이고 기준·비교 모두 0이면 행 숨김
+    if(row.isSub && pv===0 && cv===0) return '';
     const d=cv-pv, r=pv&&pv!==0?d/Math.abs(pv)*100:null;
     const good=row.isI?(d>0):(d<0);
     const dCol=d===0?'#8a98aa':good?'#0a9e6e':'#e03030';
