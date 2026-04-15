@@ -892,6 +892,9 @@ const SGA_DETAIL={"202501": {"직원급여": 494061920, "판매촉진비": 11523
 const SGA_TOP5=["직원급여", "판매촉진비", "보험료", "결제대행수수료", "감가상각비"];
 const SGA_COLORS={"직원급여":"#f97316","판매촉진비":"#a855f7","보험료":"#06b6d4","결제대행수수료":"#10b981","감가상각비":"#6b7280"};
 
+// 매출원가: 이 두 계정만 표시
+const COGS_SHOW_KEYS=['상품매출원가','제품매출원가'];
+
 // ── 동적 하위계정 저장소 ──
 // parseSheet 실행 시 자동으로 채워짐: {yyyymm: {계정명: 합산값, ...}}
 const SUB_DATA = {
@@ -910,8 +913,6 @@ const SUB_KEYS = {
   other_expense: [],
 };
 
-// 매출원가: 이 두 계정만 표시
-const COGS_SHOW_KEYS=['상품매출원가','제품매출원가'];
 
 // 동적 하위계정 조회 함수
 function getSubDetail(section, ym){ return SUB_DATA[section][ym] || null; }
@@ -1750,7 +1751,7 @@ function parseSheet(rows, sheetName){
     // 하위계정 행: 현재 섹션이 수집 대상이고, 들여쓰기된 계정명
     if(curSection && rawKey){
       // 다음 대분류 시작 감지 (로마숫자 또는 '당기' 등으로 시작하면 중단)
-      if(/^[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅰⅱⅲⅳⅴⅵⅶⅷ]/.test(rawKey)||rawKey.startsWith('당기')){
+      if(/^[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅰⅱⅲⅳⅴⅵⅶⅷ]/.test(rawKey)){
         curSection=null;
         continue;
       }
